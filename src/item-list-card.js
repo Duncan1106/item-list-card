@@ -716,9 +716,10 @@ class ItemListCard extends LitElement {
         : null;
     
       const filterValue = (this._filterValue || '').trim();
-      const showHighlight = filterValue && this.config.highlight_matches;
-      const contentParts = showHighlight ? highlightParts(item.s, filterValue) : [item.s];
-      
+      const showHighlight = Boolean(filterValue && this.config.highlight_matches);
+      const contentParts = showHighlight
+        ? highlightParts(item.s, filterValue)
+        : [String(item.s ?? '')];
       return html`
         <div class="item-row" role="listitem">
           <div class="item-summary" title=${item.s}>
