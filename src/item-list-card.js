@@ -31,17 +31,28 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
 };
 
 const highlightParts = (text, term) => {
-  if (!term.trim()) return [text];
-  const lowT = term.toLowerCase();
-  let pos = 0, idx;
+  const source = String(text ?? '');
+  const needle = String(term ?? '').trim();
+  if (!needle) return [source];
+
+  const lowerSource = source.toLowerCase();
+  const lowerNeedle = needle.toLowerCase();
+  const len = needle.length;
+
   const parts = [];
-  while ((idx = text.toLowerCase().indexOf(lowT, pos)) !== -1) {
-    if (idx > pos) parts.push(text.slice(pos, idx));
-    parts.push(html`<span class="highlight">${text.substr(idx, term.length)}</span>`);
-    pos = idx + term.length;
+  let pos = 0;
+  while (true) {
+    const idx = lowerSource.indexOf(lowerNeedle, pos);
+    if (idx === -1) break;
+    if (idx > pos) parts.push(source.slice(pos, idx));
+    parts.push(
+      html`<span class="highlight">${source.slice(idx, idx + len)}</span>`
+    );
+    pos = idx + len;
   }
-  if (pos < text.length) parts.push(text.slice(pos));
-  return parts.length ? parts : [text];
+
+  if (pos < source.length) parts.push(source.slice(pos));
+  return parts.length ? parts : [source];
 };
 
 class ItemListCard extends LitElement {
