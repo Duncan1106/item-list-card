@@ -30,6 +30,20 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
   }
 };
 
+const highlightParts = (text, term) => {
+  if (!term.trim()) return [text];
+  const lowT = term.toLowerCase();
+  let pos = 0, idx;
+  const parts = [];
+  while ((idx = text.toLowerCase().indexOf(lowT, pos)) !== -1) {
+    if (idx > pos) parts.push(text.slice(pos, idx));
+    parts.push(html`<span class="highlight">${text.substr(idx, term.length)}</span>`);
+    pos = idx + term.length;
+  }
+  if (pos < text.length) parts.push(text.slice(pos));
+  return parts.length ? parts : [text];
+};
+
 class ItemListCard extends LitElement {
   static properties = {
     hass: {},
@@ -691,71 +705,13 @@ class ItemListCard extends LitElement {
         : null;
     
       const filterValue = (this._filterValue || '').trim();
-      const shouldHighlight = filterValue && this.config.highlight_matches;
-    
-      // Default to raw string unless highlighting is enabled AND we have filter terms
-      let contentParts = [item.s];
+      const showHighlight = filterValue && this.config.highlight_matches;
+      const contentParts = showHighlight ? highlightParts(item.s, filterValue) : [item.s];
       
-      if (shouldHighlight) {
-        // Split filter into terms, escape regex metachars, skip empty
-        const terms = filterValue.split(/\s+/)
-          .filter(Boolean)
-          .map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
-        
-        if (terms.length > 0) {
-          // Skip regex processing entirely if no term is found as substring (case-insensitive)
-          const textLower = String(item.s).toLowerCase();
-          const hasMatch = terms.some(term => {
-            // Remove escape characters for substring search (but keep for regex)
-            const rawTerm = term.replace(/\\/g, '').toLowerCase();
-            return textLower.includes(rawTerm);
-          });
-    
-          if (hasMatch) {
-            try {
-              // Build regex that matches any of the terms, global and case-insensitive
-              const re = new RegExp(`(${terms.join('|')})`, 'gi');
-              const text = String(item.s);
-              const parts = [];
-              let lastIndex = 0;
-              let match;
-    
-              // Iterate all matches in text
-              while ((match = re.exec(text)) !== null) {
-                // Push non-matching segment before this match
-                if (match.index > lastIndex) {
-                  parts.push(text.slice(lastIndex, match.index));
-                }
-                // Push highlighted matching segment
-                parts.push(html`<span class="highlight">${match[0]}</span>`);
-                // Advance to end of match
-                lastIndex = match.index + match[0].length;
-                // Avoid infinite loop if match is empty (though our terms should not be empty)
-                if (match.index === lastIndex) {
-                  lastIndex++;
-                }
-              }
-              // Push remaining text after last match
-              if (lastIndex < text.length) {
-                parts.push(text.slice(lastIndex));
-              }
-    
-              // Only replace if we actually found matches (parts not empty)
-              if (parts.length > 0) {
-                contentParts = parts;
-              }
-            } catch (e) {
-              console.warn('Highlighting failed for item:', item, e);
-              // Fallback to unhighlighted text on error
-            }
-          }
-        }
-      }
-    
       return html`
         <div class="item-row" role="listitem">
           <div class="item-summary" title=${item.s}>
-            ${shouldHighlight ? contentParts : item.s}
+            ${contentParts}}
             ${friendlyName ? html`<div class="item-sublabel">${friendlyName}</div>` : ''}
           </div>
           <div class="item-controls">
