@@ -9,13 +9,24 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Required for proper branch detection
+
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+
       - run: npm install --no-audit --no-fund
-      - run: git add package-lock.json
+
       - run: |
-          git config user.name  "github-actions[bot]"
+          git add package-lock.json
+          
+          # Configure Git identity
+          git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore: add package-lock.json [skip ci]" || exit 0   # don’t fail if already present
+          
+          # Commit ONLY if changes exist (skip if already committed)
+          git diff --staged --quiet || git commit -m "chore: add package-lock.json [skip ci]"
+          
+          # Push to CORRECT branch (main, not master)
           git push origin main
