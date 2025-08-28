@@ -1,6 +1,10 @@
+# .github/workflows/lock.yml
+# One-time helper: generates package-lock.json when you click "Run workflow"
+# Feel free to delete this file after it has run successfully.
+
 name: Create package-lock.json once
 on:
-  workflow_dispatch:   # run manually via GitHub UI
+  workflow_dispatch:
 
 jobs:
   once:
@@ -9,24 +13,12 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0  # Required for proper branch detection
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - run: npm install --no-audit --no-fund
-
       - run: |
-          git add package-lock.json
-          
-          # Configure Git identity
-          git config user.name "github-actions[bot]"
+          git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          
-          # Commit ONLY if changes exist (skip if already committed)
-          git diff --staged --quiet || git commit -m "chore: add package-lock.json [skip ci]"
-          
-          # Push to CORRECT branch (main, not master)
-          git push origin main
+          git add package-lock.json
+          git diff-index --quiet HEAD || (git commit -m "chore: add package-lock.json [skip ci]" && git push origin HEAD)
