@@ -1,0 +1,10 @@
+{
+  "name": "Item List Card",
+  "version": "1.0.0",
+  "slug": "item-list-card",
+  "url": "https://github.com/YOUR_ORG/item-list-card",
+  "info": "A compact ToDo list / shopping helper card",
+  "type": "frontend",
+  "filename": "item-list-card.js",
+  "homeassistant": "2021.12.0"
+}
