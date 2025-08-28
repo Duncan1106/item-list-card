@@ -2,7 +2,7 @@ name: Release
 
 on:
   release:
-    types: [published]   # runs when a Release is published
+    types: [published]
 
 jobs:
   release:
@@ -25,7 +25,7 @@ jobs:
         run: |
           git config --local user.email || git config --global user.email "github-actions@example.com"
           git config --local user.name || git config --global user.name "github-actions"
-        
+
       - name: Check package-lock.json existence
         id: lockfile-check
         run: |
@@ -72,11 +72,23 @@ jobs:
         run: |
           npm run build
 
+      - name: Confirm artifacts directory
+        run: |
+          echo "Current directory contents:"
+          ls -la
+          if [ -d dist ]; then
+            echo "Build output dist/ exists"
+          else
+            echo "⚠️ Build output dist/ NOT found!"
+            exit 1
+          fi
+
       - name: List build artifacts
         run: |
           ls -la dist || true
 
       - name: Upload JS asset to release
+        if: steps.confirm-artifacts.outcome == 'success'
         uses: softprops/action-gh-release@v1
         with:
           files: dist/**
