@@ -5,6 +5,6 @@
   "url": "https://github.com/YOUR_ORG/item-list-card",
   "info": "A compact ToDo list / shopping helper card",
   "type": "frontend",
-  "filename": "item-list-card.js",
+  "filename": "dist/item-list-card.js",
   "homeassistant": "2021.12.0"
 }
