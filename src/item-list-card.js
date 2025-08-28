@@ -711,11 +711,13 @@ class ItemListCard extends LitElement {
       const friendlyName = showOrigin && sourceId
         ? this.hass.states[sourceId]?.attributes?.friendly_name
         : null;
+
+      const search = this._normalizeTodoText(this._filterValue);
+      const showHighlight = Boolean(search && this.config.highlight_matches);
+      const contentParts = showHighlight
+        ? highlightParts(item.s, search)
+        : [String(item.s ?? '')];
     
-      const filterValue = (this._filterValue || '').trim();
-      const realSearch = filterValue.replace(/^todo:\S+\s*/i, '').trim();
-      const showHighlight = Boolean(realSearch && this.config.highlight_matches);
-      const contentParts = showHighlight ? highlightParts(item.s, realSearch) : [String(item.s ?? '')];
       return html`
         <div class="item-row" role="listitem">
           <div class="item-summary" title=${item.s}>
