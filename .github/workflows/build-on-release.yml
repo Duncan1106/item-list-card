@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm install --prefer-offline --no-audit --no-fund
 
       - name: Build (esbuild)
         run: npm run build
