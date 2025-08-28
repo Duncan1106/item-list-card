@@ -1,8 +1,8 @@
 {
   "name": "Item List Card",
-  "content_in_root": true,
+  "content_in_root": false,
   "render_readme": true,
   "domains": ["frontend"],
-  "country": ["EN", "DE"],
-  "zip_release": false
+  "zip_release": false,
+  "country": ["EN", "DE"]
 }
