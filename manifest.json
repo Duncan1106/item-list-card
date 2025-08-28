@@ -2,7 +2,7 @@
   "name": "Item List Card",
   "version": "1.0.0",
   "slug": "item-list-card",
-  "url": "https://github.com/YOUR_ORG/item-list-card",
+  "url": "https://github.com/Duncan1106/item-list-card",
   "info": "A compact ToDo list / shopping helper card",
   "type": "frontend",
   "filename": "dist/item-list-card.js",
