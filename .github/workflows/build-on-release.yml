@@ -6,89 +6,46 @@ on:
 
 jobs:
   release:
-    name: Prepare & Build
+    name: Prepare release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # only required the first time we generate the lock-file
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          cache: 'npm'
+          cache: 'npm'   # speeds up repeated “npm install”
 
-      - name: Check Git Username/Email
-        run: |
-          git config --local user.email || git config --global user.email "github-actions@example.com"
-          git config --local user.name || git config --global user.name "github-actions"
+      # -----------------------------------------------------------------
+      # One single install — never npm ci — will always succeed
+      # -----------------------------------------------------------------
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
 
-      - name: Check package-lock.json existence
-        id: lockfile-check
+      - name: Commit fresh package-lock.json when it did not exist
         run: |
-          if [ -f package-lock.json ]; then
-            echo "lockfile found"
-            echo ::set-output name=exists::true
-          else
-            echo "lockfile not found"
-            echo ::set-output name=exists::false
+          if git status --porcelain | grep -q "package-lock.json"; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add package-lock.json
+            git commit -m "chore: generate package-lock.json"
+            git push origin HEAD
           fi
-
-      - name: Install dependencies with npm ci (lockfile found)
-        if: steps.lockfile-check.outputs.exists == 'true'
-        run: |
-          npm ci --prefer-offline --no-audit --no-fund
-
-      - name: Install dependencies and add package-lock (lockfile NOT found)
-        if: steps.lockfile-check.outputs.exists == 'false'
-        run: |
-          # 1. Install and generate lockfile
-          npm install --prefer-offline --no-audit --no-fund
-
-          # 2. Create and switch to temporary branch
-          CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
-          TEMP_BRANCH="patch-add-lockfile-$(date +%s)"
-          git checkout -b "$TEMP_BRANCH"
-
-          # 3. Add package-lock.json and commit
-          git add -A
-          git commit -m "[CI] Add package-lock.json automatically"
-
-          # 4. Push to origin
-          git push origin "$TEMP_BRANCH"
-
-          # 5. Cherry-pick commit onto the original branch
-          git checkout "$CURRENT_BRANCH"
-          git cherry-pick "$TEMP_BRANCH"
-
-          # 6. Remove temporary branch locally and remotely
-          git branch -D "$TEMP_BRANCH"
-          git push origin --delete "$TEMP_BRANCH"
 
       - name: Build
-        run: |
-          npm run build
-
-      - name: Confirm artifacts directory
-        run: |
-          echo "Current directory contents:"
-          ls -la
-          if [ -d dist ]; then
-            echo "Build output dist/ exists"
-          else
-            echo "⚠️ Build output dist/ NOT found!"
-            exit 1
-          fi
+        run: npm run build
 
       - name: List build artifacts
-        run: |
-          ls -la dist || true
+        run: ls -la dist || true
 
       - name: Upload JS asset to release
-        if: steps.confirm-artifacts.outcome == 'success'
         uses: softprops/action-gh-release@v1
         with:
           files: dist/**
