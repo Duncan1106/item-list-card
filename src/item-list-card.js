@@ -711,7 +711,7 @@ class ItemListCard extends LitElement {
       return html`
         <div class="item-row" role="listitem">
           <div class="item-summary" title=${item.s}>
-            ${contentParts}}
+            ${contentParts}
             ${friendlyName ? html`<div class="item-sublabel">${friendlyName}</div>` : ''}
           </div>
           <div class="item-controls">
