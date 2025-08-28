@@ -1,0 +1,21 @@
+name: Create package-lock.json once
+on:
+  workflow_dispatch:   # run manually via GitHub UI
+
+jobs:
+  once:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm install --no-audit --no-fund
+      - run: git add package-lock.json
+      - run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore: add package-lock.json [skip ci]" || exit 0   # don’t fail if already present
+          git push origin master
