@@ -93,11 +93,11 @@ class ItemListCard extends LitElement {
     }
     .count-badge {
       background: var(--accent-color, #03a9f4);
-      color: white;
+      color: var(--primary-text-color);
       font-weight: 600;
       padding: 2px 8px;
       border-radius: 999px;
-      font-size: 0.82rem;
+      font-size: 1.2rem;
     }
     .input-row {
       display: flex;
