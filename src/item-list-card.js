@@ -31,28 +31,25 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
 };
 
 const highlightParts = (text, term) => {
-  const source = String(text ?? '');
+  const src = String(text ?? '');
   const needle = String(term ?? '').trim();
-  if (!needle) return [source];
+  if (!needle) return [src];
 
-  const lowerSource = source.toLowerCase();
-  const lowerNeedle = needle.toLowerCase();
-  const len = needle.length;
+  const lowSrc = src.toLowerCase();
+  const lowNeedle = needle.toLowerCase();
+  const nLen = needle.length;
 
   const parts = [];
-  let pos = 0;
-  while (true) {
-    const idx = lowerSource.indexOf(lowerNeedle, pos);
-    if (idx === -1) break;
-    if (idx > pos) parts.push(source.slice(pos, idx));
-    parts.push(
-      html`<span class="highlight">${source.slice(idx, idx + len)}</span>`
-    );
-    pos = idx + len;
+  let i = 0;
+  for (;;) {
+    const hit = lowSrc.indexOf(lowNeedle, i);
+    if (hit === -1) break;
+    if (hit > i) parts.push(src.slice(i, hit));
+    parts.push(html`<span class="highlight">${src.slice(hit, hit + nLen)}</span>`);
+    i = hit + nLen;
   }
-
-  if (pos < source.length) parts.push(source.slice(pos));
-  return parts.length ? parts : [source];
+  if (i < src.length) parts.push(src.slice(i));
+  return parts.length ? parts : [src];
 };
 
 class ItemListCard extends LitElement {
