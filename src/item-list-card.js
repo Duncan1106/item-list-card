@@ -106,6 +106,7 @@ class ItemListCard extends LitElement {
     config: {},
     _cachedItems: { state: true },
     _cachedSourceMap: { state: true },
+    _displayLimit: { state: true },
     _filterValue: { state: true },
     _pendingUpdates: { state: true },
     _lastItemsHash: { state: false },
@@ -393,6 +394,7 @@ class ItemListCard extends LitElement {
     this._lastSourceMapHash = '';
     this._debouncedUpdateFilterText = debounce(this._updateFilterTextActual, 250);
     this._pendingUpdates = new Set();
+    this._displayLimit = undefined;
   }
   
   /**
@@ -402,6 +404,22 @@ class ItemListCard extends LitElement {
    */
   get MAX_DISPLAY() {
     return this.config?.max_items_without_filter ?? 20;
+  }
+
+/**
+ * Returns the default maximum number of items to show when a filter is
+ * active (initial display limit). Defaults to 50.
+ */
+  get MAX_WITH_FILTER() {
+    return this.config?.max_items_with_filter ?? 50;
+  }
+
+  /**
+   * Returns the configured amount to increment when "Show more" is clicked.
+   * Defaults to 20.
+   */
+  get SHOW_MORE_AMOUNT() {
+    return this.config?.show_more_amount ?? 20;
   }
 
   /**
@@ -451,8 +469,10 @@ class ItemListCard extends LitElement {
       title: 'ToDo List',
       show_origin: false,
       hide_add_button: false,
-      max_items_without_filter: 20,
       highlight_matches: false,
+      max_items_without_filter: 20,
+      max_items_with_filter: 50,
+      show_more_amount: 20,
       filter_key_buttons: [],
       ...config,
     };
@@ -528,6 +548,8 @@ class ItemListCard extends LitElement {
     const nextFilter = filterEntity?.state ?? '';
     if (nextFilter !== this._filterValue) {
       this._filterValue = nextFilter;
+      // reset display limit when filter changes
+        this._displayLimit = undefined;
       return true;
     }
 
@@ -548,8 +570,10 @@ class ItemListCard extends LitElement {
     const changed = itemsHash !== this._lastItemsHash || mapHash !== this._lastSourceMapHash;
 
     if (changed) {
+      // reset display limit when items/source_map changed
+      this._displayLimit = undefined;
       this._cachedItems = nextFilter.trim()
-        ? nextItems
+        ? nextItems.slice(0, this.MAX_WITH_FILTER)
         : nextItems.slice(0, this.config.max_items_without_filter);
       this._cachedSourceMap = nextMap;
       this._lastItemsHash = itemsHash;
@@ -948,6 +972,20 @@ class ItemListCard extends LitElement {
     }
 
   /**
+   * Increase visible items by show_more_amount (or remaining).
+   */
+  _showMore() {
+    // If cache not initialized or no items, nothing to do
+    const items = this._fullItemsList || this._cachedItems || [];
+    // ensure displayLimit initialized
+    if (this._displayLimit === undefined || this._displayLimit === null) {
+      this._displayLimit = this._filterValue.trim() ? this.MAX_WITH_FILTER : this.MAX_DISPLAY;
+    }
+    const add = this.SHOW_MORE_AMOUNT;
+    this._displayLimit = Math.min(this._displayLimit + add, items.length);
+  }
+
+  /**
    * Renders the card content.
    * @returns {TemplateResult} The rendered content.
    * @private
@@ -973,6 +1011,15 @@ class ItemListCard extends LitElement {
       this._cachedItems = filterValue.trim()
         ? items
         : items.slice(0, limit);
+      // remember the full list for "show more" handling
+      this._fullItemsList = items;
+      // initialize display limit depending on filter
+      if (this._displayLimit === undefined || this._displayLimit === null) {
+        this._displayLimit = filterValue.trim() ? this.MAX_WITH_FILTER : this.MAX_DISPLAY;
+      }
+      this._cachedItems = filterValue.trim()
+        ? items.slice(0, this._displayLimit)
+        : items.slice(0, this._displayLimit);
       const mapAttr = itemsEntity.attributes.source_map;
       this._cachedSourceMap = typeof mapAttr === 'string'
         ? this._safeParseJSON(mapAttr, {})
@@ -980,6 +1027,26 @@ class ItemListCard extends LitElement {
       this._lastItemsHash = this._hash(items);
       this._lastSourceMapHash = this._hash(this._cachedSourceMap);
     }
+
+    // Always ensure we have the full list cached (useful when not first render)
+    {
+      const attr = itemsEntity.attributes.filtered_items;
+      const items = typeof attr === 'string' ? this._safeParseJSON(attr, []) : Array.isArray(attr) ? attr : [];
+      this._fullItemsList = items;
+      // if filter active, ensure cachedItems follows displayLimit
+      if (filterValue.trim()) {
+        if (this._displayLimit === undefined || this._displayLimit === null) {
+          this._displayLimit = this.MAX_WITH_FILTER;
+        }
+        this._cachedItems = items.slice(0, this._displayLimit);
+      } else {
+        // unfiltered: use unfiltered limit
+        if (this._displayLimit === undefined || this._displayLimit === null) {
+          this._displayLimit = this.MAX_DISPLAY;
+        }
+        this._cachedItems = items.slice(0, this._displayLimit);
+      }
+    }    
 
     const totalItemsCount = parseInt(itemsEntity?.state, 10) || 0;
     const displayedItems = this._cachedItems || [];
@@ -1049,7 +1116,19 @@ class ItemListCard extends LitElement {
         ${displayedItems.length === 0
           ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
           : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => this._renderItemRow(item, this._cachedSourceMap))}</div>`}
-      </ha-card>
+
+        ${/* Show more button if there are more items available in the full list */ ''}
+        ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0)
+          ? html`
+              <div style="display:flex; justify-content:center; margin-top:8px;">
+                <button class="key-btn" type="button" @click=${this._showMore}>
+                  Mehr anzeigen (${Math.min(this.SHOW_MORE_AMOUNT, this._fullItemsList.length - displayedItems.length)} weitere)
+                </button>
+              </div>
+            `
+          : ''}
+      
+          </ha-card>
     `;
   }
 
