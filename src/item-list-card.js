@@ -1108,7 +1108,7 @@ class ItemListCard extends LitElement {
           : ''}
 
         ${filterValue.trim()
-          ? html`<div class="info" aria-live="polite">Filter: "${filterValue.trim()}" → ${displayedItems.length} Ergebnis${displayedItems.length !== 1 ? 'se' : ''}</div>`
+          ? html`<div class="info" aria-live="polite">Filter: "${filterValue.trim()}" → ${ (this._fullItemsList || []).length } Treffer</div>`
           : totalItemsCount > (this.config.max_items_without_filter ?? 20)
           ? html`<div class="info" aria-live="polite">${displayedItems.length} von ${totalItemsCount} Einträgen</div>`
           : ''}
