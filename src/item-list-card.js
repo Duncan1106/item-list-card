@@ -1,5 +1,15 @@
 import { LitElement, html, css } from 'lit';
 
+/**
+* Returns a debounced version of the given function `fn`.
+* The `fn` function will not be called until after `delay` milliseconds
+* have passed since the last time `debounced` was called.
+*
+* @param {function} fn - The function to debounce.
+* @param {number} [delay=200] - The delay between invocations of `fn`.
+* @returns {function} A new function that will debounce invocations of `fn`.
+* @property {function} cancel - Cancels the scheduled invocation of `fn`.
+*/
 const debounce = (fn, delay = 200) => {
   let timer;
   const debounced = function (...a) {          // regular fn so its own "this" works
@@ -10,6 +20,13 @@ const debounce = (fn, delay = 200) => {
   return debounced;
 };
 
+/**
+ * Dispatches a hass-notification event on the given element (if it exists),
+ * creating a toast notification with the given message.
+ *
+ * @param {Element} el - Element to dispatch the event on.
+ * @param {string} message - Message to show in the toast.
+ */
 const showToast = (el, message) => {
   if (!el) return;
   el.dispatchEvent(new CustomEvent('hass-notification', {
@@ -17,9 +34,29 @@ const showToast = (el, message) => {
   }));
 };
 
-const confirmDialog = async (_el, _title, text) =>
+/**
+ * Shows a confirmation dialog with the given text to the user, and returns true if they confirmed.
+ * If the browser does not support window.confirm, it will return false.
+ * @param {Element} _el - Element to dispatch the event on. (ignored)
+ * @param {string} text - Text to show in the confirmation dialog.
+ * @returns {Promise<boolean>} Whether the user confirmed.
+ */
+const confirmDialog = async (_el,  text) =>
   typeof window.confirm === 'function' ? window.confirm(text) : false;
 
+/**
+ * Calls the given Home Assistant service with the given data, and shows a
+ * toast notification on the given element if the call fails. If no element
+ * is given, the error is only logged to the console.
+ *
+ * @param {HomeAssistant} hass - The Home Assistant instance to call the service on.
+ * @param {string} domain - The domain of the service to call.
+ * @param {string} service - The service to call.
+ * @param {object} data - The data to pass to the service.
+ * @param {Element} [toastEl] - Element to dispatch the error notification on. If not given, the error is only logged.
+ * @param {string} [fallbackMsg='Fehler'] - The message to show in the toast if the call fails.
+ * @throws The error that occurred during the service call if it fails.
+ */
 const callService = async (hass, domain, service, data, toastEl, fallbackMsg = 'Fehler') => {
   try {
     await hass.callService(domain, service, data);
@@ -30,6 +67,17 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
   }
 };
 
+/**
+ * Splits the given text into an array of strings, where each string is either
+ * a part of the original text that doesn't contain the given term, or a
+ * `<span class="highlight">` element containing the term.
+ *
+ * @param {string} text - The text to split.
+ * @param {string} [term=''] - The term to highlight.
+ * @returns {string[]} An array of strings, where each string is either a
+ *   non-highlighted part of the original text, or a `<span class="highlight">`
+ *   element containing the term.
+ */
 const highlightParts = (text, term) => {
   const src = String(text ?? '');
   const needle = String(term ?? '').trim();
@@ -347,15 +395,51 @@ class ItemListCard extends LitElement {
     this._pendingUpdates = new Set();
   }
   
+  /**
+   * Returns the maximum number of items to display when there is no filter
+   * active. If not set in the config, defaults to 20.
+   * @type {number}
+   */
   get MAX_DISPLAY() {
     return this.config?.max_items_without_filter ?? 20;
   }
 
+  /**
+   * Clean up debounced filter text update when this element is no longer in the DOM.
+   * This ensures that any pending updates are cancelled and do not trigger after
+   * the element is gone.
+   */
   disconnectedCallback() {
     super.disconnectedCallback();
     this._debouncedUpdateFilterText?.cancel?.();
   }
 
+  /**
+   * Sets the configuration for this element. Throws an error if the required
+   * properties are not present in the config object.
+   * @param {Object} config - The configuration object
+   * @param {string} config.filter_items_entity - The entity ID of the Todo list
+   *     to filter
+   * @param {string} config.shopping_list_entity - The entity ID of the Todo list
+   *     to add items to
+   * @param {string} config.filter_entity - The entity ID of the input_text
+   *     controlling the filter
+   * @param {string} [config.title='ToDo List'] - The title to display in the
+   *     card header
+   * @param {boolean} [config.show_origin=false] - If true, show the origin of
+   *     each item in the list
+   * @param {boolean} [config.hide_add_button=false] - If true, hide the "Add"
+   *     button at the bottom of the list
+   * @param {number} [config.max_items_without_filter=20] - The maximum number of
+   *     items to display when there is no filter active
+   * @param {boolean} [config.highlight_matches=false] - If true, highlight the
+   *     matches in the filter text
+   * @param {Array<Object>} [config.filter_key_buttons=[]] - A list of key button
+   *     definitions with the following properties:
+   *     - `label`: The text to display in the button
+   *     - `key`: The key to send to the filter input when the button is clicked
+   *     - `icon`: The icon to display in the button (optional)
+   */
   setConfig(config) {
     if (!config) throw new Error("Missing config");
     const required = ['filter_items_entity', 'shopping_list_entity', 'filter_entity'];
@@ -374,11 +458,24 @@ class ItemListCard extends LitElement {
     };
   }
 
+  /**
+   * Returns the size of the card in "rows". The size is calculated as a base
+   * size of 4 plus the minimum of the number of items in the list and 6.
+   * @returns {number} The size of the card in "rows"
+   */
   getCardSize() {
     const base = 4;
     return base + Math.min(this._cachedItems?.length || 0, 6);
   }
 
+  /**
+   * Returns a hash string for the given value. This is used to prevent
+   * duplicate items in the list. The hash is calculated as a simple
+   * string hash function using the djb2 algorithm.
+   * @param {unknown} val The value to hash
+   * @returns {string} The hash string
+   * @private
+   */
   _hash(val) {
     try {
       const s = typeof val === 'string' ? val : JSON.stringify(val);
@@ -389,18 +486,35 @@ class ItemListCard extends LitElement {
       return '';
     }
   }
+  /**
+   * Adds a pending update to the list. This will cause the item with the given
+   * `uid` to be re-rendered on the next update.
+   * @param {string} uid The uid of the item to add to the pending updates
+   * @private
+   */
   _addPending(uid) {
     // create a new Set so Lit notices the state change
     this._pendingUpdates = new Set(this._pendingUpdates);
     this._pendingUpdates.add(uid);
   }
 
+  /**
+   * Removes a pending update from the list. This will prevent the item with the
+   * given `uid` from being re-rendered on the next update.
+   * @param {string} uid The uid of the item to remove from the pending updates
+   * @private
+   */
   _removePending(uid) {
     const s = new Set(this._pendingUpdates);
     s.delete(uid);
     this._pendingUpdates = s;
   }
 
+  /**
+   * Decides whether or not to re-render the card based on changed properties.
+   * @param {Map<string, unknown>} changedProps The changed properties
+   * @returns {boolean} Whether the card should be re-rendered
+   */
   shouldUpdate(changedProps) {
     if (!changedProps.has('hass')) return changedProps.size > 0;
 
@@ -451,6 +565,14 @@ class ItemListCard extends LitElement {
     return changed || countChanged;
   }
 
+  /**
+   * Tries to parse the given string as JSON and returns the result. If the
+   * parsing fails, it returns the given fallback value instead.
+   * @param {string} s The string to parse
+   * @param {*} fallback The value to return if the parsing fails
+   * @returns {*} The parsed JSON or the fallback value
+   * @private
+   */
   _safeParseJSON(s, fallback) {
     try {
       return JSON.parse(s);
@@ -459,10 +581,23 @@ class ItemListCard extends LitElement {
     }
   }
 
+  /**
+   * Returns true if the given string consists only of digits.
+   * @param {string} str The string to check
+   * @returns {boolean} Whether the string consists only of digits
+   * @private
+   */
   _isNumeric(str) {
     return typeof str === 'string' && /^\d+$/.test(str);
   }
 
+  /**
+   * Handles a click on one of the filter key buttons. The value in the
+   * input_text entity is updated immediately to the corresponding
+   * "todo:<filterKey>" string. If the filterKey is falsy, nothing is done.
+   * @param {string} [filterKey] The key to filter by
+   * @private
+   */
   _onFilterKeyButtonClick(filterKey) {
     if (!filterKey) return;
     const value = `todo:${String(filterKey)}`;
@@ -470,6 +605,15 @@ class ItemListCard extends LitElement {
     this._updateFilterTextActual(value);
   }
 
+  /**
+   * Updates the value of the input_text entity specified in the config
+   * (filter_entity) to the given value. If the value is falsy, the
+   * filter text is cleared. If the value is the same as the current
+   * value, nothing is done. If there is an error, it is logged to the
+   * console.
+   * @param {string} [value] The value to set the filter text to
+   * @private
+   */
   _updateFilterTextActual(value) {
     try {
       const entityId = this.config?.filter_entity;
@@ -490,6 +634,15 @@ class ItemListCard extends LitElement {
     }
   }
 
+  /**
+   * Clears the filter text completely if there is no token in the current filter text
+   * that matches the pattern "todo:<filterKey>" or if the only token is exactly
+   * "todo:<filterKey>". If there is a token like "todo:<filterKey>" present, only
+   * this token is preserved and the rest of the text is cleared. This is useful
+   * when the user clicks on the "clear filter" button and we want to keep the
+   * currently selected filter key.
+   * @private
+   */
   _clearFilterPreservingTodoKey() {
     try {
       const entityId = this.config?.filter_entity;
@@ -526,6 +679,16 @@ class ItemListCard extends LitElement {
     }
    }
 
+  /**
+   * Handles the input event of the filter input field by calling the
+   * debounced version of `_updateFilterTextActual` with the current value
+   * of the input field. This is necessary because the input event is
+   * triggered on every key press, but we don't want to update the filter
+   * on every key press, but only after the user has stopped typing for
+   * a short period of time.
+   * @private
+   * @param {Event} e - The input event.
+   */
   _handleFilterInputChange(e) {
     this._debouncedUpdateFilterText(e.target.value);
   }
@@ -541,6 +704,14 @@ class ItemListCard extends LitElement {
     }
   }
 
+  /**
+   * Normalize the given text by removing any leading "todo:" prefix and
+   * trimming the resulting string. If the text does not start with "todo:"
+   * or if it is empty, it is returned as-is.
+   * @param {string} raw - The text to normalize.
+   * @returns {string} The normalized text.
+   * @private
+   */
   _normalizeTodoText(raw) {
     let value = (raw || '').trim();
     if (!value) return '';
@@ -561,7 +732,7 @@ class ItemListCard extends LitElement {
     const value = this._normalizeTodoText(raw);
     if (!value) return;
 
-    const ok = await confirmDialog(this, 'Zur Einkaufsliste hinzufügen', `Möchtest du "${value}" zur Einkaufsliste hinzufügen?`);
+    const ok = await confirmDialog(this, `Möchtest du "${value}" zur Einkaufsliste hinzufügen?`);
     if (!ok) return;
     await callService(this.hass, 'todo', 'add_item',
       { entity_id: this.config.shopping_list_entity, item: value, description: '' },
@@ -570,6 +741,23 @@ class ItemListCard extends LitElement {
     );
   }
   
+  /**
+   * Updates an item in the given todo list, identified by the given `uid`.
+   * The `updates` object contains the new values for the item, such as a new
+   * description or a new completed state.
+   * If the item is updated successfully, the cached item description is
+   * updated immediately to reflect the new state.
+   * If the update fails, the cached item description is reverted to its
+   * previous value.
+   * @param {string} uid - The unique id of the item to update.
+   * @param {Object} updates - The new values for the item.
+   * @param {number} source - The source of the item to update.
+   * @param {Object} sourceMap - A map of source numbers to the
+   * corresponding todo list entity ids.
+   * @returns {Promise<void>} A promise that resolves when the update is
+   * done, or rejects if the update fails.
+   * @private
+   */
   async _updateOrCompleteItem(uid, updates, source, sourceMap) {
     const entityId = sourceMap?.[String(source)];
     if (!entityId) {
@@ -639,26 +827,25 @@ class ItemListCard extends LitElement {
   }
 
   _confirmAndComplete = async (item, sourceMap) => {
-    const ok = await confirmDialog(
-      this,
-      'Erledigen',
-      `Möchtest du "${item.s}" wirklich als erledigt markieren?`
-    );
+    const ok = await confirmDialog( this, `Möchtest du "${item.s}" wirklich als erledigt markieren?`);
     if (!ok) return;
-
     // Uses UID placed in 'item' field as required by your service
     this._updateOrCompleteItem(item.u, { status: 'completed' }, item.c, sourceMap);
   };
 
+  /**
+   * Adds an item to the shopping list if the user confirms the dialog
+   * @param {Object} item The todo item to add
+   * @private
+   */
   _addToShoppingList(item) {
     const entityId = this.config.shopping_list_entity;
     if (!entityId) {
       console.error('No valid shopping list entity id configured');
       return;
     }
-    const text = `Möchtest du "${item.s}" zur Einkaufsliste hinzufügen?`;
     (async () => {
-      const ok = await confirmDialog(this, 'Zur Einkaufsliste', text);
+      const ok = await confirmDialog(this, `Möchtest du "${item.s}" zur Einkaufsliste hinzufügen?`);
       if (!ok) return;
       await callService(this.hass, 'todo', 'add_item',
         { entity_id: entityId, item: item.s, description: '' },
@@ -668,6 +855,16 @@ class ItemListCard extends LitElement {
     })();
   }
 
+  /**
+   * Renders the quantity controls for a given todo item, which can be an
+   * increment/decrement button pair if the item's description is a numeric
+   * string, or just a plain text display if it's not.
+   * @param {Object} item The todo item to render.
+   * @param {Object} sourceMap A map of source numbers to the corresponding
+   * todo list entity ids.
+   * @returns {TemplateResult} The rendered quantity controls.
+   * @private
+   */
   _renderQuantityControls(item, sourceMap) {
     let qStr = String(item.d ?? '');
     if (qStr === '') qStr = '1';
@@ -705,6 +902,19 @@ class ItemListCard extends LitElement {
     `;
   }
 
+  /**
+   * Renders a single todo item row with quantity controls and a button to add
+   * the item to the shopping list. If the item is part of a list that has an
+   * origin (i.e. a sourceMap), it will also display the origin's friendly name
+   * as a sub-label below the item summary. If the item's description is a
+   * numeric string, it will be rendered as a quantity control. If the item's
+   * description is not numeric, it will be rendered as plain text.
+   * @param {Object} item The todo item to render.
+   * @param {Object} sourceMap A map of source numbers to the corresponding
+   * todo list entity ids.
+   * @returns {TemplateResult} The rendered item row.
+   * @private
+   */
   _renderItemRow(item, sourceMap) {
       const showOrigin = !!this.config?.show_origin;
       const sourceId = sourceMap?.[String(item.c)];
@@ -737,6 +947,11 @@ class ItemListCard extends LitElement {
       `;
     }
 
+  /**
+   * Renders the card content.
+   * @returns {TemplateResult} The rendered content.
+   * @private
+   */
   render() {
     if (!this.hass) {
       return html`<ha-card><div class="empty-state">Home Assistant context not available</div></ha-card>`;
@@ -842,6 +1057,12 @@ class ItemListCard extends LitElement {
   static getConfigElement() {
     return null;
   }
+  /**
+   * Provides a default configuration stub for the editor to use when not
+   * given a real configuration.
+   *
+   * @return {Object} A configuration stub with default values.
+   */
   static getStubConfig() {
     return {
       title: 'ToDo List',
