@@ -4,7 +4,6 @@
   "render_readme": true,
   "domains": ["frontend"],
   "zip_release": false,
-  "description": "A custom Lovelace card to display filtered items with quantity, plus/minus buttons, dynamically updating from your todo lists.",
   "author": "Duncan",
   "documentation": "https://github.com/Duncan1106/item-list-card",
   "keywords": ["lovelace", "card", "todo", "items", "filtered", "interactive"]
