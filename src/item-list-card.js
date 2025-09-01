@@ -927,18 +927,7 @@ _parseShowMoreButtons() {
                         `
                       )
                     : ''}
-        
-                  ${this.SHOW_MORE_AMOUNT <= remaining ? html`
-                    <button
-                      class="key-btn"
-                      type="button"
-                      title="Mehr anzeigen"
-                      @click=${() => this._showMore(this.SHOW_MORE_AMOUNT)}
-                    >
-                      Mehr anzeigen (${Math.min(this.SHOW_MORE_AMOUNT, remaining)} weitere)
-                    </button>
-                  ` : ''}
-        
+           
                   <!-- Always show "Alle" button to show the rest -->
                   <button
                     class="key-btn"
@@ -946,7 +935,7 @@ _parseShowMoreButtons() {
                     title="Alles anzeigen"
                     @click=${() => this._showMore('all')}
                   >
-                    Alle (${this._fullItemsList.length})
+                    Alle (${remaining})
                   </button>
                 </div>
               `;
