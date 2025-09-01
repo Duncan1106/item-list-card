@@ -1,4 +1,4 @@
-import { LitElement, html, css} from 'lit';
+import { LitElement, html, css } from 'lit';
 import {styles} from './styles.js'
 
 /**
@@ -850,27 +850,37 @@ class ItemListCard extends LitElement {
             </div>`
           : ''}
 
-        <div class="info" aria-live="polite">
-          <div class="info-text">
-            ${fv ? html`Filter: "${fv}" → ${totalItemsCount} Treffer`
-                : html`${displayedItems.length} von ${totalItemsCount} Einträgen`}
-          </div>
-      
-          ${remaining > 0 
-            ? html`
-              <div class="show-all-wrap">
-                <button
-                  class="key-btn show-all"
-                  type="button"
-                  @click=${this._showAll}
-                  title=${`Alle anzeigen (+${remaining})`}
-                  aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
-                >
-                  Alle anzeigen (+${remaining})
-                </button>
-              </div>` 
-            : ''}
-        </div>
+        ${filterValue.trim()
+          ? html`<div class="info" aria-live="polite">
+              <div class="info-text">Filter: "${fv}" → ${totalItemsCount} Treffer</div>
+              ${remaining > 0 ? html`
+                <div class="show-all-wrap">
+                  <button
+                    class="key-btn show-all"
+                    type="button"
+                    @click=${this._showAll}
+                    title=${`Alle anzeigen (+ ${remaining})`}
+                    aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
+                  >
+                    Alle anzeigen (+ ${remaining})
+                  </button>
+                </div>` : ''}
+            </div>`
+          : html`<div class="info" aria-live="polite">
+              <div class="info-text">${displayedItems.length} von ${totalItemsCount} Einträgen</div>
+              ${remaining > 0 ? html`
+                <div class="show-all-wrap">
+                  <button
+                    class="key-btn show-all"
+                    type="button"
+                    @click=${this._showAll}
+                    title=${`Alle anzeigen (+${remaining})`}
+                    aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
+                  >
+                    Alle anzeigen (+${remaining})
+                  </button>
+                </div>` : ''}
+            </div>`}
 
         ${displayedItems.length === 0
           ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
