@@ -791,6 +791,7 @@ class ItemListCard extends LitElement {
 
     const totalItemsCount = parseInt(itemsEntity?.state, 10) || 0;
     const displayedItems = this._cachedItems || [];
+    const remaining = Math.max(0, totalItemsCount - displayedItems);
 
     return html`
       <ha-card>
@@ -850,30 +851,35 @@ class ItemListCard extends LitElement {
 
         ${filterValue.trim()
           ? html`<div class="info" aria-live="polite">
-              Filter: "${filterValue.trim()}" → ${ (this._fullItemsList || []).length } Treffer
+              <div class="info-text">Filter: "${filterValue.trim()}" → ${totalItemsCount} Treffer</div>
+              ${remaining > 0 ? html`
+                <div class="show-all-wrap">
+                  <button
+                    class="key-btn show-all"
+                    type="button"
+                    @click=${this._showAll}
+                    title=${`Alle anzeigen (+${remaining})`}
+                    aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
+                  >
+                    Alle anzeigen (+${remaining})
+                  </button>
+                </div>` : ''}
             </div>`
-          : totalItemsCount > (this.config.max_items_without_filter ?? 20)
-            ? (() => {
-                const total = (this._fullItemsList || []).length;
-                const shown = (displayedItems || []).length;
-                const remaining = Math.max(0, total - shown);
-                return html`<div class="info" aria-live="polite">
-                  <div class="info-text">${shown} von ${total} Einträgen</div>
-                  ${remaining > 0 ? html`
-                    <div class="show-all-wrap">
-                      <button
-                        class="key-btn show-all"
-                        type="button"
-                        @click=${this._showAll}
-                        title=${`Alle anzeigen (+${remaining})`}
-                        aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
-                      >
-                        Alle anzeigen (+${remaining})
-                      </button>
-                    </div>` : ''}
-                </div>`;
-              })()
-            : ''}
+          : html`<div class="info" aria-live="polite">
+              <div class="info-text">${displayedItems} von ${totalItemsCount} Einträgen</div>
+              ${remaining > 0 ? html`
+                <div class="show-all-wrap">
+                  <button
+                    class="key-btn show-all"
+                    type="button"
+                    @click=${this._showAll}
+                    title=${`Alle anzeigen (+${remaining})`}
+                    aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
+                  >
+                    Alle anzeigen (+${remaining})
+                  </button>
+                </div>` : ''}
+            </div>`}
 
         ${displayedItems.length === 0
           ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
