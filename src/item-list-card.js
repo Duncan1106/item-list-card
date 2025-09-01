@@ -865,8 +865,8 @@ class ItemListCard extends LitElement {
                         class="key-btn show-all"
                         type="button"
                         @click=${this._showAll}
-                        title="Alle anzeigen"
-                        aria-label="Alle anzeigen"
+                        title=${`Alle anzeigen (+${remaining})`}
+                        aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
                       >
                         Alle anzeigen (+${remaining})
                       </button>
