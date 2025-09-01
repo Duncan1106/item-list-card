@@ -158,9 +158,9 @@ export const styles = css`
 
     /* small screens adjustments */
     @media (max-width: 420px) {
-        .input-row { height: 38px; gap: 6px; }
-        .btn, .input-row .btn { width: 34px; height: 34px; }
-        .quantity { min-width: 22px; }
+        .input-row { height: 44px; gap: 6px; }
+        .btn, .input-row .btn { width: 40px; height: 38px; }
+        .quantity { min-width: 28px; }
     }
 
     /* fixed-size centered spinner wrapper to avoid layout shift */
