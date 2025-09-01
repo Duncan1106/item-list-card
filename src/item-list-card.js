@@ -935,7 +935,7 @@ _parseShowMoreButtons() {
                     title="Alles anzeigen"
                     @click=${() => this._showMore('all')}
                   >
-                    Alle (${remaining})
+                    Alle
                   </button>
                 </div>
               `;
