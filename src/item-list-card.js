@@ -1,4 +1,4 @@
-import { LitElement, html, css } from 'lit';
+import { LitElement, html, nothing} from 'lit';
 import {styles} from './styles.js'
 
 /**
@@ -850,29 +850,24 @@ class ItemListCard extends LitElement {
             </div>`
           : ''}
 
-          <div class="info" aria-live="polite">
+        <div class="info" aria-live="polite">
           <div class="info-text">
-            ${fv
-              ? html`Filter: "${fv}" → ${totalItemsCount} Treffer`
-              : html`${displayedItems.length} von ${totalItemsCount} Einträgen`}
+            ${fv ? html`Filter: "${fv}" → ${totalItemsCount} Treffer`
+                : html`${displayedItems.length} von ${totalItemsCount} Einträgen`}
           </div>
-  
-          <!-- Show "Alle anzeigen" whenever there are remaining items -->
-          ${remaining > 0
-            ? html`
-                <div class="show-all-wrap">
-                  <button
-                    class="key-btn show-all"
-                    type="button"
-                    @click=${this._showAll}
-                    title=${`Alle anzeigen (+${remaining})`}
-                    aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
-                  >
-                    Alle anzeigen (+${remaining})
-                  </button>
-                </div>
-              `
-            : nothing}
+      
+          ${remaining > 0 ? html`
+            <div class="show-all-wrap">
+              <button
+                class="key-btn show-all"
+                type="button"
+                @click=${this._showAll}
+                title=${`Alle anzeigen (+${remaining})`}
+                aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
+              >
+                Alle anzeigen (+${remaining})
+              </button>
+            </div>` : nothing}
         </div>
 
         ${displayedItems.length === 0
