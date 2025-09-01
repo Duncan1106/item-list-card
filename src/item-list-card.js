@@ -910,9 +910,9 @@ _parseShowMoreButtons() {
         ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0)
           ? (() => {
               const remaining = Math.max(0, this._fullItemsList.length - displayedItems.length);
-              const configured = this._parseShowMoreButtons().filter(n => n <= remaining);
+              const configured = this._parseShowMoreButtons();
               return html`
-                <div class="key-buttons" role="group" aria-label="Mehr anzeigen Optionen">
+                <div class="show-more" role="group" aria-label="Mehr anzeigen Optionen">
                   ${configured.length
                     ? configured.map(
                         (n) => html`
@@ -920,6 +920,7 @@ _parseShowMoreButtons() {
                             class="key-btn"
                             type="button"
                             title="Mehr anzeigen ${n}"
+                            ?disabled=${n > remaining}
                             @click=${() => this._showMore(n)}
                           >
                             +${n}
@@ -927,15 +928,26 @@ _parseShowMoreButtons() {
                         `
                       )
                     : ''}
-           
-                  <!-- Always show "Alle" button to show the rest -->
+        
+                  <!-- Default increment button (keeps existing behaviour using SHOW_MORE_AMOUNT) -->
+                  <button
+                    class="key-btn"
+                    type="button"
+                    title="Mehr anzeigen"
+                    ?disabled=${this.SHOW_MORE_AMOUNT > remaining}
+                    @click=${() => this._showMore(this.SHOW_MORE_AMOUNT)}
+                  >
+                    Mehr anzeigen (${Math.min(this.SHOW_MORE_AMOUNT, remaining)} weitere)
+                  </button>
+        
+                  <!-- Always show "Alle (N)" button to show the rest -->
                   <button
                     class="key-btn"
                     type="button"
                     title="Alles anzeigen"
                     @click=${() => this._showMore('all')}
                   >
-                    Alle
+                    Alle (${remaining})
                   </button>
                 </div>
               `;
