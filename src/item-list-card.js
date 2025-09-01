@@ -912,7 +912,7 @@ _parseShowMoreButtons() {
               const remaining = Math.max(0, this._fullItemsList.length - displayedItems.length);
               const configured = this._parseShowMoreButtons().filter(n => n <= remaining);
               return html`
-                <div class="show-more" role="group" aria-label="Mehr anzeigen Optionen">
+                <div class="key-buttons" role="group" aria-label="Mehr anzeigen Optionen">
                   ${configured.length
                     ? configured.map(
                         (n) => html`
