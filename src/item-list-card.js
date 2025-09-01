@@ -928,8 +928,6 @@ _parseShowMoreButtons() {
                       )
                     : ''}
         
-                  <!-- Default increment button (keeps existing behaviour using SHOW_MORE_AMOUNT)
-                        only show when it would show at least 1 new item -->
                   ${this.SHOW_MORE_AMOUNT <= remaining ? html`
                     <button
                       class="key-btn"
@@ -948,7 +946,7 @@ _parseShowMoreButtons() {
                     title="Alles anzeigen"
                     @click=${() => this._showMore('all')}
                   >
-                    Alle
+                    Alle (${this._fullItemsList.length})
                   </button>
                 </div>
               `;
