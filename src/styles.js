@@ -291,7 +291,7 @@ export const styles = css`
 
     /* keep the left text from shrinking */
     .info .info-text {
-        flex: 0 1 auto;
+        flex: 0 0 auto;
     }
 
     /* wrapper to push button to the right */
