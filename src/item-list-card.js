@@ -703,26 +703,58 @@ class ItemListCard extends LitElement {
     }
 
   /**
-   * Increase visible items by show_more_amount (or remaining).
+   * Increases the number of items shown in the list by a certain amount (default 10),
+   * or shows all items if given the string "all" or "rest". If given a number, it will
+   * increase the limit by that amount. If given anything else, it will fall back to
+   * increasing the limit by 10.
+   * @param {number|string|undefined} option The amount to increase the limit by, or
+   * a string to show all or rest of items.
    */
-  _showMore() {
-    // If cache not initialized or no items, nothing to do
+  _showMore(option) {
     const items = this._fullItemsList || this._cachedItems || [];
+  
     // ensure displayLimit initialized
     if (this._displayLimit === undefined || this._displayLimit === null) {
-      this._displayLimit = this._filterValue.trim() ? this.MAX_WITH_FILTER : this.MAX_DISPLAY;
+      this._displayLimit = this._filterValue?.trim()
+        ? this.MAX_WITH_FILTER
+        : this.MAX_DISPLAY;
     }
-    const add = this.SHOW_MORE_AMOUNT;
-    this._displayLimit = Math.min(this._displayLimit + add, items.length);
-  }
-
-  /**
-  * Show all available items (set display limit to the full list length).
-  */
-  _showAll() {
-    const items = this._fullItemsList || this._cachedItems || [];
-    this._displayLimit = items.length;
-    // update cachedItems to reflect the new display limit
+  
+    // Determine the new limit
+    let newLimit = this._displayLimit;
+  
+    if (typeof option === 'string') {
+      const lower = option.toLowerCase().trim();
+      if (lower === 'all' || lower === 'rest') {
+        // show everything
+        newLimit = items.length;
+      } else {
+        // try parsing string as number
+        const parsed = Number(option);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          newLimit = Math.min(this._displayLimit + Math.floor(parsed), items.length);
+        } else {
+          // default when invalid string
+          newLimit = Math.min(this._displayLimit + 10, items.length);
+        }
+      }
+    } else if (typeof option === 'number') {
+      if (Number.isFinite(option) && option > 0) {
+        newLimit = Math.min(this._displayLimit + Math.floor(option), items.length);
+      } else {
+        // default when non-positive/invalid number
+        newLimit = Math.min(this._displayLimit + 10, items.length);
+      }
+    } else if (typeof option === 'undefined') {
+      // no argument -> default 10
+      newLimit = Math.min(this._displayLimit + 10, items.length);
+    } else {
+      // fallback for other types
+      newLimit = Math.min(this._displayLimit + 10, items.length);
+    }
+  
+    // Apply new limit and update cached items
+    this._displayLimit = newLimit;
     this._cachedItems = items.slice(0, this._displayLimit);
   }
 
@@ -861,7 +893,6 @@ class ItemListCard extends LitElement {
           ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
           : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => this._renderItemRow(item, this._cachedSourceMap))}</div>`}
 
-        ${/* Show more button if there are more items available in the full list */ ''}
         ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0)
           ? html`
               <div class="show-more" >
