@@ -1,4 +1,4 @@
-import { LitElement, html, nothing} from 'lit';
+import { LitElement, html, css} from 'lit';
 import {styles} from './styles.js'
 
 /**
@@ -856,18 +856,20 @@ class ItemListCard extends LitElement {
                 : html`${displayedItems.length} von ${totalItemsCount} Einträgen`}
           </div>
       
-          ${remaining > 0 ? html`
-            <div class="show-all-wrap">
-              <button
-                class="key-btn show-all"
-                type="button"
-                @click=${this._showAll}
-                title=${`Alle anzeigen (+${remaining})`}
-                aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
-              >
-                Alle anzeigen (+${remaining})
-              </button>
-            </div>` : nothing}
+          ${remaining > 0 
+            ? html`
+              <div class="show-all-wrap">
+                <button
+                  class="key-btn show-all"
+                  type="button"
+                  @click=${this._showAll}
+                  title=${`Alle anzeigen (+${remaining})`}
+                  aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
+                >
+                  Alle anzeigen (+${remaining})
+                </button>
+              </div>` 
+            : ''}
         </div>
 
         ${displayedItems.length === 0
