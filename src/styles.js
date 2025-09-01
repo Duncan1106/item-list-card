@@ -159,7 +159,7 @@ export const styles = css`
     /* small screens adjustments */
     @media (max-width: 420px) {
         .input-row { height: 44px; gap: 6px; }
-        .btn, .input-row .btn { width: 40px; height: 38px; }
+        .btn, .input-row .btn { width: 40px; height: 40px; }
         .quantity { min-width: 28px; }
     }
 
