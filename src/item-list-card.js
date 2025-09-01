@@ -792,7 +792,6 @@ class ItemListCard extends LitElement {
     const totalItemsCount = parseInt(itemsEntity?.state, 10) || 0;
     const displayedItems = this._cachedItems || [];
     const remaining = Math.max(0, totalItemsCount - displayedItems);
-    const fv = String(this.filterValue ?? '').trim();
 
     return html`
       <ha-card>
@@ -803,7 +802,7 @@ class ItemListCard extends LitElement {
         <div class="input-row">
           <input
             type="text"
-            .value=${fv}
+            .value=${filterValue}
             placeholder="Tippe einen Suchfilter ein"
             @input=${this._handleFilterInputChange}
             @keydown=${this._onInputKeydown}
@@ -852,7 +851,7 @@ class ItemListCard extends LitElement {
 
         ${filterValue.trim()
           ? html`<div class="info" aria-live="polite">
-              <div class="info-text">Filter: "${fv}" → ${totalItemsCount} Treffer</div>
+              <div class="info-text">Filter: "${filterValue.trim()}" → ${totalItemsCount} Treffer</div>
               ${remaining > 0 ? html`
                 <div class="show-all-wrap">
                   <button
