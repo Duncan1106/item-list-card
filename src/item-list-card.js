@@ -789,7 +789,7 @@ class ItemListCard extends LitElement {
       }
     }    
 
-    const totalItemsCount = parseInt(itemsEntity?.state, 10) || 0;
+    const totalItemsCount = (this._fullItemsList || []).length;
     const displayedItems = this._cachedItems || [];
     const remaining = Math.max(0, totalItemsCount - displayedItems.length);
 
@@ -858,10 +858,10 @@ class ItemListCard extends LitElement {
                     class="key-btn show-all"
                     type="button"
                     @click=${this._showAll}
-                    title=${`Alle anzeigen (+${remaining})`}
+                    title=${`Alle anzeigen (+ ${remaining})`}
                     aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}
                   >
-                    Alle anzeigen (+${remaining})
+                    Alle anzeigen (+ ${remaining})
                   </button>
                 </div>` : ''}
             </div>`
