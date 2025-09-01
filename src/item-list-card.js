@@ -791,7 +791,7 @@ class ItemListCard extends LitElement {
 
     const totalItemsCount = parseInt(itemsEntity?.state, 10) || 0;
     const displayedItems = this._cachedItems || [];
-    const remaining = Math.max(0, totalItemsCount - displayedItems);
+    const remaining = Math.max(0, totalItemsCount - displayedItems.length);
 
     return html`
       <ha-card>
@@ -866,7 +866,7 @@ class ItemListCard extends LitElement {
                 </div>` : ''}
             </div>`
           : html`<div class="info" aria-live="polite">
-              <div class="info-text">${displayedItems} von ${totalItemsCount} Einträgen</div>
+              <div class="info-text">${displayedItems.length} von ${totalItemsCount} Einträgen</div>
               ${remaining > 0 ? html`
                 <div class="show-all-wrap">
                   <button
