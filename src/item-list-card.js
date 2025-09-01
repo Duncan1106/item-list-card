@@ -850,31 +850,14 @@ class ItemListCard extends LitElement {
             </div>`
           : ''}
 
-        ${filterValue.trim()
-          ? html`<div class="info" aria-live="polite">
-              <div class="info-text">Filter: "${filterValue.trim()}" → ${totalItemsCount} Treffer</div>
-              ${remaining > 0 ? html`
-                <div class="show-all-wrap">
-                  <button class="key-btn show-all" type="button" @click=${this._showAll}
-                          title=${`Alle anzeigen (+${remaining})`}
-                          aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}>
-                    Alle anzeigen (+${remaining})
-                  </button>
-                </div>` : ''}
-            </div>`
-          : html`<div class="info" aria-live="polite">
-              <div class="info-text">${displayedCount} von ${totalItemsCount} Einträgen</div>
-              ${remaining > 0 ? html`
-                <div class="show-all-wrap">
-                  <button class="key-btn show-all" type="button" @click=${this._showAll}
-                          title=${`Alle anzeigen (+${remaining})`}
-                          aria-label=${`Alle anzeigen (plus ${remaining} weitere)`}>
-                    Alle anzeigen (+${remaining})
-                  </button>
-                </div>` : ''}
-            </div>`}
 
-        ${displayedItems.length === 0
+        ${filterValue.trim()
+          ? html`<div class="info" aria-live="polite">Filter: "${filterValue.trim()}" → ${ (this._fullItemsList || []).length } Treffer</div>`
+          : totalItemsCount > (this.config.max_items_without_filter ?? 20)
+          ? html`<div class="info" aria-live="polite">${displayedCount} von ${totalItemsCount} Einträgen</div>`
+          : ''}
+
+        ${displayedCount === 0
           ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
           : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => this._renderItemRow(item, this._cachedSourceMap))}</div>`}
 
