@@ -300,19 +300,4 @@ export const styles = css`
         display: flex;
         align-items: center;
     }
-
-    /* adjust appearance for the show-all button (reuses key-btn look) */
-    .key-btn.show-all {
-        padding: 6px 10px;
-        height: auto;
-        min-height: 32px;
-        border-radius: 8px;
-        background: rgba(0,0,0,0.03);
-        border: 1px solid transparent;
-    }
-    .key-btn.show-all:hover {
-        background: rgba(0,0,0,0.06);
-        color: var(--accent-color, #03a9f4);
-        transform: translateY(-1px);
-    }
     `;
