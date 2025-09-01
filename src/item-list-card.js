@@ -929,7 +929,6 @@ _parseShowMoreButtons() {
                       )
                     : ''}
         
-                  <!-- Always show "Alle (N)" button to show the rest -->
                   <button
                     class="key-btn"
                     type="button"
