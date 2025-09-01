@@ -98,11 +98,6 @@ export const styles = css`
         overflow: visible;
         user-select: text;
     }
-    .info {
-        font-size: 13px;
-        color: var(--secondary-text-color, #888);
-        margin-bottom: 8px;
-    }
     .item-controls {
         flex: 0 0 auto;
         display: flex;
@@ -281,9 +276,10 @@ export const styles = css`
         text-align: center;
         justify-content:center;
         display:flex; 
-        margin-top:8px;"
+        margin-top:8px;
     }
     /* ensure .info acts as a row so we can place the button to the right */
+
     .info {
         display: flex;
         align-items: center;
