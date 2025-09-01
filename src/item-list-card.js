@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import {styles} from 'styles.js'
+import {styles} from './styles.js'
 
 /**
 * Returns a debounced version of the given function `fn`.
@@ -115,7 +115,7 @@ class ItemListCard extends LitElement {
   };
 
   static styles = styles;
-  
+
   constructor() {
     super();
     this._cachedItems = [];
@@ -851,7 +851,7 @@ class ItemListCard extends LitElement {
         ${/* Show more button if there are more items available in the full list */ ''}
         ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0)
           ? html`
-              <div style="display:flex; justify-content:center; margin-top:8px;">
+              <div class="show-more" >
                 <button class="key-btn" type="button" @click=${this._showMore}>
                   Mehr anzeigen (${Math.min(this.SHOW_MORE_AMOUNT, this._fullItemsList.length - displayedItems.length)} weitere)
                 </button>

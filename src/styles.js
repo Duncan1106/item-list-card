@@ -29,7 +29,7 @@ export const styles = css`
     }
     .count-badge {
         background: var(--accent-color, #03a9f4);
-        color: var(--primary-text-color);
+        color: var(--count-badge-text-color, #fff);
         font-weight: 600;
         padding: 2px 8px;
         border-radius: 999px;
@@ -269,5 +269,12 @@ export const styles = css`
         flex: 0 0 auto;
         min-width: 44px;
         padding: 8px;
+    }
+
+    .show-more {
+        text-align: center;
+        justify-content:center;
+        display:flex; 
+        margin-top:8px;"
     }
     `;
