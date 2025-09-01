@@ -57,6 +57,12 @@ export const styles = css`
         border-color: var(--accent-color, #03a9f4);
         box-shadow: 0 0 0 4px rgba(3,169,244,0.06);
     }
+    /* keyboard-only focus */
+    .input-row input:focus-visible {
+        outline: none;
+        border-color: var(--accent-color, #03a9f4);
+        box-shadow: 0 0 0 4px rgba(3,169,244,0.06);
+    }
     .input-row .btn {
         width: 36px;
         height: 36px;
