@@ -146,14 +146,6 @@ class ItemListCard extends LitElement {
   }
 
   /**
-   * Returns the configured amount to increment when "Show more" is clicked.
-   * Defaults to 20.
-   */
-  get SHOW_MORE_AMOUNT() {
-    return this.config?.show_more_amount ?? 20;
-  }
-
-  /**
    * Clean up debounced filter text update when this element is no longer in the DOM.
    * This ensures that any pending updates are cancelled and do not trigger after
    * the element is gone.
@@ -203,7 +195,7 @@ class ItemListCard extends LitElement {
       highlight_matches: false,
       max_items_without_filter: 20,
       max_items_with_filter: 50,
-      show_more_amount: 20,
+      show_more_buttons: '',
       filter_key_buttons: [],
       ...config,
     };
@@ -702,13 +694,14 @@ class ItemListCard extends LitElement {
       `;
     }
 
+
   /**
-   * Increases the number of items shown in the list by a certain amount (default 10),
-   * or shows all items if given the string "all" or "rest". If given a number, it will
-   * increase the limit by that amount. If given anything else, it will fall back to
-   * increasing the limit by 10.
-   * @param {number|string|undefined} option The amount to increase the limit by, or
-   * a string to show all or rest of items.
+   * Increases the display limit of the list by the given amount.
+   * @param {number|string|undefined} option - Number of items to add to the
+   *   display limit, or a string that can be parsed as a number. If `'all'` or
+   *   `'rest'`, the list will show all items. If `undefined`, the default is
+   *   10. If any other value, the default is 10.
+   * @private
    */
   _showMore(option) {
     const items = this._fullItemsList || this._cachedItems || [];
@@ -757,6 +750,27 @@ class ItemListCard extends LitElement {
     this._displayLimit = newLimit;
     this._cachedItems = items.slice(0, this._displayLimit);
   }
+
+/**
+ * Parse the comma separated config string this.config.show_more_buttons
+ * into an array of positive integers (deduplicated and sorted ascending).
+ * Returns [] when none available.
+ * @returns {number[]}
+ * @private
+ */
+_parseShowMoreButtons() {
+  const raw = String(this.config?.show_more_buttons ?? '').trim();
+  if (!raw) return [];
+  const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
+  const nums = parts
+    .map((p) => {
+      const n = Number(p);
+      return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
+    })
+    .filter((n) => n !== null);
+  // dedupe and sort
+  return Array.from(new Set(nums)).sort((a, b) => a - b);
+}
 
   /**
    * Renders the card content.
@@ -894,13 +908,51 @@ class ItemListCard extends LitElement {
           : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => this._renderItemRow(item, this._cachedSourceMap))}</div>`}
 
         ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0)
-          ? html`
-              <div class="show-more" >
-                <button class="key-btn" type="button" @click=${this._showMore}>
-                  Mehr anzeigen (${Math.min(this.SHOW_MORE_AMOUNT, this._fullItemsList.length - displayedItems.length)} weitere)
-                </button>
-              </div>
-            `
+          ? (() => {
+              const remaining = Math.max(0, this._fullItemsList.length - displayedItems.length);
+              const configured = this._parseShowMoreButtons().filter(n => n <= remaining);
+              return html`
+                <div class="show-more" role="group" aria-label="Mehr anzeigen Optionen">
+                  ${configured.length
+                    ? configured.map(
+                        (n) => html`
+                          <button
+                            class="key-btn"
+                            type="button"
+                            title="Mehr anzeigen ${n}"
+                            @click=${() => this._showMore(n)}
+                          >
+                            +${n}
+                          </button>
+                        `
+                      )
+                    : ''}
+        
+                  <!-- Default increment button (keeps existing behaviour using SHOW_MORE_AMOUNT)
+                        only show when it would show at least 1 new item -->
+                  ${this.SHOW_MORE_AMOUNT <= remaining ? html`
+                    <button
+                      class="key-btn"
+                      type="button"
+                      title="Mehr anzeigen"
+                      @click=${() => this._showMore(this.SHOW_MORE_AMOUNT)}
+                    >
+                      Mehr anzeigen (${Math.min(this.SHOW_MORE_AMOUNT, remaining)} weitere)
+                    </button>
+                  ` : ''}
+        
+                  <!-- Always show "Alle" button to show the rest -->
+                  <button
+                    class="key-btn"
+                    type="button"
+                    title="Alles anzeigen"
+                    @click=${() => this._showMore('all')}
+                  >
+                    Alle
+                  </button>
+                </div>
+              `;
+            })()
           : ''}
       
           </ha-card>
