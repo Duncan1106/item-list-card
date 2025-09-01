@@ -912,7 +912,7 @@ _parseShowMoreButtons() {
               const remaining = Math.max(0, this._fullItemsList.length - displayedItems.length);
               const configured = this._parseShowMoreButtons();
               return html`
-                <div class="show-more" role="group" aria-label="Mehr anzeigen Optionen">
+                <div class="key-buttons" role="group" aria-label="Mehr anzeigen Optionen">
                   ${configured.length
                     ? configured.map(
                         (n) => html`
@@ -928,17 +928,6 @@ _parseShowMoreButtons() {
                         `
                       )
                     : ''}
-        
-                  <!-- Default increment button (keeps existing behaviour using SHOW_MORE_AMOUNT) -->
-                  <button
-                    class="key-btn"
-                    type="button"
-                    title="Mehr anzeigen"
-                    ?disabled=${this.SHOW_MORE_AMOUNT > remaining}
-                    @click=${() => this._showMore(this.SHOW_MORE_AMOUNT)}
-                  >
-                    Mehr anzeigen (${Math.min(this.SHOW_MORE_AMOUNT, remaining)} weitere)
-                  </button>
         
                   <!-- Always show "Alle (N)" button to show the rest -->
                   <button
