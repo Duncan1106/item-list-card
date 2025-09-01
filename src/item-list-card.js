@@ -717,6 +717,16 @@ class ItemListCard extends LitElement {
   }
 
   /**
+  * Show all available items (set display limit to the full list length).
+  */
+  _showAll() {
+    const items = this._fullItemsList || this._cachedItems || [];
+    this._displayLimit = items.length;
+    // update cachedItems to reflect the new display limit
+    this._cachedItems = items.slice(0, this._displayLimit);
+  }
+
+  /**
    * Renders the card content.
    * @returns {TemplateResult} The rendered content.
    * @private
@@ -839,10 +849,31 @@ class ItemListCard extends LitElement {
           : ''}
 
         ${filterValue.trim()
-          ? html`<div class="info" aria-live="polite">Filter: "${filterValue.trim()}" → ${ (this._fullItemsList || []).length } Treffer</div>`
+          ? html`<div class="info" aria-live="polite">
+              Filter: "${filterValue.trim()}" → ${ (this._fullItemsList || []).length } Treffer
+            </div>`
           : totalItemsCount > (this.config.max_items_without_filter ?? 20)
-          ? html`<div class="info" aria-live="polite">${displayedItems.length} von ${totalItemsCount} Einträgen</div>`
-          : ''}
+            ? (() => {
+                const total = (this._fullItemsList || []).length;
+                const shown = (displayedItems || []).length;
+                const remaining = Math.max(0, total - shown);
+                return html`<div class="info" aria-live="polite">
+                  <div class="info-text">${shown} von ${total} Einträgen</div>
+                  ${remaining > 0 ? html`
+                    <div class="show-all-wrap">
+                      <button
+                        class="key-btn show-all"
+                        type="button"
+                        @click=${this._showAll}
+                        title="Alle anzeigen"
+                        aria-label="Alle anzeigen"
+                      >
+                        Alle anzeigen (+${remaining})
+                      </button>
+                    </div>` : ''}
+                </div>`;
+              })()
+            : ''}
 
         ${displayedItems.length === 0
           ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
