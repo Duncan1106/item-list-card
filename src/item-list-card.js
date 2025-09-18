@@ -374,7 +374,7 @@ class ItemListCard extends LitElement {
       if (curRaw === valRaw) return;
   
       callService(this.hass, 'input_text', 'set_value',
-        { entity_id: entityId, valRaw },
+        { entity_id: entityId, value: value ?? '' },
         this,
         'Fehler beim Aktualisieren des Suchfeldes');
     } catch (err) {
