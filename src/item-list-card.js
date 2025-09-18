@@ -347,7 +347,7 @@ class ItemListCard extends LitElement {
    */
   _onFilterKeyButtonClick(filterKey) {
     if (!filterKey) return;
-    const value = `todo:${String(filterKey)}`;
+    const value = `todo:${String(filterKey)} `;
     // Use the immediate update so the input_text value is set right away.
     this._updateFilterTextActual(value);
   }
@@ -368,11 +368,12 @@ class ItemListCard extends LitElement {
         return;
       }
       const current = this.hass.states?.[entityId]?.state ?? '';
-      const curTrim = String(current).trim();
-      const valTrim = String(value ?? '').trim();
-      if (curTrim === valTrim) return;
-
-       callService(this.hass, 'input_text', 'set_value',
+      // compare raw values so trailing spaces cause an update
+      const curRaw = String(current);
+      const valRaw = String(value ?? '');
+      if (curRaw === valRaw) return;
+  
+      callService(this.hass, 'input_text', 'set_value',
         { entity_id: entityId, value },
         this,
         'Fehler beim Aktualisieren des Suchfeldes');
@@ -380,7 +381,7 @@ class ItemListCard extends LitElement {
       console.error("Error in _updateFilterTextActual:", err);
     }
   }
-
+  
   /**
    * Clears the filter text completely if there is no token in the current filter text
    * that matches the pattern "todo:<filterKey>" or if the only token is exactly
@@ -400,31 +401,29 @@ class ItemListCard extends LitElement {
         this._updateFilterTextActual('');
         return;
       }
-
+  
       // find token like todo:somekey (no spaces inside)
       const tokens = trimmed.split(/\s+/).filter(Boolean);
       const todoTokenIndex = tokens.findIndex(t => /^todo:[^\s]+$/.test(t));
-
+  
       if (todoTokenIndex === -1) {
         // no todo:key => clear completely
         this._updateFilterTextActual('');
         return;
       }
-
-      // if only that token present -> clear as well
-      if (tokens.length === 1) {
-        this._updateFilterTextActual('');
-        return;
-      }
-
+  
       // preserve only the todo:key token (keep original case)
       const preserved = tokens[todoTokenIndex];
-      this._updateFilterTextActual(preserved);
+  
+      // If the todo token is the only token, set it with a trailing space.
+      // Also when preserving from multiple tokens we add a trailing space so the
+      // user can continue typing after the key.
+      this._updateFilterTextActual(preserved + ' ');
     } catch (err) {
       console.error('Error while clearing filter:', err);
       this._updateFilterTextActual('');
     }
-   }
+  }
 
   /**
    * Handles the input event of the filter input field by calling the
