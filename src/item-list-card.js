@@ -412,6 +412,12 @@ class ItemListCard extends LitElement {
         return;
       }
   
+      // If the todo token is the only token present, clear it completely.
+      if (tokens.length === 1) {
+        this._updateFilterTextActual('');
+        return;
+      }
+
       // preserve only the todo:key token (keep original case)
       const preserved = tokens[todoTokenIndex];
   
