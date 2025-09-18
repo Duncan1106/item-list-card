@@ -863,7 +863,7 @@ _parseShowMoreButtons() {
           <button
             class="btn ${!filterValue ? 'hidden' : ''}"
             type="button"
-            @click=${() => this._clearFilterPreservingTodoKey('')}
+            @click=${() => this._clearFilterPreservingTodoKey()}
             title="Eingabe leeren"
             aria-label="Eingabe leeren"
           >
