@@ -801,10 +801,6 @@ _parseShowMoreButtons() {
       const items = typeof attr === 'string'
         ? this._safeParseJSON(attr, [])
         : Array.isArray(attr) ? attr : [];
-      const limit = this.MAX_DISPLAY;
-      this._cachedItems = filterValue.trim()
-        ? items
-        : items.slice(0, limit);
       // remember the full list for "show more" handling
       this._fullItemsList = items;
     
