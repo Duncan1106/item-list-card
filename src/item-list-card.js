@@ -111,7 +111,6 @@ class ItemListCard extends LitElement {
     _filterValue: { state: true },
     _pendingUpdates: { state: true },
     _lastItemsHash: { state: false },
-    _lastSourceMapHash: { state: false },
   };
 
   static styles = styles;
@@ -825,7 +824,8 @@ _parseShowMoreButtons() {
       // initialize last-seen hash from the external hash entity (if present)
       const hashEntity = this.hass.states?.[this.config.hash_entity];
       const extHash = hashEntity?.state ?? '';
-      this._lastItemsHash = extHash;
+      const localFp = this._computeItemsFingerprint(itemsEntity) || '';
+      this._lastItemsHash = extHash || localFp;
     }
 
     // Always ensure we have the full list cached (useful when not first render)
