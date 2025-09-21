@@ -183,7 +183,7 @@ class ItemListCard extends LitElement {
    */
   setConfig(config) {
     if (!config) throw new Error("Missing config");
-    const required = ['filter_items_entity', 'shopping_list_entity', 'filter_entity'];
+    const required = ['filter_items_entity', 'shopping_list_entity', 'filter_entity', 'hash_entity'];
     const missing = required.filter(k => !config[k]);
     if (missing.length) {
       throw new Error(`Missing required config: ${missing.join(', ')}`);
@@ -211,24 +211,6 @@ class ItemListCard extends LitElement {
     return base + Math.min(this._cachedItems?.length || 0, 6);
   }
 
-  /**
-   * Returns a hash string for the given value. This is used to prevent
-   * duplicate items in the list. The hash is calculated as a simple
-   * string hash function using the djb2 algorithm.
-   * @param {unknown} val The value to hash
-   * @returns {string} The hash string
-   * @private
-   */
-  _hash(val) {
-    try {
-      const s = typeof val === 'string' ? val : JSON.stringify(val);
-      let h = 0;
-      for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i) | 0;
-      return String(h);
-    } catch {
-      return '';
-    }
-  }
   /**
    * Adds a pending update to the list. This will cause the item with the given
    * `uid` to be re-rendered on the next update.
@@ -276,9 +258,10 @@ shouldUpdate(changedProps) {
     return true;
   }
 
-  // Use backend-provided hash
   const itemsHash = hashEntity?.state ?? "";
-  const changed = itemsHash !== this._lastItemsHash;
+  // If no hash provided by backend, we consider it changed to allow initial
+  // hydration. After that we rely on external hash changes to trigger updates.
+  const changed = itemsHash !== (this._lastItemsHash || '');
 
   if (changed) {
     this._displayLimit = undefined;
@@ -793,29 +776,36 @@ _parseShowMoreButtons() {
     const filterValue = this._filterValue ?? '';
     const showAddButton = filterValue.trim().length > 3 && !this.config.hide_add_button;
 
-    // If cache not initialized yet, hydrate from entity
     if (!this._lastItemsHash) {
       const attr = itemsEntity.attributes.filtered_items;
-      const items = typeof attr === 'string' ? this._safeParseJSON(attr, []) : Array.isArray(attr) ? attr : [];
+      const items = typeof attr === 'string'
+        ? this._safeParseJSON(attr, [])
+        : Array.isArray(attr) ? attr : [];
       const limit = this.MAX_DISPLAY;
       this._cachedItems = filterValue.trim()
         ? items
         : items.slice(0, limit);
       // remember the full list for "show more" handling
       this._fullItemsList = items;
+    
       // initialize display limit depending on filter
       if (this._displayLimit === undefined || this._displayLimit === null) {
         this._displayLimit = filterValue.trim() ? this.MAX_WITH_FILTER : this.MAX_DISPLAY;
       }
-      this._cachedItems = filterValue.trim()
-        ? items.slice(0, this._displayLimit)
-        : items.slice(0, this._displayLimit);
+    
+      // set cached items according to display limit
+      this._cachedItems = items.slice(0, this._displayLimit);
+    
       const mapAttr = itemsEntity.attributes.source_map;
       this._cachedSourceMap = typeof mapAttr === 'string'
         ? this._safeParseJSON(mapAttr, {})
         : (mapAttr && typeof mapAttr === 'object') ? mapAttr : {};
-      this._lastItemsHash = this._hash(items);
-      this._lastSourceMapHash = this._hash(this._cachedSourceMap);
+    
+      // initialize last-seen hash from the external hash entity (if present)
+      const hashEntity = this.hass.states?.[this.config.hash_entity];
+      const extHash = hashEntity?.state ?? '';
+      this._lastItemsHash = extHash;
+      this._lastSourceMapHash = extHash;
     }
 
     // Always ensure we have the full list cached (useful when not first render)
