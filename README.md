@@ -2,7 +2,7 @@
 
 A custom Lovelace card to display filtered items aggregated from multiple `todo.*` lists—all handled with finesse by your setup.
 
-This repository contains a sleek, reactive frontend, but it leans on a robust backend to truly shine. You'll need a template sensor and automation to collect, filter, and surface the data. The full working backend example is tucked away below.
+This repository contains a sleek, reactive frontend, but it leans on a robust backend to truly shine. You'll need a template trigger sensor (example provided below) to collect, filter, and surface the data.
 
 ---
 
@@ -21,6 +21,7 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 1. Add this repo as a **Frontend Custom Repository** in HACS.
 2. Install **Item List Card**.
 3. Confirm the resource is loaded in Lovelace:
+
     ```yaml
     url: /hacsfiles/item-list-card/dist/item-list-card.js
     type: module
@@ -30,6 +31,7 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 
 1. Copy `dist/item-list-card.js` to your `/www/` folder.
 2. Add to Lovelace:
+
     ```yaml
     url: /local/item-list-card.js
     type: module
@@ -37,12 +39,60 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 
 ---
 
-##  Backend Setup (Required)
+## Frontend Setup
+
+### Minimal config
+
+```yaml
+type: custom:item-list-card
+filter_items_entity: sensor.kellervorrate_combined_filtered_items
+hash_entity: sensor.kellervorrate_combined_filtered_items_hash
+shopping_list_entity: todo.einkaufsliste
+filter_entity: input_text.search_todo_list
+```
+
+### Full config
+
+```yaml
+type: custom:item-list-card
+title: Kellervorräte
+filter_items_entity: sensor.kellervorrate_combined_filtered_items
+hash_entity: sensor.kellervorrate_combined_filtered_items_hash
+shopping_list_entity: todo.einkaufsliste
+filter_entity: input_text.search_todo_list
+max_items_without_filter: 15
+max_items_with_filter: 15
+show_more_buttons: 10,15,20,25
+show_origin: true
+hide_add_button: false
+highlight_matches: true
+filter_key_buttons:
+  - name: Kellervorräte
+    icon: mdi:warehouse
+    filter_key: kellervorrate
+  - name: Kellervorrat (Safe)
+    icon: mdi:safe
+    filter_key: safe
+  - name: Katzenfutter
+    icon: mdi:cat
+    filter_key: katzen
+  - name: Marmelade & Eingemachtes
+    icon: mdi:fruit-cherries
+    filter_key: marmelade
+  - name: Kühltruhe (Keller)
+    icon: mdi:fridge
+    filter_key: kuhltruhe_k
+  - name: Kühltruhe (Garage)
+    icon: mdi:garage
+    filter_key: kuhltruhe_g
+```
+
+## Backend Setup (Required)
 
 This card is purely frontend. Without the backend aggregation and filtering, it’s just an empty shell. Expand below for the full YAML magic:
 
 <details>
-<summary>Click to expand the full template sensor example</summary>
+<summary>Click to expand the full template trigger sensor example</summary>
 
 ```yaml
 template:
@@ -196,3 +246,6 @@ template:
       - name: "Kellervorrate Combined Filtered Items Hash"
         unique_id: kellervorrate_combined_filtered_items_hash
         state: "{{ state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | to_json | sha1}}"
+```
+
+</details>

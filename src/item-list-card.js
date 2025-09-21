@@ -111,7 +111,6 @@ class ItemListCard extends LitElement {
     _filterValue: { state: true },
     _pendingUpdates: { state: true },
     _lastItemsHash: { state: false },
-    _lastSourceMapHash: { state: false },
   };
 
   static styles = styles;
@@ -122,7 +121,6 @@ class ItemListCard extends LitElement {
     this._cachedSourceMap = {};
     this._filterValue = '';
     this._lastItemsHash = '';
-    this._lastSourceMapHash = '';
     this._debouncedUpdateFilterText = debounce(this._updateFilterTextActual, 250);
     this._pendingUpdates = new Set();
     this._displayLimit = undefined;
@@ -165,6 +163,7 @@ class ItemListCard extends LitElement {
    *     to add items to
    * @param {string} config.filter_entity - The entity ID of the input_text
    *     controlling the filter
+   * @param {string} config.hash_entity - Entity providing a backend hash of items/source map (required).
    * @param {string} [config.title='ToDo List'] - The title to display in the
    *     card header
    * @param {boolean} [config.show_origin=false] - If true, show the origin of
@@ -183,7 +182,7 @@ class ItemListCard extends LitElement {
    */
   setConfig(config) {
     if (!config) throw new Error("Missing config");
-    const required = ['filter_items_entity', 'shopping_list_entity', 'filter_entity'];
+    const required = ['filter_items_entity', 'shopping_list_entity', 'filter_entity', 'hash_entity'];
     const missing = required.filter(k => !config[k]);
     if (missing.length) {
       throw new Error(`Missing required config: ${missing.join(', ')}`);
@@ -212,24 +211,6 @@ class ItemListCard extends LitElement {
   }
 
   /**
-   * Returns a hash string for the given value. This is used to prevent
-   * duplicate items in the list. The hash is calculated as a simple
-   * string hash function using the djb2 algorithm.
-   * @param {unknown} val The value to hash
-   * @returns {string} The hash string
-   * @private
-   */
-  _hash(val) {
-    try {
-      const s = typeof val === 'string' ? val : JSON.stringify(val);
-      let h = 0;
-      for (let i = 0; i < s.length; i++) h = ((h << 5) - h) + s.charCodeAt(i) | 0;
-      return String(h);
-    } catch {
-      return '';
-    }
-  }
-  /**
    * Adds a pending update to the list. This will cause the item with the given
    * `uid` to be re-rendered on the next update.
    * @param {string} uid The uid of the item to add to the pending updates
@@ -253,61 +234,69 @@ class ItemListCard extends LitElement {
     this._pendingUpdates = s;
   }
 
-/**
- * Decides whether or not to re-render the card based on changed properties.
- * @param {Map<string, unknown>} changedProps The changed properties
- * @returns {boolean} Whether the card should be re-rendered
- */
-shouldUpdate(changedProps) {
-  if (!changedProps.has("hass")) return changedProps.size > 0;
+  /**
+   * Decides whether or not to re-render the card based on changed properties.
+   * @param {Map<string, unknown>} changedProps The changed properties
+   * @returns {boolean} Whether the card should be re-rendered
+   */
+  shouldUpdate(changedProps) {
+    if (!changedProps.has("hass")) return changedProps.size > 0;
 
-  const hass = this.hass;
-  if (!hass || !this.config) return true;
+    const hass = this.hass;
+    if (!hass || !this.config) return true;
 
-  const filterEntity = hass.states?.[this.config.filter_entity];
-  const filterItemsEntity = hass.states?.[this.config.filter_items_entity];
-  const hashEntity = hass.states?.[this.config.hash_entity];
+    const filterEntity = hass.states?.[this.config.filter_entity];
+    const filterItemsEntity = hass.states?.[this.config.filter_items_entity];
+    const hashEntity = hass.states?.[this.config.hash_entity];
 
-  // Update cached filter value
-  const nextFilter = filterEntity?.state ?? "";
-  if (nextFilter !== this._filterValue) {
-    this._filterValue = nextFilter;
-    this._displayLimit = undefined;
-    return true;
+    // Update cached filter value
+    const nextFilter = filterEntity?.state ?? "";
+    if (nextFilter !== this._filterValue) {
+      this._filterValue = nextFilter;
+      this._displayLimit = undefined;
+      return true;
+    }
+
+    let itemsHash = String(hashEntity?.state ?? '');
+    const lower = itemsHash.toLowerCase();
+    if (!itemsHash || lower === 'unknown' || lower === 'unavailable') {
+      itemsHash = '';
+    }
+    // Prefer backend hash; if missing/empty, fall back to a local fingerprint so updates still flow.
+    const fallbackHash = !itemsHash
+      ? this._computeItemsFingerprint(filterItemsEntity)
+      : null;
+    const effectiveHash = fallbackHash ?? itemsHash;
+    const changed = effectiveHash !== (this._lastItemsHash || '');
+
+    if (changed) {
+      this._displayLimit = undefined;
+      // still parse data for rendering
+      const itemsAttr = filterItemsEntity?.attributes?.filtered_items;
+      const nextItems = typeof itemsAttr === "string"
+        ? this._safeParseJSON(itemsAttr, [])
+        : Array.isArray(itemsAttr) ? itemsAttr : [];
+
+      const mapAttr = filterItemsEntity?.attributes?.source_map;
+      const nextMap = typeof mapAttr === "string"
+        ? this._safeParseJSON(mapAttr, {})
+        : (mapAttr && typeof mapAttr === "object") ? mapAttr : {};
+
+      this._cachedItems = nextFilter.trim()
+        ? nextItems.slice(0, this.MAX_WITH_FILTER)
+        : nextItems.slice(0, this.MAX_DISPLAY);
+      this._cachedSourceMap = nextMap;
+      this._lastItemsHash = effectiveHash;
+    }
+
+    // Also update when total count changes (entity state)
+    const oldHass = changedProps.get("hass");
+    const oldCount = parseInt(oldHass?.states?.[this.config.filter_items_entity]?.state, 10) || 0;
+    const newCount = parseInt(filterItemsEntity?.state, 10) || 0;
+    const countChanged = oldCount !== newCount;
+
+    return changed || countChanged;
   }
-
-  // Use backend-provided hash
-  const itemsHash = hashEntity?.state ?? "";
-  const changed = itemsHash !== this._lastItemsHash;
-
-  if (changed) {
-    this._displayLimit = undefined;
-    // still parse data for rendering
-    const itemsAttr = filterItemsEntity?.attributes?.filtered_items;
-    const nextItems = typeof itemsAttr === "string"
-      ? this._safeParseJSON(itemsAttr, [])
-      : Array.isArray(itemsAttr) ? itemsAttr : [];
-
-    const mapAttr = filterItemsEntity?.attributes?.source_map;
-    const nextMap = typeof mapAttr === "string"
-      ? this._safeParseJSON(mapAttr, {})
-      : (mapAttr && typeof mapAttr === "object") ? mapAttr : {};
-
-    this._cachedItems = nextFilter.trim()
-      ? nextItems.slice(0, this.MAX_WITH_FILTER)
-      : nextItems.slice(0, this.config.max_items_without_filter);
-    this._cachedSourceMap = nextMap;
-    this._lastItemsHash = itemsHash;
-  }
-
-  // Also update when total count changes (entity state)
-  const oldHass = changedProps.get("hass");
-  const oldCount = parseInt(oldHass?.states?.[this.config.filter_items_entity]?.state, 10) || 0;
-  const newCount = parseInt(filterItemsEntity?.state, 10) || 0;
-  const countChanged = oldCount !== newCount;
-
-  return changed || countChanged;
-}
 
 
   /**
@@ -324,6 +313,24 @@ shouldUpdate(changedProps) {
     } catch {
       return fallback;
     }
+  }
+
+  /**
+   * Computes a fingerprint (string) from the given entity that represents the
+   * current state of the items (filtered_items) and their source map.
+   * This fingerprint is used to detect changes in the items or source map.
+   * @param {Object} entity The entity to compute the fingerprint for.
+   * @returns {string|null} The computed fingerprint or null if the entity is null.
+   * @private
+   */
+  _computeItemsFingerprint(entity) {
+    if (!entity) return null;
+    const itemsAttr = entity.attributes?.filtered_items;
+    const itemsPart = typeof itemsAttr === 'string' ? itemsAttr : JSON.stringify(itemsAttr ?? []);
+    const mapAttr = entity.attributes?.source_map;
+    const mapPart = typeof mapAttr === 'string' ? mapAttr : JSON.stringify(mapAttr ?? {});
+    // Include the numeric state (total count) to catch count-only changes too.
+    return `${entity.state}|${itemsPart}|${mapPart}`;
   }
 
   /**
@@ -793,29 +800,37 @@ _parseShowMoreButtons() {
     const filterValue = this._filterValue ?? '';
     const showAddButton = filterValue.trim().length > 3 && !this.config.hide_add_button;
 
-    // If cache not initialized yet, hydrate from entity
     if (!this._lastItemsHash) {
       const attr = itemsEntity.attributes.filtered_items;
-      const items = typeof attr === 'string' ? this._safeParseJSON(attr, []) : Array.isArray(attr) ? attr : [];
-      const limit = this.MAX_DISPLAY;
-      this._cachedItems = filterValue.trim()
-        ? items
-        : items.slice(0, limit);
+      const items = typeof attr === 'string'
+        ? this._safeParseJSON(attr, [])
+        : Array.isArray(attr) ? attr : [];
       // remember the full list for "show more" handling
       this._fullItemsList = items;
+    
       // initialize display limit depending on filter
       if (this._displayLimit === undefined || this._displayLimit === null) {
         this._displayLimit = filterValue.trim() ? this.MAX_WITH_FILTER : this.MAX_DISPLAY;
       }
-      this._cachedItems = filterValue.trim()
-        ? items.slice(0, this._displayLimit)
-        : items.slice(0, this._displayLimit);
+    
+      // set cached items according to display limit
+      this._cachedItems = items.slice(0, this._displayLimit);
+    
       const mapAttr = itemsEntity.attributes.source_map;
       this._cachedSourceMap = typeof mapAttr === 'string'
         ? this._safeParseJSON(mapAttr, {})
         : (mapAttr && typeof mapAttr === 'object') ? mapAttr : {};
-      this._lastItemsHash = this._hash(items);
-      this._lastSourceMapHash = this._hash(this._cachedSourceMap);
+    
+      // initialize last-seen hash from the external hash entity (if present)
+      const hashEntity = this.hass.states?.[this.config.hash_entity];
+      let extHash = String(hashEntity?.state ?? '');
+      const low = extHash.toLowerCase();
+      if (!extHash || low === 'unknown' || low === 'unavailable') extHash = '';
+      let localFp = '';
+      if (!extHash) {
+        localFp = this._computeItemsFingerprint(itemsEntity) || '';
+      }
+      this._lastItemsHash = extHash || localFp;
     }
 
     // Always ensure we have the full list cached (useful when not first render)
@@ -963,6 +978,7 @@ _parseShowMoreButtons() {
     return {
       title: 'ToDo List',
       filter_items_entity: 'sensor.todo_filtered_items',
+      hash_entity: 'sensor.todo_hash',
       shopping_list_entity: 'todo.shopping_list',
       filter_entity: 'input_text.todo_filter',
     };
