@@ -257,9 +257,13 @@ class ItemListCard extends LitElement {
       return true;
     }
 
-    const itemsHash = hashEntity?.state ?? "";
+    let itemsHash = String(hashEntity?.state ?? '');
+    const lower = itemsHash.toLowerCase();
+    if (!itemsHash || lower === 'unknown' || lower === 'unavailable') {
+      itemsHash = '';
+    }
     // Prefer backend hash; if missing/empty, fall back to a local fingerprint so updates still flow.
-    const fallbackHash = (!this.config?.hash_entity || !itemsHash)
+    const fallbackHash = !itemsHash
       ? this._computeItemsFingerprint(filterItemsEntity)
       : null;
     const effectiveHash = fallbackHash ?? itemsHash;
@@ -819,7 +823,9 @@ _parseShowMoreButtons() {
     
       // initialize last-seen hash from the external hash entity (if present)
       const hashEntity = this.hass.states?.[this.config.hash_entity];
-      const extHash = hashEntity?.state ?? '';
+      let extHash = String(hashEntity?.state ?? '');
+      const low = extHash.toLowerCase();
+      if (!extHash || low === 'unknown' || low === 'unavailable') extHash = '';
       const localFp = this._computeItemsFingerprint(itemsEntity) || '';
       this._lastItemsHash = extHash || localFp;
     }
