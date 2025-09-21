@@ -39,7 +39,7 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 
 ## Frontend Setup
 
-### minimal config
+### Minimal config
 ```yaml
     type: custom:item-list-card
     filter_items_entity: sensor.kellervorrate_combined_filtered_items
@@ -49,7 +49,7 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 ```
 
 
-### full config
+### Full config
 ```yaml
     type: custom:item-list-card
     title: Kellervorräte
@@ -88,10 +88,8 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 
 This card is purely frontend. Without the backend aggregation and filtering, it’s just an empty shell. Expand below for the full YAML magic:
 
-
-
 <details>
-<summary>Click to expand the full template sensor example</summary>
+<summary>Click to expand the full template trigger sensor example</summary>
 
 ```yaml
 template:

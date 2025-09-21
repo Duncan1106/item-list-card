@@ -163,7 +163,7 @@ class ItemListCard extends LitElement {
    *     to add items to
    * @param {string} config.filter_entity - The entity ID of the input_text
    *     controlling the filter
-   * @param {string} [config.hash_entity] - Entity providing a backend hash of items/source map (required).
+   * @param {string} config.hash_entity - Entity providing a backend hash of items/source map (required).
    * @param {string} [config.title='ToDo List'] - The title to display in the
    *     card header
    * @param {boolean} [config.show_origin=false] - If true, show the origin of
