@@ -245,7 +245,7 @@ template:
     sensor:
       - name: "Kellervorrate Combined Filtered Items Hash"
         unique_id: kellervorrate_combined_filtered_items_hash
-        state: "{{ state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | to_json | sha1}}"
+        state: "{{ state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | to_json | md5 }}"
 ```
 
 </details>
