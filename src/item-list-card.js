@@ -253,64 +253,62 @@ class ItemListCard extends LitElement {
     this._pendingUpdates = s;
   }
 
-  /**
-   * Decides whether or not to re-render the card based on changed properties.
-   * @param {Map<string, unknown>} changedProps The changed properties
-   * @returns {boolean} Whether the card should be re-rendered
-   */
-  shouldUpdate(changedProps) {
-    if (!changedProps.has('hass')) return changedProps.size > 0;
+/**
+ * Decides whether or not to re-render the card based on changed properties.
+ * @param {Map<string, unknown>} changedProps The changed properties
+ * @returns {boolean} Whether the card should be re-rendered
+ */
+shouldUpdate(changedProps) {
+  if (!changedProps.has("hass")) return changedProps.size > 0;
 
-    const hass = this.hass;
-    if (!hass || !this.config) return true;
+  const hass = this.hass;
+  if (!hass || !this.config) return true;
 
-    const filterEntity = hass.states?.[this.config.filter_entity];
-    const filterItemsEntity = hass.states?.[this.config.filter_items_entity];
+  const filterEntity = hass.states?.[this.config.filter_entity];
+  const filterItemsEntity = hass.states?.[this.config.filter_items_entity];
+  const hashEntity = hass.states?.[this.config.hash_entity];
 
-    // Update cached filter value
-    const nextFilter = filterEntity?.state ?? '';
-    if (nextFilter !== this._filterValue) {
-      this._filterValue = nextFilter;
-      // reset display limit when filter changes
-        this._displayLimit = undefined;
-      return true;
-    }
+  // Update cached filter value
+  const nextFilter = filterEntity?.state ?? "";
+  if (nextFilter !== this._filterValue) {
+    this._filterValue = nextFilter;
+    this._displayLimit = undefined;
+    return true;
+  }
 
-    // Check filtered_items change
+  // Use backend-provided hash
+  const itemsHash = hashEntity?.state ?? "";
+  const changed = itemsHash !== this._lastItemsHash;
+
+  if (changed) {
+    this._displayLimit = undefined;
+    // still parse data for rendering
     const itemsAttr = filterItemsEntity?.attributes?.filtered_items;
-    const nextItems = typeof itemsAttr === 'string'
+    const nextItems = typeof itemsAttr === "string"
       ? this._safeParseJSON(itemsAttr, [])
       : Array.isArray(itemsAttr) ? itemsAttr : [];
-    const itemsHash = this._hash(nextItems);
 
-    // Check source_map change
     const mapAttr = filterItemsEntity?.attributes?.source_map;
-    const nextMap = typeof mapAttr === 'string'
+    const nextMap = typeof mapAttr === "string"
       ? this._safeParseJSON(mapAttr, {})
-      : (mapAttr && typeof mapAttr === 'object') ? mapAttr : {};
-    const mapHash = this._hash(nextMap);
+      : (mapAttr && typeof mapAttr === "object") ? mapAttr : {};
 
-    const changed = itemsHash !== this._lastItemsHash || mapHash !== this._lastSourceMapHash;
-
-    if (changed) {
-      // reset display limit when items/source_map changed
-      this._displayLimit = undefined;
-      this._cachedItems = nextFilter.trim()
-        ? nextItems.slice(0, this.MAX_WITH_FILTER)
-        : nextItems.slice(0, this.config.max_items_without_filter);
-      this._cachedSourceMap = nextMap;
-      this._lastItemsHash = itemsHash;
-      this._lastSourceMapHash = mapHash;
-    }
-
-    // Also update when total count (state) changes while no filter applied
-    const oldHass = changedProps.get('hass');
-    const oldCount = parseInt(oldHass?.states?.[this.config.filter_items_entity]?.state, 10) || 0;
-    const newCount = parseInt(filterItemsEntity?.state, 10) || 0;
-    const countChanged = oldCount !== newCount;
-
-    return changed || countChanged;
+    this._cachedItems = nextFilter.trim()
+      ? nextItems.slice(0, this.MAX_WITH_FILTER)
+      : nextItems.slice(0, this.config.max_items_without_filter);
+    this._cachedSourceMap = nextMap;
+    this._lastItemsHash = itemsHash;
   }
+
+  // Also update when total count changes (entity state)
+  const oldHass = changedProps.get("hass");
+  const oldCount = parseInt(oldHass?.states?.[this.config.filter_items_entity]?.state, 10) || 0;
+  const newCount = parseInt(filterItemsEntity?.state, 10) || 0;
+  const countChanged = oldCount !== newCount;
+
+  return changed || countChanged;
+}
+
 
   /**
    * Tries to parse the given string as JSON and returns the result. If the
