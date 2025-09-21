@@ -284,7 +284,7 @@ class ItemListCard extends LitElement {
 
       this._cachedItems = nextFilter.trim()
         ? nextItems.slice(0, this.MAX_WITH_FILTER)
-        : nextItems.slice(0, this.config.max_items_without_filter);
+        : nextItems.slice(0, this.MAX_DISPLAY);
       this._cachedSourceMap = nextMap;
       this._lastItemsHash = effectiveHash;
     }
@@ -826,7 +826,10 @@ _parseShowMoreButtons() {
       let extHash = String(hashEntity?.state ?? '');
       const low = extHash.toLowerCase();
       if (!extHash || low === 'unknown' || low === 'unavailable') extHash = '';
-      const localFp = this._computeItemsFingerprint(itemsEntity) || '';
+      let localFp = '';
+      if (!extHash) {
+        localFp = this._computeItemsFingerprint(itemsEntity) || '';
+      }
       this._lastItemsHash = extHash || localFp;
     }
 
