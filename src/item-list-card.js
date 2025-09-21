@@ -164,7 +164,7 @@ class ItemListCard extends LitElement {
    *     to add items to
    * @param {string} config.filter_entity - The entity ID of the input_text
    *     controlling the filter
-   * @param {string} [config.hash_entity] - Entity providing a backend hash of items/source map.
+   * @param {string} [config.hash_entity] - Entity providing a backend hash of items/source map (required).
    * @param {string} [config.title='ToDo List'] - The title to display in the
    *     card header
    * @param {boolean} [config.show_origin=false] - If true, show the origin of
@@ -283,7 +283,7 @@ class ItemListCard extends LitElement {
         ? nextItems.slice(0, this.MAX_WITH_FILTER)
         : nextItems.slice(0, this.config.max_items_without_filter);
       this._cachedSourceMap = nextMap;
-      this._lastItemsHash = itemsHash;
+      this._lastItemsHash = effectiveHash;
     }
 
     // Also update when total count changes (entity state)
@@ -312,15 +312,14 @@ class ItemListCard extends LitElement {
     }
   }
 
-/*************  ✨ Windsurf Command ⭐  *************/
   /**
-   * Computes a fingerprint for the given entity by concatenating the state,
-   * stringified filtered items and stringified source map.
-   * @param {Object} entity The entity to compute the fingerprint for
-   * @returns {string|null} The computed fingerprint or null if the entity is null
+   * Computes a fingerprint (string) from the given entity that represents the
+   * current state of the items (filtered_items) and their source map.
+   * This fingerprint is used to detect changes in the items or source map.
+   * @param {Object} entity The entity to compute the fingerprint for.
+   * @returns {string|null} The computed fingerprint or null if the entity is null.
    * @private
    */
-/*******  9c1924b0-28e8-40d4-8a16-8061a54f04b8  *******/
   _computeItemsFingerprint(entity) {
     if (!entity) return null;
     const itemsAttr = entity.attributes?.filtered_items;
