@@ -166,18 +166,18 @@ template:
             {% endif %}
         attributes:
           source_map: >
-            {% set lists = {
-              "1": "todo.kellervorrate",
-              "2": "todo.kellervorrate_safe",
-              "3": "todo.kellervorrate_katzenfutter",
-              "4": "todo.kellervorrate_marmelade_selbstgemachtes",
-              "5": "todo.kuhltruhe_keller",
-              "6": "todo.kuhltruhe_garage"
-            } %}
+            {% set lists = [
+              'todo.kellervorrate',
+              'todo.kellervorrate_safe',
+              'todo.kellervorrate_katzenfutter',
+              'todo.kellervorrate_marmelade_selbstgemachtes',
+              'todo.kuhltruhe_keller',
+              'todo.kuhltruhe_garage'
+            ] %}
 
             {% set ns = namespace(source_map={}) %}
 
-            {% for key, entity_id in lists.items() %}
+            {% for entity_id in lists %}
               {# get raw friendly name (or build fallback from entity_id) #}
               {% set fn_raw = state_attr(entity_id, 'friendly_name')
                 | default(entity_id.split('.')[-1] | replace('_', ' ') | title) %}
@@ -193,7 +193,7 @@ template:
                 | trim %}
 
               {% set ns.source_map = ns.source_map | combine({
-                key: {
+                (loop.index|string): {
                   'entity_id': entity_id,
                   'friendly_name': fn
                 }
@@ -216,11 +216,11 @@ template:
               'todo.kuhltruhe_garage'
             ] %}
             
-            {% set ns2 = namespace(map={}) %}
+            {% set ns2 = namespace(index_map={}) %}
             {% for entity_id in lists %}
-              {% set ns2.map = ns2.map | combine({ (entity_id): loop.index }) %}
+              {% set ns2.index_map = ns2.index_map | combine({ (entity_id): loop.index }) %}
             {% endfor %}
-            {% set source_map = ns2.map %}
+            {% set list_index = ns2.index_map %}
 
             {% set filtered_lists = lists
               | select('search', filter_key)
@@ -243,7 +243,7 @@ template:
                         'u': item.uid,
                         's': item.summary,
                         'd': item.description,
-                        'c': source_map[list_id]
+                        'c': list_index[list_id]
                       } %}
                       {% set combined.items = combined.items + [minimal_item] %}
                     {% endif %}
@@ -255,7 +255,7 @@ template:
               
               {# ---- SORTING STEP ---- #}
               {% set sorted_items = combined.items | sort(attribute='s', case_sensitive=False) %}
-              {{ sorted_items }}
+              {{ sorted_items | to_json}}
               
             {% else %}
               []
