@@ -216,15 +216,12 @@ template:
               'todo.kuhltruhe_garage'
             ] %}
             
-            {% set source_map = {
-              'todo.kellervorrate': 1,
-              'todo.kellervorrate_safe': 2,
-              'todo.kellervorrate_katzenfutter': 3,
-              'todo.kellervorrate_marmelade_selbstgemachtes': 4,
-              'todo.kuhltruhe_keller': 5,
-              'todo.kuhltruhe_garage': 6
-            } %}
-            
+            {% set ns2 = namespace(map={}) %}
+            {% for entity_id in lists %}
+              {% set ns2.map = ns2.map | combine({ (entity_id): loop.index }) %}
+            {% endfor %}
+            {% set source_map = ns2.map %}
+
             {% set filtered_lists = lists
               | select('search', filter_key)
               | list if filter_key else lists %}
