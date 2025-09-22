@@ -166,14 +166,41 @@ template:
             {% endif %}
         attributes:
           source_map: >
-            {
+            {% set lists = {
               "1": "todo.kellervorrate",
               "2": "todo.kellervorrate_safe",
               "3": "todo.kellervorrate_katzenfutter",
               "4": "todo.kellervorrate_marmelade_selbstgemachtes",
               "5": "todo.kuhltruhe_keller",
               "6": "todo.kuhltruhe_garage"
-            }
+            } %}
+
+            {% set ns = namespace(source_map={}) %}
+
+            {% for key, entity_id in lists.items() %}
+              {# get raw friendly name (or build fallback from entity_id) #}
+              {% set fn_raw = state_attr(entity_id, 'friendly_name')
+                | default(entity_id.split('.')[-1] | replace('_', ' ') | title) %}
+
+              {# remove straight and smart quotes, collapse double spaces and trim #}
+              {% set fn = fn_raw
+                | replace('"', '')
+                | replace("'", '')
+                | replace('“', '')
+                | replace('”', '')
+                | replace('  ', ' ')
+                | replace('’', '')
+                | trim %}
+
+              {% set ns.source_map = ns.source_map | combine({
+                key: {
+                  'entity_id': entity_id,
+                  'friendly_name': fn
+                }
+              }) %}
+            {% endfor %}
+
+            {{ ns.source_map | to_json }}
           filtered_items: >
             {% set input = states('input_text.search_todo_list') | default('') | lower %}
             {% set has_filter = 'todo:' in input %}
@@ -240,12 +267,22 @@ template:
   - trigger: 
       - platform: state
         entity_id: sensor.kellervorrate_combined_filtered_items
+      - platform: state
+        entity_id: sensor.kellervorrate_combined_filtered_items
+        attribute: filtered_items
       - platform: homeassistant
         event: start
     sensor:
       - name: "Kellervorrate Combined Filtered Items Hash"
         unique_id: kellervorrate_combined_filtered_items_hash
-        state: "{{ state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | to_json | sha1}}"
+        state: >-
+            {{ 
+                (
+                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | default([]) | to_json) 
+                    ~
+                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'source_map') | default({}) | to_json) 
+                ) | md5
+            }}
 ```
 
 </details>
