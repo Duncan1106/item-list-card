@@ -516,7 +516,8 @@ class ItemListCard extends LitElement {
    * @private
    */
   async _updateOrCompleteItem(uid, updates, source, sourceMap) {
-    const entityId = sourceMap?.[String(source)];
+    // const entityId = sourceMap?.[String(source)];
+    const entityId = sourceMap[String(source)]?.entity_id
     if (!entityId) {
       console.error('No valid todo entity id for source:', source);
       return;
@@ -674,9 +675,8 @@ class ItemListCard extends LitElement {
    */
   _renderItemRow(item, sourceMap) {
       const showOrigin = !!this.config?.show_origin;
-      const sourceId = sourceMap?.[String(item.c)];
-      const friendlyName = showOrigin && sourceId
-        ? this.hass.states[sourceId]?.attributes?.friendly_name
+      const friendlyName = showOrigin 
+        ? sourceMap?.[String(item.c)]?.friendly_name 
         : null;
 
       const search = this._normalizeTodoText(this._filterValue);
