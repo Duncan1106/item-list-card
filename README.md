@@ -188,8 +188,8 @@ template:
                 | replace("'", '')
                 | replace('“', '')
                 | replace('”', '')
-                | replace('  ', ' ')
                 | replace('’', '')
+                | regex_replace('\\s+', ' ')
                 | trim %}
 
               {% set ns.source_map = ns.source_map | combine({
