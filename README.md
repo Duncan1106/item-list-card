@@ -267,6 +267,9 @@ template:
   - trigger: 
       - platform: state
         entity_id: sensor.kellervorrate_combined_filtered_items
+      - platform: state
+        entity_id: sensor.kellervorrate_combined_filtered_items
+        attribute: filtered_items
       - platform: homeassistant
         event: start
     sensor:
@@ -275,9 +278,9 @@ template:
         state: >-
             {{ 
                 (
-                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | default({}, true) | to_json) 
+                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | list | default([]) | to_json) 
                     ~
-                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'source_map') | default({}, true) | to_json) 
+                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'source_map') | default({}) | to_json) 
                 ) | md5
             }}
 ```
