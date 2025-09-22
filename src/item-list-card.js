@@ -517,7 +517,7 @@ class ItemListCard extends LitElement {
    */
   async _updateOrCompleteItem(uid, updates, source, sourceMap) {
     // const entityId = sourceMap?.[String(source)];
-    const entityId = sourceMap[String(source)]?.entity_id
+    const entityId = sourceMap?.[String(source)]?.entity_id;
     if (!entityId) {
       console.error('No valid todo entity id for source:', source);
       return;
