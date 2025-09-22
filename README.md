@@ -272,14 +272,14 @@ template:
     sensor:
       - name: "Kellervorrate Combined Filtered Items Hash"
         unique_id: kellervorrate_combined_filtered_items_hash
-        state: >- 
-             {{ 
+        state: >-
+            {{ 
                 (
-                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | map(attribute='u') | to_json) 
+                  (state_attr('sensor.kellervorrate_combined_filtered_items', 'filtered_items') | to_json) 
                     ~
                   (state_attr('sensor.kellervorrate_combined_filtered_items', 'source_map') | to_json) 
                 ) | md5
-             }}
+            }}
 ```
 
 </details>
