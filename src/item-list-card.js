@@ -124,6 +124,8 @@ const highlightParts = (text, term) => {
   if (!tokens.length) return [src];
 
   // Lowercase once for matching; dedupe by lowercase.
+  // Note: For better Unicode/i18n support (e.g., Turkish), consider w.toLocaleLowerCase() if needed,
+  // but toLowerCase() is faster for ASCII and matches original intent.
   const lowSrc = src.toLowerCase();
   // Search set, longest-first
   const sortedWords = Array.from(new Set(tokens.map(w => w.toLowerCase())))
@@ -147,6 +149,10 @@ const highlightParts = (text, term) => {
     for (const low of sortedWords) {
       const found = lowSrc.indexOf(low, pos);
       if (found === -1) continue;
+      if (found === pos) {
+        minIndex = pos;
+        break; // Earliest possible—no need to check further.
+      }
       if (minIndex === -1 || found < minIndex) {
         minIndex = found;
       }
