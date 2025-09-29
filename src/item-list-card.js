@@ -68,38 +68,126 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
   }
 };
 
+// /**
+//  * Splits the given text into an array of strings, where each string is either
+//  * a part of the original text that doesn't contain the given term, or a
+//  * `<span class="highlight">` element containing the term.
+//  *
+//  * @param {string} text - The text to split.
+//  * @param {string} [term=''] - The term to highlight.
+//  * @returns {string[]} An array of strings, where each string is either a
+//  *   non-highlighted part of the original text, or a `<span class="highlight">`
+//  *   element containing the term.
+//  */
+// const highlightParts = (text, term) => {
+//   const src = String(text ?? '');
+//   const needle = String(term ?? '').trim();
+//   if (!needle) return [src];
+
+//   const lowSrc = src.toLowerCase();
+//   const lowNeedle = needle.toLowerCase();
+//   const nLen = needle.length;
+
+//   const parts = [];
+//   let i = 0;
+//   for (;;) {
+//     const hit = lowSrc.indexOf(lowNeedle, i);
+//     if (hit === -1) break;
+//     if (hit > i) parts.push(src.slice(i, hit));
+//     parts.push(html`<span class="highlight">${src.slice(hit, hit + nLen)}</span>`);
+//     i = hit + nLen;
+//   }
+//   if (i < src.length) parts.push(src.slice(i));
+//   return parts.length ? parts : [src];
+// };
+
+
 /**
  * Splits the given text into an array of strings, where each string is either
- * a part of the original text that doesn't contain the given term, or a
- * `<span class="highlight">` element containing the term.
+ * a part of the original text that doesn't contain any search word, or a
+ * `<span class="highlight">` element containing a matched search word.
+ *
+ * Implementation uses only string operations (no RegExp).
  *
  * @param {string} text - The text to split.
- * @param {string} [term=''] - The term to highlight.
- * @returns {string[]} An array of strings, where each string is either a
- *   non-highlighted part of the original text, or a `<span class="highlight">`
- *   element containing the term.
+ * @param {string} [term=''] - The search term (may contain multiple words).
+ * @returns {Array<string|TemplateResult>} Array of plain strings and html parts.
  */
 const highlightParts = (text, term) => {
   const src = String(text ?? '');
   const needle = String(term ?? '').trim();
   if (!needle) return [src];
 
+  // split on whitespace (like your Jinja search_term.split())
+  const words = needle
+    .split(/\s+/)
+    .map(w => w.trim())
+    .filter(Boolean);
+
+  if (!words.length) return [src];
+
+  // Work in lowercase for case-insensitive matching, but preserve original src parts.
   const lowSrc = src.toLowerCase();
-  const lowNeedle = needle.toLowerCase();
-  const nLen = needle.length;
+  const lowWords = words.map(w => w.toLowerCase());
+
+  // When multiple words match at the same index prefer the longest word
+  const idxToWord = (index) => {
+    // find all words that match at this index
+    let chosen = null;
+    for (let i = 0; i < lowWords.length; i++) {
+      const w = lowWords[i];
+      if (lowSrc.startsWith(w, index)) {
+        if (!chosen || w.length > chosen.word.length) {
+          chosen = { word: w, orig: words[i] };
+        }
+      }
+    }
+    return chosen;
+  };
 
   const parts = [];
-  let i = 0;
-  for (;;) {
-    const hit = lowSrc.indexOf(lowNeedle, i);
-    if (hit === -1) break;
-    if (hit > i) parts.push(src.slice(i, hit));
-    parts.push(html`<span class="highlight">${src.slice(hit, hit + nLen)}</span>`);
-    i = hit + nLen;
+  let pos = 0;
+  const N = src.length;
+
+  while (pos < N) {
+    // find earliest next match among all words (using indexOf)
+    let nextIndex = -1;
+    let nextWord = null;
+    let nextOrig = null;
+
+    for (let i = 0; i < lowWords.length; i++) {
+      const w = lowWords[i];
+      if (!w) continue;
+      const found = lowSrc.indexOf(w, pos);
+      if (found === -1) continue;
+      if (nextIndex === -1 || found < nextIndex || (found === nextIndex && w.length > nextWord.length)) {
+        nextIndex = found;
+        nextWord = w;
+        nextOrig = words[i];
+      }
+    }
+
+    if (nextIndex === -1) {
+      // no more matches
+      parts.push(src.slice(pos));
+      break;
+    }
+
+    // push text before match if any
+    if (nextIndex > pos) parts.push(src.slice(pos, nextIndex));
+
+    // prefer the longest matching word at nextIndex (avoid short/inside-long overlaps)
+    const chosen = idxToWord(nextIndex);
+    const matchLen = chosen ? chosen.word.length : nextWord.length;
+    const matchedText = src.slice(nextIndex, nextIndex + matchLen);
+    parts.push(html`<span class="highlight">${matchedText}</span>`);
+
+    pos = nextIndex + matchLen;
   }
-  if (i < src.length) parts.push(src.slice(i));
+
   return parts.length ? parts : [src];
 };
+
 
 class ItemListCard extends LitElement {
   static properties = {
