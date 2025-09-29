@@ -119,31 +119,27 @@ const highlightParts = (text, term) => {
   const needle = String(term ?? '').trim();
   if (!needle) return [src];
 
-  // Split on whitespace (static RegExp; for zero RegExp, see manual alternative below)
-  const words = needle
-    .split(/\s+/)
-    .map(w => w.trim())
-    .filter(Boolean);
+  // Split on whitespace (static RegExp)
+  const tokens = needle.split(/\s+/).map(w => w.trim()).filter(Boolean);
+  if (!tokens.length) return [src];
 
-  if (!words.length) return [src];
-
-  // Work in lowercase for case-insensitive matching, preserve original casing in output.
+  // Lowercase once for matching; dedupe by lowercase while preserving first form.
   const lowSrc = src.toLowerCase();
-  const lowWords = words.map(w => w.toLowerCase());
+  const lowToOrig = new Map();
+  for (const w of tokens) {
+    const lw = w.toLowerCase();
+    if (!lowToOrig.has(lw)) lowToOrig.set(lw, w);
+  }
+  // Search set, longest-first
+  const sortedWords = Array.from(lowToOrig.keys()).sort((a, b) => b.length - a.length);
 
-  // Optional: Sort by length descending for slight perf gain in idxToWord (longer first).
-  // Also pair original/case-low for easy access.
-  const sortedWordPairs = lowWords
-    .map((lw, i) => ({ low: lw, orig: words[i], len: lw.length }))
-    .sort((a, b) => b.len - a.len);  // Descending length
-
-  // Helper: Find longest word matching at exact index (now uses pre-sorted pairs).
+  // Helper: longest word length matching at exact index.
   const getLongestAtIndex = (index) => {
-    for (const { low, orig, len } of sortedWordPairs) {
-      if (len === 0 || !lowSrc.startsWith(low, index)) continue;
-      return { low, orig, len };  // First (longest) match wins due to sort.
+    for (const low of sortedWords) {
+      if (low.length === 0) continue;
+      if (lowSrc.startsWith(low, index)) return low.length; // longest-first
     }
-    return null;  // Should not happen if index is valid.
+    return 0;
   };
 
   const parts = [];
@@ -153,7 +149,7 @@ const highlightParts = (text, term) => {
   while (pos < N) {
     // Step 1: Find the earliest next match position across all words.
     let minIndex = -1;
-    for (const { low } of sortedWordPairs) {
+    for (const low of sortedWords) {
       if (low.length === 0) continue;
       const found = lowSrc.indexOf(low, pos);
       if (found === -1) continue;
@@ -169,8 +165,8 @@ const highlightParts = (text, term) => {
     }
 
     // Step 2: At minIndex, select the longest word that starts there.
-    const chosen = getLongestAtIndex(minIndex);
-    if (!chosen) {
+    const matchLen = getLongestAtIndex(minIndex);
+    if (matchLen === 0) {
       // Rare: index found but no word matches? Advance minimally and retry.
       pos = minIndex + 1;
       continue;
@@ -182,15 +178,14 @@ const highlightParts = (text, term) => {
     }
 
     // Highlight the matched text (preserves original casing).
-    const matchedText = src.slice(minIndex, minIndex + chosen.len);
+    const matchedText = src.slice(minIndex, minIndex + matchLen);
     parts.push(html`<span class="highlight">${matchedText}</span>`);
 
-    pos = minIndex + chosen.len;
+    pos = minIndex + matchLen;
   }
 
   return parts.length ? parts : [src];
 };
-
 
 class ItemListCard extends LitElement {
   static properties = {
