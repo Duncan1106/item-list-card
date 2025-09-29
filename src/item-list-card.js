@@ -107,18 +107,19 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
  * a part of the original text that doesn't contain any search word, or a
  * `<span class="highlight">` element containing a matched search word.
  *
- * Implementation uses only string operations (no RegExp).
+ * Implementation uses only string operations (no dynamic RegExp for matching; uses string ops and a whitespace split).
+ * Matches words independently (case-insensitive) and prefers the longest match at any position to avoid overlaps.
  *
  * @param {string} text - The text to split.
- * @param {string} [term=''] - The search term (may contain multiple words).
- * @returns {Array<string|TemplateResult>} Array of plain strings and html parts.
+ * @param {string} [term=''] - The search term (may contain multiple words, split on whitespace).
+ * @returns {Array<string | TemplateResult>} Array of plain strings and html parts (via `html` template).
  */
 const highlightParts = (text, term) => {
   const src = String(text ?? '');
   const needle = String(term ?? '').trim();
   if (!needle) return [src];
 
-  // split on whitespace (like your Jinja search_term.split())
+  // Split on whitespace (static RegExp; for zero RegExp, see manual alternative below)
   const words = needle
     .split(/\s+/)
     .map(w => w.trim())
@@ -126,23 +127,23 @@ const highlightParts = (text, term) => {
 
   if (!words.length) return [src];
 
-  // Work in lowercase for case-insensitive matching, but preserve original src parts.
+  // Work in lowercase for case-insensitive matching, preserve original casing in output.
   const lowSrc = src.toLowerCase();
   const lowWords = words.map(w => w.toLowerCase());
 
-  // When multiple words match at the same index prefer the longest word
-  const idxToWord = (index) => {
-    // find all words that match at this index
-    let chosen = null;
-    for (let i = 0; i < lowWords.length; i++) {
-      const w = lowWords[i];
-      if (lowSrc.startsWith(w, index)) {
-        if (!chosen || w.length > chosen.word.length) {
-          chosen = { word: w, orig: words[i] };
-        }
-      }
+  // Optional: Sort by length descending for slight perf gain in idxToWord (longer first).
+  // Also pair original/case-low for easy access.
+  const sortedWordPairs = lowWords
+    .map((lw, i) => ({ low: lw, orig: words[i], len: lw.length }))
+    .sort((a, b) => b.len - a.len);  // Descending length
+
+  // Helper: Find longest word matching at exact index (now uses pre-sorted pairs).
+  const getLongestAtIndex = (index) => {
+    for (const { low, orig, len } of sortedWordPairs) {
+      if (len === 0 || !lowSrc.startsWith(low, index)) continue;
+      return { low, orig, len };  // First (longest) match wins due to sort.
     }
-    return chosen;
+    return null;  // Should not happen if index is valid.
   };
 
   const parts = [];
@@ -150,39 +151,41 @@ const highlightParts = (text, term) => {
   const N = src.length;
 
   while (pos < N) {
-    // find earliest next match among all words (using indexOf)
-    let nextIndex = -1;
-    let nextWord = null;
-    let nextOrig = null;
-
-    for (let i = 0; i < lowWords.length; i++) {
-      const w = lowWords[i];
-      if (!w) continue;
-      const found = lowSrc.indexOf(w, pos);
+    // Step 1: Find the earliest next match position across all words.
+    let minIndex = -1;
+    for (const { low } of sortedWordPairs) {
+      if (low.length === 0) continue;
+      const found = lowSrc.indexOf(low, pos);
       if (found === -1) continue;
-      if (nextIndex === -1 || found < nextIndex || (found === nextIndex && w.length > nextWord.length)) {
-        nextIndex = found;
-        nextWord = w;
-        nextOrig = words[i];
+      if (minIndex === -1 || found < minIndex) {
+        minIndex = found;
       }
     }
 
-    if (nextIndex === -1) {
-      // no more matches
+    if (minIndex === -1) {
+      // No more matches.
       parts.push(src.slice(pos));
       break;
     }
 
-    // push text before match if any
-    if (nextIndex > pos) parts.push(src.slice(pos, nextIndex));
+    // Step 2: At minIndex, select the longest word that starts there.
+    const chosen = getLongestAtIndex(minIndex);
+    if (!chosen) {
+      // Rare: index found but no word matches? Advance minimally and retry.
+      pos = minIndex + 1;
+      continue;
+    }
 
-    // prefer the longest matching word at nextIndex (avoid short/inside-long overlaps)
-    const chosen = idxToWord(nextIndex);
-    const matchLen = chosen ? chosen.word.length : nextWord.length;
-    const matchedText = src.slice(nextIndex, nextIndex + matchLen);
+    // Push non-matching text before (if any).
+    if (minIndex > pos) {
+      parts.push(src.slice(pos, minIndex));
+    }
+
+    // Highlight the matched text (preserves original casing).
+    const matchedText = src.slice(minIndex, minIndex + chosen.len);
     parts.push(html`<span class="highlight">${matchedText}</span>`);
 
-    pos = nextIndex + matchLen;
+    pos = minIndex + chosen.len;
   }
 
   return parts.length ? parts : [src];
