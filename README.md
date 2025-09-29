@@ -180,7 +180,7 @@ template:
             {% for entity_id in lists %}
               {# get raw friendly name (or build fallback from entity_id) #}
               {% set fn_raw = state_attr(entity_id, 'friendly_name')
-                | default(entity_id.split('.')[-1] | replace('_', ' ') | title) %}
+                | default(entity_id.split('.')[-1] | replace('_', ' ') | title, true) %}
 
               {# remove straight and smart quotes, collapse double spaces and trim #}
               {% set fn = fn_raw
