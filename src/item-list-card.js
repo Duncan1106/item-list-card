@@ -123,20 +123,15 @@ const highlightParts = (text, term) => {
   const tokens = needle.split(/\s+/).map(w => w.trim()).filter(Boolean);
   if (!tokens.length) return [src];
 
-  // Lowercase once for matching; dedupe by lowercase while preserving first form.
+  // Lowercase once for matching; dedupe by lowercase.
   const lowSrc = src.toLowerCase();
-  const lowToOrig = new Map();
-  for (const w of tokens) {
-    const lw = w.toLowerCase();
-    if (!lowToOrig.has(lw)) lowToOrig.set(lw, w);
-  }
   // Search set, longest-first
-  const sortedWords = Array.from(lowToOrig.keys()).sort((a, b) => b.length - a.length);
+  const sortedWords = Array.from(new Set(tokens.map(w => w.toLowerCase())))
+    .sort((a, b) => b.length - a.length);
 
   // Helper: longest word length matching at exact index.
   const getLongestAtIndex = (index) => {
     for (const low of sortedWords) {
-      if (low.length === 0) continue;
       if (lowSrc.startsWith(low, index)) return low.length; // longest-first
     }
     return 0;
@@ -150,7 +145,6 @@ const highlightParts = (text, term) => {
     // Step 1: Find the earliest next match position across all words.
     let minIndex = -1;
     for (const low of sortedWords) {
-      if (low.length === 0) continue;
       const found = lowSrc.indexOf(low, pos);
       if (found === -1) continue;
       if (minIndex === -1 || found < minIndex) {
@@ -166,11 +160,6 @@ const highlightParts = (text, term) => {
 
     // Step 2: At minIndex, select the longest word that starts there.
     const matchLen = getLongestAtIndex(minIndex);
-    if (matchLen === 0) {
-      // Rare: index found but no word matches? Advance minimally and retry.
-      pos = minIndex + 1;
-      continue;
-    }
 
     // Push non-matching text before (if any).
     if (minIndex > pos) {
