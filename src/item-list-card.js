@@ -68,36 +68,111 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
   }
 };
 
+// /**
+//  * Splits the given text into an array of strings, where each string is either
+//  * a part of the original text that doesn't contain the given term, or a
+//  * `<span class="highlight">` element containing the term.
+//  *
+//  * @param {string} text - The text to split.
+//  * @param {string} [term=''] - The term to highlight.
+//  * @returns {string[]} An array of strings, where each string is either a
+//  *   non-highlighted part of the original text, or a `<span class="highlight">`
+//  *   element containing the term.
+//  */
+// const highlightParts = (text, term) => {
+//   const src = String(text ?? '');
+//   const needle = String(term ?? '').trim();
+//   if (!needle) return [src];
+
+//   const lowSrc = src.toLowerCase();
+//   const lowNeedle = needle.toLowerCase();
+//   const nLen = needle.length;
+
+//   const parts = [];
+//   let i = 0;
+//   for (;;) {
+//     const hit = lowSrc.indexOf(lowNeedle, i);
+//     if (hit === -1) break;
+//     if (hit > i) parts.push(src.slice(i, hit));
+//     parts.push(html`<span class="highlight">${src.slice(hit, hit + nLen)}</span>`);
+//     i = hit + nLen;
+//   }
+//   if (i < src.length) parts.push(src.slice(i));
+//   return parts.length ? parts : [src];
+// };
+
+
 /**
  * Splits the given text into an array of strings, where each string is either
- * a part of the original text that doesn't contain the given term, or a
- * `<span class="highlight">` element containing the term.
+ * a part of the original text that doesn't contain any search word, or a
+ * `<span class="highlight">` element containing a matched search word.
+ *
+ * Implementation uses only string operations (no dynamic RegExp for matching; uses string ops and a whitespace split).
+ * Matches words independently (case-insensitive) and prefers the longest match at any position to avoid overlaps.
  *
  * @param {string} text - The text to split.
- * @param {string} [term=''] - The term to highlight.
- * @returns {string[]} An array of strings, where each string is either a
- *   non-highlighted part of the original text, or a `<span class="highlight">`
- *   element containing the term.
+ * @param {string} [term=''] - The search term (may contain multiple words, split on whitespace).
+ * @returns {Array<string | TemplateResult>} Array of plain strings and html parts (via `html` template).
  */
 const highlightParts = (text, term) => {
   const src = String(text ?? '');
   const needle = String(term ?? '').trim();
   if (!needle) return [src];
 
+  // Split on whitespace (static RegExp)
+  const tokens = needle.split(/\s+/).map(w => w.trim()).filter(Boolean);
+  if (!tokens.length) return [src];
+
+  // Lowercase once for matching; dedupe by lowercase.
   const lowSrc = src.toLowerCase();
-  const lowNeedle = needle.toLowerCase();
-  const nLen = needle.length;
+  // Search set, longest-first
+  const sortedWords = Array.from(new Set(tokens.map(w => w.toLowerCase())))
+    .sort((a, b) => b.length - a.length);
+
+  // Helper: longest word length matching at exact index.
+  const getLongestAtIndex = (index) => {
+    for (const low of sortedWords) {
+      if (lowSrc.startsWith(low, index)) return low.length; // longest-first
+    }
+    return 0;
+  };
 
   const parts = [];
-  let i = 0;
-  for (;;) {
-    const hit = lowSrc.indexOf(lowNeedle, i);
-    if (hit === -1) break;
-    if (hit > i) parts.push(src.slice(i, hit));
-    parts.push(html`<span class="highlight">${src.slice(hit, hit + nLen)}</span>`);
-    i = hit + nLen;
+  let pos = 0;
+  const N = src.length;
+
+  while (pos < N) {
+    // Step 1: Find the earliest next match position across all words.
+    let minIndex = -1;
+    for (const low of sortedWords) {
+      const found = lowSrc.indexOf(low, pos);
+      if (found === -1) continue;
+      if (minIndex === -1 || found < minIndex) {
+        minIndex = found;
+      }
+    }
+
+    if (minIndex === -1) {
+      // No more matches.
+      parts.push(src.slice(pos));
+      break;
+    }
+
+    // Step 2: At minIndex, select the longest word that starts there.
+    const matchLen = getLongestAtIndex(minIndex);
+
+    // Push non-matching text before (if any).
+    if (minIndex > pos) {
+      parts.push(src.slice(pos, minIndex));
+    }
+
+    // Highlight the matched text (preserves original casing).
+    const matchedText = src.slice(minIndex, minIndex + matchLen);
+    parts.push(html`<span class="highlight">${matchedText}</span>`);
+
+    pos = minIndex + matchLen;
   }
-  if (i < src.length) parts.push(src.slice(i));
+
   return parts.length ? parts : [src];
 };
 
