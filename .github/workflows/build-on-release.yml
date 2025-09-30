@@ -42,22 +42,15 @@ jobs:
           npm run clean
           npm run build
           
-      - name: Commit built dist file
+      # If lock-file was just created, commit + push back once
+      - name: Commit package-lock.json when missing
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-      
-          if [ -f dist/item-list-card.js ]; then
-            # force-add the ignored file, then commit only if there are changes
+          if git status --porcelain | grep -q package-lock.json; then
+            git config user.name  "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
             git add -f dist/item-list-card.js
-            if git diff --cached --quiet; then
-              echo "No changes to commit."
-            else
-              git commit -m "chore(release): add dist/item-list-card.js [skip ci]"
-              git push
-            fi
-          else
-            echo "dist/item-list-card.js not found; skipping commit."
+            git commit -m "chore: dist/item-list-card.js [skip ci]"
+            git push
           fi
       
       # Attach dist/item-list-card.js to the GitHub release
