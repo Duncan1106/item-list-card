@@ -42,15 +42,21 @@ jobs:
           npm run clean
           npm run build
           
-      # Minify the built file into dist/
-      - name: Minify to dist
+      # Commit built dist file back to the repo if it changed
+      - name: Commit built dist file
         run: |
-          # ensure dist exists
-          mkdir -p dist
-          # use terser via npx to minify; adjust input file path if different
-          npx terser dist/item-list-card.js --compress --mangle --output dist/item-list-card.min.js
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-
+          # only commit if dist/item-list-card.js exists and changed
+          if [ -f dist/item-list-card.js ] && git status --porcelain | grep -q "dist/item-list-card.js"; then
+            git add dist/item-list-card.js
+            git commit -m "chore(release): add dist/item-list-card.js [skip ci]"
+            git push
+          else
+            echo "No dist/item-list-card.js changes to commit."
+          fi
+      
       # Attach dist/item-list-card.js to the GitHub release
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
