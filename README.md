@@ -6,6 +6,20 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 
 ---
 
+## Table of Contents
+
+1. [Why this card?](#why-this-card)  
+2. [Installation](#installation)  
+   - [Option A: via HACS](#option-a-via-hacs)  
+   - [Option B: Manual Install](#option-b-manual-install)  
+3. [Frontend Setup](#frontend-setup)  
+   - [Minimal config](#minimal-config)  
+   - [Full config](#full-config)  
+4. [Backend Setup (Required)](#backend-setup-required)  
+5. [Troubleshooting checklist (fast debug)](#troubleshooting-checklist-fast-debug)  
+
+
+
 ##  Why this card?
 
 - **Effortless filtering**: Type into an `input_text` helper to slice through your todo items.
@@ -283,3 +297,24 @@ template:
 ```
 
 </details>
+
+
+## Troubleshooting checklist (fast debug)
+If the card renders blank or misbehaves, walk this checklist:
+
+1. **Resource not loaded**  
+   - Check Browser Developer Tools → Console for 404 or module load errors.  
+   - Confirm Card is loaded in the Resource Tab in Homeassistant
+
+2. **Sensor shape incorrect**  
+   - Developer Tools → States → open the configured `filter_items_entity`.  
+   - Verify `attributes.filtered_items` exists and is an array of objects with `id`, `name`, `quantity`.
+
+3. **Hash flicker**  
+   - Check `hash_entity` value stability. If it changes every update, the frontend will re-render unnecessarily.
+
+4. **Service calls not reflected**  
+   - Confirm the service call updates the underlying data source. If it mutates something else, the card won't see the change.
+
+Developer tip: temporarily set `attributes.items` to a small static JSON in Developer Tools to test rendering independent of templates.
+
