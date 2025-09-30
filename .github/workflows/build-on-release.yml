@@ -41,6 +41,15 @@ jobs:
         run: |
           npm run clean
           npm run build
+          
+      # Minify the built file into dist/
+      - name: Minify to dist
+        run: |
+          # ensure dist exists
+          mkdir -p dist
+          # use terser via npx to minify; adjust input file path if different
+          npx terser dist/item-list-card.js --compress --mangle --output dist/item-list-card.min.js
+
 
       # Attach dist/item-list-card.js to the GitHub release
       - name: Upload release asset
