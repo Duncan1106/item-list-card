@@ -14,6 +14,9 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
@@ -21,11 +24,9 @@ jobs:
           node-version: 20
           cache: npm
 
-      # Always non-brittle install; no npm ci
       - name: Install deps
         run: npm install --no-audit --no-fund
 
-      # If lock-file was just created, commit + push back once
       - name: Commit package-lock.json when missing
         run: |
           if git status --porcelain | grep -q package-lock.json; then
@@ -36,12 +37,11 @@ jobs:
             git push
           fi
 
-      # Clean, then single-file build
       - name: Build
         run: |
           npm run clean
           npm run build
-          
+
       - name: Commit built dist file (force-add ignored file)
         run: |
           git config user.name  "github-actions[bot]"
@@ -61,8 +61,7 @@ jobs:
           else
             echo "dist/item-list-card.js not found; skipping commit."
           fi
-      
-      # Attach dist/item-list-card.js to the GitHub release
+
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
