@@ -42,19 +42,22 @@ jobs:
           npm run clean
           npm run build
           
-      # Commit built dist file back to the repo if it changed
       - name: Commit built dist file
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # only commit if dist/item-list-card.js exists and changed
-          if [ -f dist/item-list-card.js ] && git status --porcelain | grep -q "dist/item-list-card.js"; then
-            git add dist/item-list-card.js
-            git commit -m "chore(release): add dist/item-list-card.js [skip ci]"
-            git push
+      
+          if [ -f dist/item-list-card.js ]; then
+            # force-add the ignored file, then commit only if there are changes
+            git add -f dist/item-list-card.js
+            if git diff --cached --quiet; then
+              echo "No changes to commit."
+            else
+              git commit -m "chore(release): add dist/item-list-card.js [skip ci]"
+              git push
+            fi
           else
-            echo "No dist/item-list-card.js changes to commit."
+            echo "dist/item-list-card.js not found; skipping commit."
           fi
       
       # Attach dist/item-list-card.js to the GitHub release
