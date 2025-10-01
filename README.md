@@ -1,4 +1,4 @@
-[![CodeQL](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql)
+[![CodeQL](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql) [![Release](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml)
 
 # Item List Card for Home Assistant
 
