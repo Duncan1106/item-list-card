@@ -22,7 +22,7 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 
 
 
-##  Why this card?
+## Why this card?
 
 - **Effortless filtering**: Type into an `input_text` helper to slice through your todo items.
 - **Unified view**: Aggregate multiple lists—pantry, freezer, cat food—into one dynamic sensor.
@@ -30,7 +30,7 @@ This repository contains a sleek, reactive frontend, but it leans on a robust ba
 
 ---
 
-##  Installation
+## Installation
 
 ### Option A: via HACS
 
