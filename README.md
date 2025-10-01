@@ -1,4 +1,4 @@
-[![CodeQL](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql) [![Release](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml)
+[![CodeQL](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql) [![Release](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/a09631f0e93848548ca63f154ba5c545)](https://app.codacy.com/gh/Duncan1106/item-list-card/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade)
 
 # Item List Card for Home Assistant
 
