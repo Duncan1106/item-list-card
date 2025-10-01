@@ -252,6 +252,14 @@ export const styles = css`
         border-color: var(--accent-color, #03a9f4);
     }
 
+    /* active state for pressed appearance */
+    .key-buttons .key-btn.active {
+        background: rgba(0,0,0,0.08);
+        transform: translateY(1px);
+        color: var(--accent-color, #03a9f4);
+        border-color: var(--accent-color, #03a9f4);
+    }
+
     /* icon centering & sizing */
     .key-buttons .key-btn ha-icon,
     .btn ha-icon {
