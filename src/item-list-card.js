@@ -993,10 +993,11 @@ _parseShowMoreButtons() {
                 const label = btn.name || btn.filter_key || '';
                 const icon = btn.icon;
                 const fk = btn.filter_key || '';
+                const active = this._isActiveButton(fk);
                 return html`
                   <button
-                    class="key-btn ${this._isActiveButton(fk) ? 'active' : ''}"
-                    aria-pressed=${this._isActiveButton(fk) ? 'true' : 'false'}
+                    class="key-btn ${active ? 'active' : ''}"
+                    aria-pressed=${active ? 'true' : 'false'}
                     type="button"
                     title=${label}
                     aria-label=${label}
