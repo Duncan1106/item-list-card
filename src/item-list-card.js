@@ -303,7 +303,7 @@ class ItemListCard extends LitElement {
     const filter = this._filterValue || '';
     console.log("Filter: ", filter);
     console.log("FilterKey: ", filterKey);
-    console.log(filter.startsWith(`todo:${filterKey} `));
+    console.log("StartsWith: ", filter.startsWith(`todo:${filterKey} `));
     return filter.startsWith(`todo:${filterKey} `);
   }
 
