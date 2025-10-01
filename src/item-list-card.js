@@ -257,8 +257,8 @@ class ItemListCard extends LitElement {
    *     matches in the filter text
    * @param {Array<Object>} [config.filter_key_buttons=[]] - A list of key button
    *     definitions with the following properties:
-   *     - `label`: The text to display in the button
-   *     - `key`: The key to send to the filter input when the button is clicked
+   *     - `name`: The text to display in the button (fallback to `filter_key` if missing)
+   *     - `filter_key`: The key to send to the filter input when the button is clicked
    *     - `icon`: The icon to display in the button (optional)
    */
   setConfig(config) {
@@ -300,11 +300,9 @@ class ItemListCard extends LitElement {
    */
   _isActiveButton(filterKey) {
     if (!filterKey) return false;
-    const filter = this._filterValue || '';
-    console.log("Filter: ", filter);
-    console.log("FilterKey: ", filterKey);
-    console.log("StartsWith: ", filter.startsWith(`todo:${filterKey} `));
-    return filter.startsWith(`todo:${filterKey} `);
+    const filter = (this._filterValue || '').trim();
+    const prefix = `todo:${filterKey}`;
+    return filter.startsWith(prefix) || filter.startsWith(prefix + ' ');
   }
 
   /**
@@ -996,11 +994,10 @@ _parseShowMoreButtons() {
                 const label = btn.name || btn.filter_key || '';
                 const icon = btn.icon;
                 const fk = btn.filter_key || '';
-                const active = this._isActiveButton(fk);
                 return html`
                   <button
-                    class="key-btn ${active ? 'active' : ''}"
-                    aria-pressed=${active ? 'true' : 'false'}
+                    class="key-btn ${this._isActiveButton(fk) ? 'active' : ''}"
+                    ?aria-pressed=${this._isActiveButton(fk)}
                     type="button"
                     title=${label}
                     aria-label=${label}
