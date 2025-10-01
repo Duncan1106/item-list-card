@@ -292,6 +292,19 @@ class ItemListCard extends LitElement {
   }
 
   /**
+   * Checks if a key button is active based on the current filter value.
+   * A button is active if the filter starts with "todo:<filterKey>".
+   * @param {string} filterKey - The key to check.
+   * @returns {boolean} True if active.
+   * @private
+   */
+  _isActiveButton(filterKey) {
+    if (!filterKey) return false;
+    const filter = this._filterValue?.trim() || '';
+    return filter.startsWith(`todo:${filterKey} `);
+  }
+
+  /**
    * Adds a pending update to the list. This will cause the item with the given
    * `uid` to be re-rendered on the next update.
    * @param {string} uid The uid of the item to add to the pending updates
@@ -980,9 +993,11 @@ _parseShowMoreButtons() {
                 const label = btn.name || btn.filter_key || '';
                 const icon = btn.icon;
                 const fk = btn.filter_key || '';
+                const active = this._isActiveButton(fk);
                 return html`
                   <button
-                    class="key-btn"
+                    class="key-btn ${active ? 'active' : ''}"
+                    aria-pressed=${active ? 'true' : 'false'}
                     type="button"
                     title=${label}
                     aria-label=${label}
