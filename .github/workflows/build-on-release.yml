@@ -17,6 +17,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
+          ref: main
 
       - name: Setup Node 20
         uses: actions/setup-node@v4
