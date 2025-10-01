@@ -27,6 +27,9 @@ jobs:
       - name: Install deps
         run: npm install --no-audit --no-fund
 
+      - name: Update lockfile
+        run: npm install --package-lock-only
+
       - name: Commit package-lock.json when missing
         run: |
           if git status --porcelain | grep -q package-lock.json; then
