@@ -255,7 +255,6 @@ export const styles = css`
     /* active state for pressed appearance */
     .key-buttons .key-btn.active {
         background: rgba(0,0,0,0.08);
-        transform: translateY(1px);
         color: var(--accent-color, #03a9f4);
         border-color: var(--accent-color, #03a9f4);
         box-shadow: none; /* override hover shadow when pressed */
