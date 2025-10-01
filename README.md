@@ -319,4 +319,3 @@ If the card renders blank or misbehaves, walk this checklist:
    - Confirm the service call updates the underlying data source. If it mutates something else, the card won't see the change.
 
 Developer tip: temporarily set `attributes.filtered_items` to a small static JSON in Developer Tools to test rendering independent of templates.
-
