@@ -258,6 +258,19 @@ export const styles = css`
         transform: translateY(1px);
         color: var(--accent-color, #03a9f4);
         border-color: var(--accent-color, #03a9f4);
+        box-shadow: none; /* override hover shadow when pressed */
+    }
+    /* ensure pressed still has a visible ring for keyboard users */
+    .key-buttons .key-btn.active:focus-visible {
+        box-shadow: 0 0 0 4px rgba(3,169,244,0.06);
+    }
+    /* make pressed override hover consistently */
+    .key-buttons .key-btn.active:hover,
+    .key-buttons .key-btn.active:focus {
+        background: rgba(0,0,0,0.08);
+        transform: translateY(1px);
+        color: var(--accent-color, #03a9f4);
+        border-color: var(--accent-color, #03a9f4);
     }
 
     /* icon centering & sizing */

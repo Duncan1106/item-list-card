@@ -996,6 +996,7 @@ _parseShowMoreButtons() {
                 return html`
                   <button
                     class="key-btn ${this._isActiveButton(fk) ? 'active' : ''}"
+                    aria-pressed=${this._isActiveButton(fk) ? 'true' : 'false'}
                     type="button"
                     title=${label}
                     aria-label=${label}
