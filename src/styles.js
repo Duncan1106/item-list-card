@@ -1,3 +1,5 @@
+/* jshint esversion: 6 */
+
 import { css } from 'lit';
 
 export const styles = css`
