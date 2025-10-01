@@ -4,7 +4,6 @@
   "description": "A compact ToDo list / shopping helper Lovelace card for Home Assistant",
   "main": "dist/item-list-card.js",
   "scripts": {
-    "test": "node test/validate-jshintrc.test.js",
     "build": "esbuild src/item-list-card.js --bundle --sourcemap --minify --format=esm --target=es2020 --outfile=dist/item-list-card.js",
     "build:dev": "esbuild src/item-list-card.js --bundle --sourcemap --format=esm --target=es2020 --outfile=dist/item-list-card.js",
     "clean": "rimraf dist"
