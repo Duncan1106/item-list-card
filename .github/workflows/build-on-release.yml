@@ -66,21 +66,14 @@ jobs:
 
           git commit -m "chore: add dist/item-list-card.js [skip ci]"
 
-          # Determine the repository default branch to push into.
-          # This resolves origin/HEAD -> origin/<default-branch>
-          DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin/HEAD | sed 's@origin/@@')
-          if [ -z "$DEFAULT_BRANCH" ] || [ "$DEFAULT_BRANCH" = "HEAD" ]; then
-            # Fallback: try fetching remote HEAD info
-            DEFAULT_BRANCH=$(git remote show origin | awk '/HEAD branch/ {print $NF}')
-          fi
+          # Ensure we’re on the main branch and up-to-date
+          git fetch origin main
+          git checkout main
+          git reset --hard origin/main
 
-          if [ -z "$DEFAULT_BRANCH" ]; then
-            echo "Could not determine default branch; aborting push."
-            exit 1
-          fi
+          echo "Pushing built file commit to origin/main"
+          git push origin main
 
-          echo "Pushing built file commit to origin/$DEFAULT_BRANCH"
-          git push origin HEAD:refs/heads/"$DEFAULT_BRANCH"
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
