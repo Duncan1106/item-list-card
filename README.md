@@ -1,3 +1,5 @@
+[![CodeQL](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql)
+
 # Item List Card for Home Assistant
 
 A custom Lovelace card to display filtered items aggregated from multiple `todo.*` lists—all handled with finesse by your setup.
