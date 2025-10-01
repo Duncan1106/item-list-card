@@ -1,5 +1,5 @@
 import { LitElement, html, css } from 'lit';
-import {styles} from './styles.js'
+import {styles} from './styles.js';
 
 /**
 * Returns a debounced version of the given function `fn`.
