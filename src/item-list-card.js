@@ -301,7 +301,7 @@ class ItemListCard extends LitElement {
   _isActiveButton(filterKey) {
     if (!filterKey) return false;
     const filter = this._filterValue?.trim() || '';
-    return filter.startsWith(`todo:${filterKey}`);
+    return filter.startsWith(`todo:${filterKey} `);
   }
 
   /**
