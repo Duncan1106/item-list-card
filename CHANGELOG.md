@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project uses date-based tags (YYYY.MM.DD) for releases.
 
-## [2025.10.03] - 2025-10-03
+## [2025.10.3] - 2025-10-03
 
 ### Added
 - Overhauled README.md with comprehensive structure: introduction, features list, screenshots placeholder, HACS/manual installation guides, minimal/full configuration examples for frontend (with options like max_items, filter_key_buttons), backend setup referencing TEMPLATE.md, usage examples, troubleshooting checklist, and contributing section linking to DEVELOPMENT.md.
