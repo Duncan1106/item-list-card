@@ -1,12 +1,18 @@
-```yaml
 template:
+  - sensor:
+      - name: "Todo Lists Config"
+        unique_id: todo_lists_config
+        state: "static"
+        attributes:
+          todo_lists: >-
+            ['todo.kellervorrate', 'todo.kellervorrate_katzenfutter', 'todo.kellervorrate_safe', 'todo.kellervorrate_marmelade_selbstgemachtes', 'todo.kuhltruhe_keller', 'todo.kuhltruhe_garage']
   - trigger:
       - platform: state
         entity_id: input_text.search_todo_list
       - platform: time_pattern
         seconds: "/1"
       - platform: state
-        entity_id:
+        entity_id: &todo_lists
           - todo.kellervorrate
           - todo.kellervorrate_katzenfutter
           - todo.kellervorrate_safe
@@ -18,13 +24,7 @@ template:
         data:
           status: needs_action
         target:
-          entity_id:
-            - todo.kellervorrate
-            - todo.kellervorrate_safe
-            - todo.kellervorrate_katzenfutter
-            - todo.kellervorrate_marmelade_selbstgemachtes
-            - todo.kuhltruhe_keller
-            - todo.kuhltruhe_garage
+          entity_id: *todo_lists
         response_variable: all_todo_items
     sensor:
       - name: "Kellervorrate Combined Filtered Items"
@@ -35,14 +35,7 @@ template:
             {% set filter_key = (input.split('todo:')[1].split(' ')[0]) if has_filter else '' %}
             {% set search_term = input.split('todo:' ~ filter_key)[1] | trim if has_filter else input %}
             
-            {% set lists = [
-              'todo.kellervorrate',
-              'todo.kellervorrate_safe',
-              'todo.kellervorrate_katzenfutter',
-              'todo.kellervorrate_marmelade_selbstgemachtes',
-              'todo.kuhltruhe_keller',
-              'todo.kuhltruhe_garage'
-            ] %}
+            {% set lists = state_attr('sensor.todo_lists_config', 'todo_lists') | default([]) %}
             
             {% set filtered_lists = lists  
               | select('search', filter_key)  
@@ -63,21 +56,14 @@ template:
                   {% endif %}
                 {% endfor %}
               {% endfor %}
-            
+              
               {{ count.total }}
             {% else %}
               0
             {% endif %}
         attributes:
           source_map: >
-            {% set lists = [
-              'todo.kellervorrate',
-              'todo.kellervorrate_safe',
-              'todo.kellervorrate_katzenfutter',
-              'todo.kellervorrate_marmelade_selbstgemachtes',
-              'todo.kuhltruhe_keller',
-              'todo.kuhltruhe_garage'
-            ] %}
+            {% set lists = state_attr('sensor.todo_lists_config', 'todo_lists') | default([]) %}
 
             {% set ns = namespace(source_map={}) %}
 
@@ -111,14 +97,7 @@ template:
             {% set filter_key = (input.split('todo:')[1].split(' ')[0]) if has_filter else '' %}
             {% set search_term = input.split('todo:' ~ filter_key)[1] | trim if has_filter else input %}
 
-            {% set lists = [
-              'todo.kellervorrate',
-              'todo.kellervorrate_safe',
-              'todo.kellervorrate_katzenfutter',
-              'todo.kellervorrate_marmelade_selbstgemachtes',
-              'todo.kuhltruhe_keller',
-              'todo.kuhltruhe_garage'
-            ] %}
+            {% set lists = state_attr('sensor.todo_lists_config', 'todo_lists') | default([]) %}
             
             {% set ns2 = namespace(index_map={}) %}
             {% for entity_id in lists %}
@@ -184,4 +163,3 @@ template:
                   (state_attr('sensor.kellervorrate_combined_filtered_items', 'source_map') | default({}) | to_json) 
                 ) | md5
             }}
-```
