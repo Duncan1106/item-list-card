@@ -304,6 +304,7 @@ class ItemListCard extends LitElement {
     const prefix = `todo:${filterKey}`;
     const isActive = filter.startsWith(prefix) || filter.startsWith(prefix + ' ');
     console.log('Active check for button:', { filterKey, rawFilter: this._filterValue, trimmedFilter: filter, prefix, prefixWithSpace: prefix + ' ', isActive });
+    alert(`Active check called for filterKey: ${filterKey}, isActive: ${isActive}, filter: "${this._filterValue}"`); // Temporary alert for debugging
     return isActive;
   }
 
