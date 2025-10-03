@@ -997,7 +997,7 @@ _parseShowMoreButtons() {
                   const label = btn.name || btn.filter_key || '';
                   const icon = btn.icon;
                   const fk = btn.filter_key || '';
-                  const { active } = activeStates[index];
+                  const { active = false } = activeStates[index] || {};
                   const activeClass = active ? 'active' : '';
                   return html`
                     <button
