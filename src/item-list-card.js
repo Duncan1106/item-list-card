@@ -303,8 +303,7 @@ class ItemListCard extends LitElement {
     const filter = (this._filterValue || '').trim();
     const prefix = `todo:${filterKey}`;
     const isActive = filter.startsWith(prefix) || filter.startsWith(prefix + ' ');
-    console.log('Active check for button:', { filterKey, rawFilter: this._filterValue, trimmedFilter: filter, prefix, prefixWithSpace: prefix + ' ', isActive });
-    alert(`Active check called for filterKey: ${filterKey}, isActive: ${isActive}, filter: "${this._filterValue}"`); // Temporary alert for debugging
+    console.error('Active check for button:', { filterKey, rawFilter: this._filterValue, trimmedFilter: filter, prefix, prefixWithSpace: prefix + ' ', isActive });
     return isActive;
   }
 
@@ -976,7 +975,7 @@ _parseShowMoreButtons() {
           <input
             type="text"
             .value=${filterValue}
-            placeholder="Tippe einen Suchfilter ein"
+            placeholder="TEST FILTER - DEBUG"  // Temporary change to confirm build loads
             @input=${this._handleFilterInputChange}
             @keydown=${this._onInputKeydown}
             aria-label="Filter"
@@ -1009,7 +1008,7 @@ _parseShowMoreButtons() {
                 const fk = btn.filter_key || '';
                 const activeClass = this._isActiveButton(fk) ? 'active' : '';
                 const ariaPressed = this._isActiveButton(fk);
-                console.log('Rendering button:', { fk, label, activeClass, ariaPressed, currentFilter: this._filterValue });
+                console.error('Rendering button:', { fk, label, activeClass, ariaPressed, currentFilter: this._filterValue });
                 return html`
                   <button
                     class="key-btn ${activeClass}"
