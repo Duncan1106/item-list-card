@@ -1002,7 +1002,7 @@ _parseShowMoreButtons() {
                   const label = btn.name || btn.filter_key || '';
                   const icon = typeof btn.icon === 'string' && /^mdi:[\w-]+$/.test(btn.icon) ? btn.icon : null;
                   const fk = btn.filter_key || '';
-                  const { active = false } = activeStates[index] || { active: false };
+                  const { active = false } = (activeStates[index] || { active: false }) instanceof Object ? activeStates[index] : { active: false };
                   const activeClass = active ? 'active' : '';
                   return html`
                     <button
