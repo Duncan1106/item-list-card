@@ -44,7 +44,7 @@ jobs:
       - name: Build
         run: |
           npm run clean
-          npm run build:dev
+          npm run build
 
       - name: Commit built dist file (force-add ignored file)
         run: |
@@ -74,39 +74,6 @@ jobs:
 
           echo "Pushing built file commit to origin/main"
           git push origin main
-
-      - name: Update CHANGELOG.md with release notes
-        if: startsWith(github.ref, 'refs/tags/')
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          TAG_NAME="${{ github.event.release.tag_name }}"
-          RELEASE_BODY="${{ github.event.release.body }}"
-
-          # Create new section header (date in UTC)
-          NEW_SECTION="## [${TAG_NAME}] - $(date -u +%Y-%m-%d)\n\n### Added\n\n### Changed\n\n### Fixed\n\n### Removed\n\n[${TAG_NAME}]: https://github.com/Duncan1106/item-list-card/releases/tag/${TAG_NAME}\n"
-
-          # If release body provided, append it under 'Release Notes'
-          if [ -n "$RELEASE_BODY" ]; then
-            NEW_SECTION="${NEW_SECTION}\n### Release Notes\n${RELEASE_BODY}\n"
-          fi
-
-          # Insert new section before [Unreleased] or append if not present
-          if grep -q "^## \\[Unreleased\\]" CHANGELOG.md; then
-            # Use awk to insert multiline variable before the first Unreleased header
-            awk -v n="$NEW_SECTION" 'BEGIN{printn=1} { if(printn && $0 ~ /^## \[Unreleased\]/){ print n; print $0; printn=0; next } print }' CHANGELOG.md > CHANGELOG.md.new && mv CHANGELOG.md.new CHANGELOG.md
-          else
-            echo -e "$NEW_SECTION" >> CHANGELOG.md
-          fi
-
-          git add CHANGELOG.md
-          if git diff --staged --quiet; then
-            echo "No changes to CHANGELOG.md; skipping commit."
-          else
-            git commit -m "docs: update CHANGELOG.md for ${TAG_NAME} [skip ci]"
-            git push origin main
-          fi
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v2
