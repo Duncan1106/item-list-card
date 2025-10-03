@@ -62,45 +62,11 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
   try {
     await hass.callService(domain, service, data);
   } catch (err) {
-    console.error(`Error calling ${domain}.${service}:`, err);
+    // console.error(`Error calling ${domain}.${service}:`, err);
     showToast(toastEl, fallbackMsg);
     throw err;
   }
 };
-
-// /**
-//  * Splits the given text into an array of strings, where each string is either
-//  * a part of the original text that doesn't contain the given term, or a
-//  * `<span class="highlight">` element containing the term.
-//  *
-//  * @param {string} text - The text to split.
-//  * @param {string} [term=''] - The term to highlight.
-//  * @returns {string[]} An array of strings, where each string is either a
-//  *   non-highlighted part of the original text, or a `<span class="highlight">`
-//  *   element containing the term.
-//  */
-// const highlightParts = (text, term) => {
-//   const src = String(text ?? '');
-//   const needle = String(term ?? '').trim();
-//   if (!needle) return [src];
-
-//   const lowSrc = src.toLowerCase();
-//   const lowNeedle = needle.toLowerCase();
-//   const nLen = needle.length;
-
-//   const parts = [];
-//   let i = 0;
-//   for (;;) {
-//     const hit = lowSrc.indexOf(lowNeedle, i);
-//     if (hit === -1) break;
-//     if (hit > i) parts.push(src.slice(i, hit));
-//     parts.push(html`<span class="highlight">${src.slice(hit, hit + nLen)}</span>`);
-//     i = hit + nLen;
-//   }
-//   if (i < src.length) parts.push(src.slice(i));
-//   return parts.length ? parts : [src];
-// };
-
 
 /**
  * Splits the given text into an array of strings, where each string is either
@@ -303,7 +269,6 @@ class ItemListCard extends LitElement {
     const filter = (this._filterValue || '').trim();
     const prefix = `todo:${filterKey}`;
     const isActive = filter.startsWith(prefix) || filter.startsWith(prefix + ' ');
-    console.error('Active check for button:', { filterKey, rawFilter: this._filterValue, trimmedFilter: filter, prefix, prefixWithSpace: prefix + ' ', isActive });
     return isActive;
   }
 
@@ -975,7 +940,7 @@ _parseShowMoreButtons() {
           <input
             type="text"
             .value=${filterValue}
-            placeholder="TEST FILTER - DEBUG"  // Temporary change to confirm build loads
+            placeholder="Tippe einen Suchfilter ein"
             @input=${this._handleFilterInputChange}
             @keydown=${this._onInputKeydown}
             aria-label="Filter"
@@ -1008,7 +973,6 @@ _parseShowMoreButtons() {
                 const fk = btn.filter_key || '';
                 const activeClass = this._isActiveButton(fk) ? 'active' : '';
                 const ariaPressed = this._isActiveButton(fk);
-                console.error('Rendering button:', { fk, label, activeClass, ariaPressed, currentFilter: this._filterValue });
                 return html`
                   <button
                     class="key-btn ${activeClass}"
