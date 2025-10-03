@@ -257,19 +257,6 @@ class ItemListCard extends LitElement {
     return base + Math.min(this._cachedItems?.length || 0, 6);
   }
 
-  /**
-   * Checks if a key button is active based on the current filter value.
-   * A button is active if the filter starts with "todo:<filterKey>".
-   * @param {string} filterKey - The key to check.
-   * @returns {boolean} True if active.
-   * @private
-   */
-  _isActiveButton(filterKey) {
-    if (!filterKey) return false;
-    const filter = String(this._filterValue || '');
-    const prefix = `todo:${filterKey} `;
-    return filter.startsWith(prefix);
-  }
 
   /**
    * Adds a pending update to the list. This will cause the item with the given
@@ -992,33 +979,24 @@ _parseShowMoreButtons() {
         </div>
         
         ${Array.isArray(this.config.filter_key_buttons) && this.config.filter_key_buttons.length
-          ? (() => {
-              const activeStates = this.config.filter_key_buttons.map(btn => ({
-                fk: btn.filter_key || '',
-                active: this._isActiveButton(btn.filter_key || '')
-              }));
-              return html`<div class="key-buttons" role="toolbar" aria-label="Schnellfilter">
-                ${this.config.filter_key_buttons.map((btn, index) => {
-                  const label = btn.name || btn.filter_key || '';
-                  const icon = typeof btn.icon === 'string' && /^mdi:[\w-]+$/.test(btn.icon) ? btn.icon : null;
-                  const fk = btn.filter_key || '';
-                  const { active } = activeStates[index] || { active: false };
-                  const activeClass = active ? 'active' : '';
-                  return html`
-                    <button
-                      class="key-btn ${activeClass}"
-                      ?aria-pressed=${active}
-                      type="button"
-                      title=${label}
-                      aria-label=${label}
-                      @click=${() => this._onFilterKeyButtonClick(fk)}
-                    >
-                      ${icon ? html`<ha-icon .icon=${icon}></ha-icon>` : html`${label}`}
-                    </button>
-                  `;
-                })}
-              </div>`;
-            })()
+          ? html`<div class="key-buttons" role="toolbar" aria-label="Schnellfilter">
+              ${this.config.filter_key_buttons.map((btn) => {
+                const label = btn.name || btn.filter_key || '';
+                const icon = typeof btn.icon === 'string' && /^mdi:[\w-]+$/.test(btn.icon) ? btn.icon : null;
+                const fk = btn.filter_key || '';
+                return html`
+                  <button
+                    class="key-btn"
+                    type="button"
+                    title=${label}
+                    aria-label=${label}
+                    @click=${() => this._onFilterKeyButtonClick(fk)}
+                  >
+                    ${icon ? html`<ha-icon .icon=${icon}></ha-icon>` : html`${label}`}
+                  </button>
+                `;
+              })}
+            </div>`
           : ''}
 
 
