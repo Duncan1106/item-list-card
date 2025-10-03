@@ -44,7 +44,7 @@ jobs:
       - name: Build
         run: |
           npm run clean
-          npm run build
+          npm run build:dev
 
       - name: Commit built dist file (force-add ignored file)
         run: |
