@@ -2,7 +2,7 @@
 
 A custom Lovelace card that displays filtered and aggregated items from multiple `todo.*` lists. It provides an interactive, UI-first experience for managing shopping lists, inventory, or tasks in Home Assistant.
 
-This frontend card requires a backend template sensor to aggregate and filter data from your todo lists. See [Backend Setup](#backend-setup) for details.
+This frontend card requires a backend template sensor to aggregate and filter data from your todo lists. See [Backend Setup](#backend-setup-required) for details.
 
 [![HACS](https://img.shields.io/badge/HACS-Custom%20Lovelace%20Cards-blue.svg)](https://github.com/hacs/integration)
 
