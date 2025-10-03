@@ -1,3 +1,4 @@
+```yaml
 template:
   - sensor:
       - name: "Todo Lists Config"
@@ -163,3 +164,4 @@ template:
                   (state_attr('sensor.kellervorrate_combined_filtered_items', 'source_map') | default({}) | to_json) 
                 ) | md5
             }}
+```
