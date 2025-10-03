@@ -42,6 +42,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 **Full Changelog**: https://github.com/Duncan1106/item-list-card/compare/2025.10.3...2025.10.03
 
+## [2025.10.3.1] - 2025-10-03
+
+### Added
+
+### Changed
+
+### Fixed
+
+### Removed
+
+[2025.10.3.1]: https://github.com/Duncan1106/item-list-card/releases/tag/2025.10.3.1
+
+### Release Notes
+**Full Changelog**: https://github.com/Duncan1106/item-list-card/compare/2025.10.03...2025.10.3.1
+
 ## [Unreleased]
 
 ### Added
