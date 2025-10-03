@@ -302,7 +302,9 @@ class ItemListCard extends LitElement {
     if (!filterKey) return false;
     const filter = (this._filterValue || '').trim();
     const prefix = `todo:${filterKey}`;
-    return filter.startsWith(prefix) || filter.startsWith(prefix + ' ');
+    const isActive = filter.startsWith(prefix) || filter.startsWith(prefix + ' ');
+    console.log('Active check for button:', { filterKey, rawFilter: this._filterValue, trimmedFilter: filter, prefix, prefixWithSpace: prefix + ' ', isActive });
+    return isActive;
   }
 
   /**
@@ -1004,10 +1006,13 @@ _parseShowMoreButtons() {
                 const label = btn.name || btn.filter_key || '';
                 const icon = btn.icon;
                 const fk = btn.filter_key || '';
+                const activeClass = this._isActiveButton(fk) ? 'active' : '';
+                const ariaPressed = this._isActiveButton(fk);
+                console.log('Rendering button:', { fk, label, activeClass, ariaPressed, currentFilter: this._filterValue });
                 return html`
                   <button
-                    class="key-btn ${this._isActiveButton(fk) ? 'active' : ''}"
-                    ?aria-pressed=${this._isActiveButton(fk)}
+                    class="key-btn ${activeClass}"
+                    ?aria-pressed=${ariaPressed}
                     type="button"
                     title=${label}
                     aria-label=${label}
