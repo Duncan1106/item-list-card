@@ -1002,11 +1002,7 @@ _parseShowMoreButtons() {
                   const label = btn.name || btn.filter_key || '';
                   const icon = typeof btn.icon === 'string' && /^mdi:[\w-]+$/.test(btn.icon) ? btn.icon : null;
                   const fk = btn.filter_key || '';
-<<<<<<< HEAD
                   const { active } = activeStates[index] || { active: false };
-=======
-                  const { active = false } = (activeStates[index] && typeof activeStates[index] === 'object' && activeStates[index] !== null) ? activeStates[index] : { active: false };
->>>>>>> d934b38c6a1b202eda22899c6f0024c1d3fe97a1
                   const activeClass = active ? 'active' : '';
                   return html`
                     <button
