@@ -462,17 +462,20 @@ class ItemListCard extends LitElement {
    * @private
    */
   async _updateFilterTextActual(value) {
-    try {
-      const entityId = this.config?.filter_entity;
-      if (!entityId || !this.hass) {
-        return;
-      }
-      const current = this.hass.states?.[entityId]?.state ?? '';
-      // compare raw values so trailing spaces cause an update
-      const curRaw = String(current);
-      const valRaw = String(value ?? '');
-      if (curRaw === valRaw) return;
+    const entityId = this.config?.filter_entity;
+    if (!entityId || !this.hass) {
+      return;
+    }
+    const current = this.hass.states?.[entityId]?.state ?? '';
+    // compare raw values so trailing spaces cause an update
+    const curRaw = String(current);
+    const valRaw = String(value ?? '');
+    if (curRaw === valRaw) return;
 
+    // Save previous filter value for revert (use let for mutability if needed, but here it's just for scope)
+    let previousFilterValue = this._filterValue;
+
+    try {
       // Optimistic update for immediate UI feedback
       this._filterValue = valRaw;
       this.requestUpdate();
@@ -483,8 +486,8 @@ class ItemListCard extends LitElement {
         'Fehler beim Aktualisieren des Suchfeldes');
     } catch (err) {
       console.error("Error in _updateFilterTextActual:", err);
-      // Revert on failure
-      this._filterValue = curRaw;
+      // Revert on failure to previous value
+      this._filterValue = previousFilterValue;
       this.requestUpdate();
     }
   }
