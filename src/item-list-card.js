@@ -62,7 +62,7 @@ const callService = async (hass, domain, service, data, toastEl, fallbackMsg = '
   try {
     await hass.callService(domain, service, data);
   } catch (err) {
-    // console.error(`Error calling ${domain}.${service}:`, err);
+    console.error(`Error calling ${domain}.${service}:`, err);
     showToast(toastEl, fallbackMsg);
     throw err;
   }
