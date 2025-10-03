@@ -461,7 +461,7 @@ class ItemListCard extends LitElement {
    * @param {string} [value] The value to set the filter text to
    * @private
    */
-  _updateFilterTextActual(value) {
+  async _updateFilterTextActual(value) {
     try {
       const entityId = this.config?.filter_entity;
       if (!entityId || !this.hass) {
@@ -472,13 +472,20 @@ class ItemListCard extends LitElement {
       const curRaw = String(current);
       const valRaw = String(value ?? '');
       if (curRaw === valRaw) return;
-  
-      callService(this.hass, 'input_text', 'set_value',
+
+      // Optimistic update for immediate UI feedback
+      this._filterValue = valRaw;
+      this.requestUpdate();
+
+      await callService(this.hass, 'input_text', 'set_value',
         { entity_id: entityId, value: value ?? '' },
         this,
         'Fehler beim Aktualisieren des Suchfeldes');
     } catch (err) {
       console.error("Error in _updateFilterTextActual:", err);
+      // Revert on failure
+      this._filterValue = curRaw;
+      this.requestUpdate();
     }
   }
   
