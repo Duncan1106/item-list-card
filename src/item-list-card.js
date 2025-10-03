@@ -266,10 +266,9 @@ class ItemListCard extends LitElement {
    */
   _isActiveButton(filterKey) {
     if (!filterKey) return false;
-    const filter = (this._filterValue || '').trim();
-    const prefix = `todo:${filterKey}`;
-    const isActive = filter.startsWith(prefix) || filter.startsWith(prefix + ' ');
-    return isActive;
+    const filter = String(this._filterValue || '');
+    const prefix = `todo:${filterKey} `;
+    return filter.startsWith(prefix);
   }
 
   /**
@@ -311,9 +310,11 @@ class ItemListCard extends LitElement {
     const filterItemsEntity = hass.states?.[this.config.filter_items_entity];
     const hashEntity = hass.states?.[this.config.hash_entity];
 
-    // Update cached filter value
+    // Update cached filter value only if the remote value actually changed on this hass tick
+    const oldHass = changedProps.get("hass");
+    const prevRemote = oldHass?.states?.[this.config.filter_entity]?.state ?? "";
     const nextFilter = filterEntity?.state ?? "";
-    if (nextFilter !== this._filterValue) {
+    if (nextFilter !== prevRemote && nextFilter !== this._filterValue) {
       this._filterValue = nextFilter;
       this._displayLimit = undefined;
       return true;
@@ -352,7 +353,7 @@ class ItemListCard extends LitElement {
     }
 
     // Also update when total count changes (entity state)
-    const oldHass = changedProps.get("hass");
+    // oldHass already retrieved above
     const oldCount = parseInt(oldHass?.states?.[this.config.filter_items_entity]?.state, 10) || 0;
     const newCount = parseInt(filterItemsEntity?.state, 10) || 0;
     const countChanged = oldCount !== newCount;
@@ -484,7 +485,11 @@ class ItemListCard extends LitElement {
   
       if (todoTokenIndex === -1) {
         // no todo:key => clear completely
-        this._updateFilterTextActual('');
+        const previous = this._filterValue;
+        const value = '';
+        this._filterValue = value;
+        this.requestUpdate();
+        this._setFilterService(previous, value);
         return;
       }
   
@@ -995,9 +1000,9 @@ _parseShowMoreButtons() {
               return html`<div class="key-buttons" role="toolbar" aria-label="Schnellfilter">
                 ${this.config.filter_key_buttons.map((btn, index) => {
                   const label = btn.name || btn.filter_key || '';
-                  const icon = btn.icon;
+                  const icon = typeof btn.icon === 'string' && /^mdi:[\w-]+$/.test(btn.icon) ? btn.icon : null;
                   const fk = btn.filter_key || '';
-                  const { active = false } = activeStates[index] || { active: false };
+                  const { active = false } = activeStates[index] || { active: false, fk: '' };
                   const activeClass = active ? 'active' : '';
                   return html`
                     <button
