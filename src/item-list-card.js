@@ -168,7 +168,7 @@ class ItemListCard extends LitElement {
     this._cachedSourceMap = {};
     this._filterValue = '';
     this._lastItemsHash = '';
-    this._debouncedUpdateFilterText = debounce(this._updateFilterTextActual, 250);
+    this._debouncedSetFilter = debounce((prev, val) => this._setFilterService(prev, val), 250);
     this._pendingUpdates = new Set();
     this._displayLimit = undefined;
   }
@@ -197,7 +197,7 @@ class ItemListCard extends LitElement {
    */
   disconnectedCallback() {
     super.disconnectedCallback();
-    this._debouncedUpdateFilterText?.cancel?.();
+    this._debouncedSetFilter?.cancel?.();
   }
 
   /**
@@ -415,8 +415,10 @@ class ItemListCard extends LitElement {
   _onFilterKeyButtonClick(filterKey) {
     if (!filterKey) return;
     const value = `todo:${String(filterKey)} `;
-    // Use the immediate update so the input_text value is set right away.
-    this._updateFilterTextActual(value);
+    const previous = this._filterValue;
+    this._filterValue = value;
+    this.requestUpdate();
+    this._setFilterService(previous, value);
   }
 
   /**
@@ -428,7 +430,7 @@ class ItemListCard extends LitElement {
    * @param {string} [value] The value to set the filter text to
    * @private
    */
-  async _updateFilterTextActual(value) {
+  async _setFilterService(previous, value) {
     const entityId = this.config?.filter_entity;
     if (!entityId || !this.hass) {
       return;
@@ -439,22 +441,15 @@ class ItemListCard extends LitElement {
     const valRaw = String(value ?? '');
     if (curRaw === valRaw) return;
 
-    // Save previous filter value for revert (use let for mutability if needed, but here it's just for scope)
-    let previousFilterValue = this._filterValue;
-
     try {
-      // Optimistic update for immediate UI feedback
-      this._filterValue = valRaw;
-      this.requestUpdate();
-
       await callService(this.hass, 'input_text', 'set_value',
         { entity_id: entityId, value: value ?? '' },
         this,
         'Fehler beim Aktualisieren des Suchfeldes');
     } catch (err) {
-      console.error("Error in _updateFilterTextActual:", err);
+      console.error("Error in _setFilterService:", err);
       // Revert on failure to previous value
-      this._filterValue = previousFilterValue;
+      this._filterValue = previous;
       this.requestUpdate();
     }
   }
@@ -475,7 +470,11 @@ class ItemListCard extends LitElement {
       const trimmed = String(current).trim();
       if (!trimmed) {
         // nothing to do
-        this._updateFilterTextActual('');
+        const previous = this._filterValue;
+        const value = '';
+        this._filterValue = value;
+        this.requestUpdate();
+        this._setFilterService(previous, value);
         return;
       }
   
@@ -491,7 +490,11 @@ class ItemListCard extends LitElement {
   
       // If the todo token is the only token present, clear it completely.
       if (tokens.length === 1) {
-        this._updateFilterTextActual('');
+        const previous = this._filterValue;
+        const value = '';
+        this._filterValue = value;
+        this.requestUpdate();
+        this._setFilterService(previous, value);
         return;
       }
 
@@ -501,10 +504,18 @@ class ItemListCard extends LitElement {
       // If the todo token is the only token, set it with a trailing space.
       // Also when preserving from multiple tokens we add a trailing space so the
       // user can continue typing after the key.
-      this._updateFilterTextActual(preserved + ' ');
+      const previous = this._filterValue;
+      const value = preserved + ' ';
+      this._filterValue = value;
+      this.requestUpdate();
+      this._setFilterService(previous, value);
     } catch (err) {
       console.error('Error while clearing filter:', err);
-      this._updateFilterTextActual('');
+      const prev = this._filterValue;
+      const val = '';
+      this._filterValue = val;
+      this.requestUpdate();
+      this._setFilterService(prev, val);
     }
   }
 
@@ -519,7 +530,13 @@ class ItemListCard extends LitElement {
    * @param {Event} e - The input event.
    */
   _handleFilterInputChange(e) {
-    this._debouncedUpdateFilterText(e.target.value);
+    const newValue = e.target.value;
+    if (newValue !== this._filterValue) {
+      const previous = this._filterValue;
+      this._filterValue = newValue;
+      this.requestUpdate();
+      this._debouncedSetFilter(previous, newValue);
+    }
   }
 
   _onInputKeydown = (e) => {
@@ -529,7 +546,11 @@ class ItemListCard extends LitElement {
       if (this.config.hide_add_button) return;
       if (val.length > 3) this._addFilterTextToShoppingList();
     } else if (e.key === 'Escape') {
-      this._updateFilterTextActual('');
+      const previous = this._filterValue;
+      const value = '';
+      this._filterValue = value;
+      this.requestUpdate();
+      this._setFilterService(previous, value);
     }
   }
 
@@ -557,7 +578,7 @@ class ItemListCard extends LitElement {
   }
 
   _addFilterTextToShoppingList = async () => {
-    const raw = this.hass.states[this.config.filter_entity]?.state || '';
+    const raw = this._filterValue || '';
     const value = this._normalizeTodoText(raw);
     if (!value) return;
 
@@ -966,27 +987,33 @@ _parseShowMoreButtons() {
         </div>
         
         ${Array.isArray(this.config.filter_key_buttons) && this.config.filter_key_buttons.length
-          ? html`<div class="key-buttons" role="toolbar" aria-label="Schnellfilter">
-              ${this.config.filter_key_buttons.map(btn => {
-                const label = btn.name || btn.filter_key || '';
-                const icon = btn.icon;
-                const fk = btn.filter_key || '';
-                const activeClass = this._isActiveButton(fk) ? 'active' : '';
-                const ariaPressed = this._isActiveButton(fk);
-                return html`
-                  <button
-                    class="key-btn ${activeClass}"
-                    ?aria-pressed=${ariaPressed}
-                    type="button"
-                    title=${label}
-                    aria-label=${label}
-                    @click=${() => this._onFilterKeyButtonClick(fk)}
-                  >
-                    ${icon ? html`<ha-icon .icon=${icon}></ha-icon>` : html`${label}`}
-                  </button>
-                `;
-              })}
-            </div>`
+          ? (() => {
+              const activeStates = this.config.filter_key_buttons.map(btn => ({
+                fk: btn.filter_key || '',
+                active: this._isActiveButton(btn.filter_key || '')
+              }));
+              return html`<div class="key-buttons" role="toolbar" aria-label="Schnellfilter">
+                ${this.config.filter_key_buttons.map((btn, index) => {
+                  const label = btn.name || btn.filter_key || '';
+                  const icon = btn.icon;
+                  const fk = btn.filter_key || '';
+                  const { active } = activeStates[index];
+                  const activeClass = active ? 'active' : '';
+                  return html`
+                    <button
+                      class="key-btn ${activeClass}"
+                      ?aria-pressed=${active}
+                      type="button"
+                      title=${label}
+                      aria-label=${label}
+                      @click=${() => this._onFilterKeyButtonClick(fk)}
+                    >
+                      ${icon ? html`<ha-icon .icon=${icon}></ha-icon>` : html`${label}`}
+                    </button>
+                  `;
+                })}
+              </div>`;
+            })()
           : ''}
 
 
