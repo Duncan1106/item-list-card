@@ -12,14 +12,17 @@ This guide covers setting up the development environment, building the project, 
 ## Setup
 
 1. **Clone the Repository**:
-   ```
+
+   ```bash
    git clone https://github.com/Duncan1106/item-list-card.git
    cd item-list-card
    ```
 
 2. **Install Dependencies**:
+
    Run the following command to install Node.js dependencies:
-   ```
+
+   ```bash
    npm install
    ```
 
@@ -33,23 +36,29 @@ This guide covers setting up the development environment, building the project, 
 The project uses [esbuild](https://esbuild.github.io/) for bundling and minification.
 
 - **Development Build** (unminified, with sourcemaps):
-  ```
+
+  ```bash
   npm run build:dev
   ```
+
   Outputs to `dist/item-list-card.js`.
 
 - **Production Build** (minified):
-  ```
+
+  ```bash
   npm run build
   ```
+
   Outputs to `dist/item-list-card.js`.
 
 - **Clean Dist Folder**:
-  ```
+
+  ```bash
   npm run clean
   ```
 
 After building, add the JS file as a resource in Home Assistant Lovelace:
+
 ```yaml
 url: /hacsfiles/item-list-card/dist/item-list-card.js  # If using HACS
 # or
@@ -95,8 +104,9 @@ The card is built with [Lit](https://lit.dev/) for lightweight web components, t
 
 1. **Fork the Repository**: Create a fork on GitHub.
 
-2. **Create a Branch**: 
-   ```
+2. **Create a Branch**:
+
+   ```bash
    git checkout -b feature/your-feature-name
    ```
 
@@ -110,9 +120,11 @@ The card is built with [Lit](https://lit.dev/) for lightweight web components, t
    - Follow conventional commits if possible (e.g., `feat: add new filter option`).
 
 5. **Push and Pull Request**:
-   ```
+
+   ```bash
    git push origin feature/your-feature-name
    ```
+
    - Open a PR against the main branch.
    - Describe the changes, reference issues if applicable.
    - Ensure CI passes (add if not present).
