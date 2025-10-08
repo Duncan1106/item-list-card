@@ -1,152 +1,9 @@
-import { LitElement, html, css } from 'lit';
-import {styles} from './styles.js';
-
-/**
-* Returns a debounced version of the given function `fn`.
-* The `fn` function will not be called until after `delay` milliseconds
-* have passed since the last time `debounced` was called.
-*
-* @param {function} fn - The function to debounce.
-* @param {number} [delay=200] - The delay between invocations of `fn`.
-* @returns {function} A new function that will debounce invocations of `fn`.
-* @property {function} cancel - Cancels the scheduled invocation of `fn`.
-*/
-const debounce = (fn, delay = 200) => {
-  let timer;
-  const debounced = function (...a) {          // regular fn so its own "this" works
-    clearTimeout(timer);
-    timer = setTimeout(() => fn.call(this, ...a), delay);
-  };
-  debounced.cancel = () => clearTimeout(timer);
-  return debounced;
-};
-
-/**
- * Dispatches a hass-notification event on the given element (if it exists),
- * creating a toast notification with the given message.
- *
- * @param {Element} el - Element to dispatch the event on.
- * @param {string} message - Message to show in the toast.
- */
-const showToast = (el, message) => {
-  if (!el) return;
-  el.dispatchEvent(new CustomEvent('hass-notification', {
-    detail: { message }, bubbles: true, composed: true,
-  }));
-};
-
-/**
- * Shows a confirmation dialog with the given text to the user, and returns true if they confirmed.
- * If the browser does not support window.confirm, it will return false.
- * @param {Element} _el - Element to dispatch the event on. (ignored)
- * @param {string} text - Text to show in the confirmation dialog.
- * @returns {Promise<boolean>} Whether the user confirmed.
- */
-const confirmDialog = async (_el,  text) =>
-  typeof window.confirm === 'function' ? window.confirm(text) : false;
-
-/**
- * Calls the given Home Assistant service with the given data, and shows a
- * toast notification on the given element if the call fails. If no element
- * is given, the error is only logged to the console.
- *
- * @param {HomeAssistant} hass - The Home Assistant instance to call the service on.
- * @param {string} domain - The domain of the service to call.
- * @param {string} service - The service to call.
- * @param {object} data - The data to pass to the service.
- * @param {Element} [toastEl] - Element to dispatch the error notification on. If not given, the error is only logged.
- * @param {string} [fallbackMsg='Fehler'] - The message to show in the toast if the call fails.
- * @throws The error that occurred during the service call if it fails.
- */
-const callService = async (hass, domain, service, data, toastEl, fallbackMsg = 'Fehler') => {
-  try {
-    await hass.callService(domain, service, data);
-  } catch (err) {
-    console.error(`Error calling ${domain}.${service}:`, err);
-    showToast(toastEl, fallbackMsg);
-    throw err;
-  }
-};
-
-/**
- * Splits the given text into an array of strings, where each string is either
- * a part of the original text that doesn't contain any search word, or a
- * `<span class="highlight">` element containing a matched search word.
- *
- * Implementation uses only string operations (no dynamic RegExp for matching; uses string ops and a whitespace split).
- * Matches words independently (case-insensitive) and prefers the longest match at any position to avoid overlaps.
- *
- * @param {string} text - The text to split.
- * @param {string} [term=''] - The search term (may contain multiple words, split on whitespace).
- * @returns {Array<string | TemplateResult>} Array of plain strings and html parts (via `html` template).
- */
-const highlightParts = (text, term) => {
-  const src = String(text ?? '');
-  const needle = String(term ?? '').trim();
-  if (!needle) return [src];
-
-  // Split on whitespace (static RegExp)
-  const tokens = needle.split(/\s+/).map(w => w.trim()).filter(Boolean);
-  if (!tokens.length) return [src];
-
-  // Lowercase once for matching; dedupe by lowercase.
-  // Note: For better Unicode/i18n support (e.g., Turkish), consider w.toLocaleLowerCase() if needed,
-  // but toLowerCase() is faster for ASCII and matches original intent.
-  const lowSrc = src.toLowerCase();
-  // Search set, longest-first
-  const sortedWords = Array.from(new Set(tokens.map(w => w.toLowerCase())))
-    .sort((a, b) => b.length - a.length);
-
-  // Helper: longest word length matching at exact index.
-  const getLongestAtIndex = (index) => {
-    for (const low of sortedWords) {
-      if (lowSrc.startsWith(low, index)) return low.length; // longest-first
-    }
-    return 0;
-  };
-
-  const parts = [];
-  let pos = 0;
-  const N = src.length;
-
-  while (pos < N) {
-    // Step 1: Find the earliest next match position across all words.
-    let minIndex = -1;
-    for (const low of sortedWords) {
-      const found = lowSrc.indexOf(low, pos);
-      if (found === -1) continue;
-      if (found === pos) {
-        minIndex = pos;
-        break; // Earliest possible—no need to check further.
-      }
-      if (minIndex === -1 || found < minIndex) {
-        minIndex = found;
-      }
-    }
-
-    if (minIndex === -1) {
-      // No more matches.
-      parts.push(src.slice(pos));
-      break;
-    }
-
-    // Step 2: At minIndex, select the longest word that starts there.
-    const matchLen = getLongestAtIndex(minIndex);
-
-    // Push non-matching text before (if any).
-    if (minIndex > pos) {
-      parts.push(src.slice(pos, minIndex));
-    }
-
-    // Highlight the matched text (preserves original casing).
-    const matchedText = src.slice(minIndex, minIndex + matchLen);
-    parts.push(html`<span class="highlight">${matchedText}</span>`);
-
-    pos = minIndex + matchLen;
-  }
-
-  return parts.length ? parts : [src];
-};
+import { LitElement, html } from 'lit';
+import { styles } from './styles.js';
+import { debounce, confirmDialog } from './utils.js';
+import { safeParseJSON, computeItemsFingerprint } from './dataUtils.js';
+import { setFilterService, updateOrCompleteItem, addFilterTextToShoppingList, addToShoppingList } from './hassServices.js';
+import { parseShowMoreButtons, renderItemRow } from './renderers.js';
 
 class ItemListCard extends LitElement {
   static properties = {
@@ -168,7 +25,15 @@ class ItemListCard extends LitElement {
     this._cachedSourceMap = {};
     this._filterValue = '';
     this._lastItemsHash = '';
-    this._debouncedSetFilter = debounce((prev, val) => this._setFilterService(prev, val), 250);
+    this._debouncedSetFilter = debounce(async (prev, val) => {
+      try {
+        await setFilterService(this.hass, this.config, val, this);
+      } catch (err) {
+        // Revert on failure
+        this._filterValue = prev;
+        this.requestUpdate();
+      }
+    }, 250);
     this._pendingUpdates = new Set();
     this._displayLimit = undefined;
   }
@@ -314,7 +179,7 @@ class ItemListCard extends LitElement {
     }
     // Prefer backend hash; if missing/empty, fall back to a local fingerprint so updates still flow.
     const fallbackHash = !itemsHash
-      ? this._computeItemsFingerprint(filterItemsEntity)
+      ? computeItemsFingerprint(filterItemsEntity)
       : null;
     const effectiveHash = fallbackHash ?? itemsHash;
     const changed = effectiveHash !== (this._lastItemsHash || '');
@@ -324,12 +189,12 @@ class ItemListCard extends LitElement {
       // still parse data for rendering
       const itemsAttr = filterItemsEntity?.attributes?.filtered_items;
       const nextItems = typeof itemsAttr === "string"
-        ? this._safeParseJSON(itemsAttr, [])
+        ? safeParseJSON(itemsAttr, [])
         : Array.isArray(itemsAttr) ? itemsAttr : [];
 
       const mapAttr = filterItemsEntity?.attributes?.source_map;
       const nextMap = typeof mapAttr === "string"
-        ? this._safeParseJSON(mapAttr, {})
+        ? safeParseJSON(mapAttr, {})
         : (mapAttr && typeof mapAttr === "object") ? mapAttr : {};
 
       this._cachedItems = nextFilter.trim()
@@ -349,49 +214,7 @@ class ItemListCard extends LitElement {
   }
 
 
-  /**
-   * Tries to parse the given string as JSON and returns the result. If the
-   * parsing fails, it returns the given fallback value instead.
-   * @param {string} s The string to parse
-   * @param {*} fallback The value to return if the parsing fails
-   * @returns {*} The parsed JSON or the fallback value
-   * @private
-   */
-  _safeParseJSON(s, fallback) {
-    try {
-      return JSON.parse(s);
-    } catch {
-      return fallback;
-    }
-  }
-
-  /**
-   * Computes a fingerprint (string) from the given entity that represents the
-   * current state of the items (filtered_items) and their source map.
-   * This fingerprint is used to detect changes in the items or source map.
-   * @param {Object} entity The entity to compute the fingerprint for.
-   * @returns {string|null} The computed fingerprint or null if the entity is null.
-   * @private
-   */
-  _computeItemsFingerprint(entity) {
-    if (!entity) return null;
-    const itemsAttr = entity.attributes?.filtered_items;
-    const itemsPart = typeof itemsAttr === 'string' ? itemsAttr : JSON.stringify(itemsAttr ?? []);
-    const mapAttr = entity.attributes?.source_map;
-    const mapPart = typeof mapAttr === 'string' ? mapAttr : JSON.stringify(mapAttr ?? {});
-    // Include the numeric state (total count) to catch count-only changes too.
-    return `${entity.state}|${itemsPart}|${mapPart}`;
-  }
-
-  /**
-   * Returns true if the given string consists only of digits.
-   * @param {string} str The string to check
-   * @returns {boolean} Whether the string consists only of digits
-   * @private
-   */
-  _isNumeric(str) {
-    return typeof str === 'string' && /^\d+$/.test(str);
-  }
+  // Data processing methods moved to dataUtils.js
 
   /**
    * Handles a click on one of the filter key buttons. The value in the
@@ -400,47 +223,21 @@ class ItemListCard extends LitElement {
    * @param {string} [filterKey] The key to filter by
    * @private
    */
-  _onFilterKeyButtonClick(filterKey) {
+  async _onFilterKeyButtonClick(filterKey) {
     if (!filterKey) return;
     const value = `todo:${String(filterKey)} `;
     const previous = this._filterValue;
     this._filterValue = value;
     this.requestUpdate();
-    this._setFilterService(previous, value);
-  }
-
-  /**
-   * Updates the value of the input_text entity specified in the config
-   * (filter_entity) to the given value. If the value is falsy, the
-   * filter text is cleared. If the value is the same as the current
-   * value, nothing is done. If there is an error, it is logged to the
-   * console.
-   * @param {string} [value] The value to set the filter text to
-   * @private
-   */
-  async _setFilterService(previous, value) {
-    const entityId = this.config?.filter_entity;
-    if (!entityId || !this.hass) {
-      return;
-    }
-    const current = this.hass.states?.[entityId]?.state ?? '';
-    // compare raw values so trailing spaces cause an update
-    const curRaw = String(current);
-    const valRaw = String(value ?? '');
-    if (curRaw === valRaw) return;
-
     try {
-      await callService(this.hass, 'input_text', 'set_value',
-        { entity_id: entityId, value: value ?? '' },
-        this,
-        'Fehler beim Aktualisieren des Suchfeldes');
+      await setFilterService(this.hass, this.config, value, this);
     } catch (err) {
-      console.error("Error in _setFilterService:", err);
-      // Revert on failure to previous value
+      // Revert on failure
       this._filterValue = previous;
       this.requestUpdate();
     }
   }
+
   
   /**
    * Clears the filter text completely if there is no token in the current filter text
@@ -451,7 +248,7 @@ class ItemListCard extends LitElement {
    * currently selected filter key.
    * @private
    */
-  _clearFilterPreservingTodoKey() {
+  async _clearFilterPreservingTodoKey() {
     try {
       const entityId = this.config?.filter_entity;
       const current = this.hass?.states?.[entityId]?.state ?? '';
@@ -462,37 +259,37 @@ class ItemListCard extends LitElement {
         const value = '';
         this._filterValue = value;
         this.requestUpdate();
-        this._setFilterService(previous, value);
+        await setFilterService(this.hass, this.config, previous, value, this);
         return;
       }
-  
+
       // find token like todo:somekey (no spaces inside)
       const tokens = trimmed.split(/\s+/).filter(Boolean);
       const todoTokenIndex = tokens.findIndex(t => /^todo:[^\s]+$/.test(t));
-  
+
       if (todoTokenIndex === -1) {
         // no todo:key => clear completely
         const previous = this._filterValue;
         const value = '';
         this._filterValue = value;
         this.requestUpdate();
-        this._setFilterService(previous, value);
+        await setFilterService(this.hass, this.config, value, this);
         return;
       }
-  
+
       // If the todo token is the only token present, clear it completely.
       if (tokens.length === 1) {
         const previous = this._filterValue;
         const value = '';
         this._filterValue = value;
         this.requestUpdate();
-        this._setFilterService(previous, value);
+        await setFilterService(this.hass, this.config, value, this);
         return;
       }
 
       // preserve only the todo:key token (keep original case)
       const preserved = tokens[todoTokenIndex];
-  
+
       // If the todo token is the only token, set it with a trailing space.
       // Also when preserving from multiple tokens we add a trailing space so the
       // user can continue typing after the key.
@@ -500,14 +297,18 @@ class ItemListCard extends LitElement {
       const value = preserved + ' ';
       this._filterValue = value;
       this.requestUpdate();
-      this._setFilterService(previous, value);
+      await setFilterService(this.hass, this.config, value, this);
     } catch (err) {
       console.error('Error while clearing filter:', err);
       const prev = this._filterValue;
       const val = '';
       this._filterValue = val;
       this.requestUpdate();
-      this._setFilterService(prev, val);
+      try {
+        await setFilterService(this.hass, this.config, val, this);
+      } catch (setErr) {
+        console.error('Error setting filter in catch:', setErr);
+      }
     }
   }
 
@@ -531,149 +332,38 @@ class ItemListCard extends LitElement {
     }
   }
 
-  _onInputKeydown = (e) => {
+  _onInputKeydown = async (e) => {
     if (e.key === 'Enter') {
       const val = (e.currentTarget?.value || '').trim();
       if (!val) return;
       if (this.config.hide_add_button) return;
-      if (val.length > 3) this._addFilterTextToShoppingList();
+      if (val.length > 3) await this._addFilterTextToShoppingList();
     } else if (e.key === 'Escape') {
       const previous = this._filterValue;
       const value = '';
       this._filterValue = value;
       this.requestUpdate();
-      this._setFilterService(previous, value);
+      try {
+        await setFilterService(this.hass, this.config, value, this);
+      } catch (err) {
+        // Revert on failure
+        this._filterValue = previous;
+        this.requestUpdate();
+      }
     }
   }
 
-  /**
-   * Normalize the given text by removing any leading "todo:" prefix and
-   * trimming the resulting string. If the text does not start with "todo:"
-   * or if it is empty, it is returned as-is.
-   * @param {string} raw - The text to normalize.
-   * @returns {string} The normalized text.
-   * @private
-   */
-  _normalizeTodoText(raw) {
-    let value = (raw || '').trim();
-    if (!value) return '';
-    if (value.startsWith('todo:')) {
-      const parts = value.split(' ');
-      if (parts.length > 1) {
-        parts.shift();
-        value = parts.join(' ');
-      } else {
-        return '';
-      }
-    }
-    return value;
-  }
 
   _addFilterTextToShoppingList = async () => {
-    const raw = this._filterValue || '';
-    const value = this._normalizeTodoText(raw);
-    if (!value) return;
-
-    const ok = await confirmDialog(this, `Möchtest du "${value}" zur Einkaufsliste hinzufügen?`);
-    if (!ok) return;
-    await callService(this.hass, 'todo', 'add_item',
-      { entity_id: this.config.shopping_list_entity, item: value, description: '' },
-      this,
-      'Konnte \''+value+'\' **nicht** zur Einkaufsliste hinzufügen'
-    );
+    await addFilterTextToShoppingList(this.hass, this.config, this._filterValue, this);
   }
   
-  /**
-   * Updates an item in the given todo list, identified by the given `uid`.
-   * The `updates` object contains the new values for the item, such as a new
-   * description or a new completed state.
-   * If the item is updated successfully, the cached item description is
-   * updated immediately to reflect the new state.
-   * If the update fails, the cached item description is reverted to its
-   * previous value.
-   * @param {string} uid - The unique id of the item to update.
-   * @param {Object} updates - The new values for the item.
-   * @param {number} source - The source of the item to update.
-   * @param {Object} sourceMap - A map of source numbers to the
-   * corresponding todo list entity ids.
-   * @returns {Promise<void>} A promise that resolves when the update is
-   * done, or rejects if the update fails.
-   * @private
-   */
-  async _updateOrCompleteItem(uid, updates, source, sourceMap) {
-    // const entityId = sourceMap?.[String(source)];
-    const entityId = sourceMap?.[String(source)]?.entity_id;
-    if (!entityId) {
-      console.error('No valid todo entity id for source:', source);
-      return;
-    }
-
-    const data = {
-      entity_id: entityId,
-      item: uid,
-      ...updates,
-    };
-
-    // Optional: coerce numeric description to string if your service requires it
-    let newDesc;
-    if (updates.description !== undefined) {
-      let desc = parseInt(updates.description, 10);
-      if (isNaN(desc) || desc < 0) desc = 0;
-      data.description = String(desc);
-      newDesc = String(desc);
-    }
-
-    // --- Optimistic UI update: update cached item description immediately ---
-    let previousDesc = null;
-    if (newDesc !== undefined && Array.isArray(this._cachedItems)) {
-      const idx = this._cachedItems.findIndex(it => String(it.u) === String(uid));
-      if (idx >= 0) {
-        // copy array and item to trigger reactive update
-        const newItems = this._cachedItems.slice();
-        previousDesc = newItems[idx].d;
-        // set optimistic value (keep numeric-ish as string to match how items store d)
-        newItems[idx] = { ...newItems[idx], d: newDesc };
-        this._cachedItems = newItems;
-      }
-    }
-
-    // mark pending so UI can disable controls for this UID (use reassignment
-    // so Lit reliably notices the change)
-    this._addPending(uid);
-    
-    try {
-      // Use shared callService wrapper (will show toast on failure)
-      await callService(
-        this.hass,
-        'todo',
-        'update_item',
-        data,
-        this,
-        'Fehler beim Aktualisieren des Eintrags'
-      );
-      // success => nothing else to do here
-      /* success */
-      this._removePending(uid);
-    } catch (err) {
-      console.error('todo/update_item:', err);
-      // revert
-      if (previousDesc !== null && Array.isArray(this._cachedItems)) {
-        const idx = this._cachedItems.findIndex(it => String(it.u) === String(uid));
-        if (idx >= 0) {
-          const newItems = this._cachedItems.slice();
-          newItems[idx] = { ...newItems[idx], d: previousDesc };
-          this._cachedItems = newItems;
-        }
-      }
-      this._removePending(uid);
-    }
-  }
 
   _confirmAndComplete = async (item, sourceMap) => {
-    const ok = await confirmDialog( this, `Möchtest du "${item.s}" wirklich als erledigt markieren?`);
+    const ok = await confirmDialog(this, `Möchtest du "${item.s}" wirklich als erledigt markieren?`);
     if (!ok) return;
     // Uses UID placed in 'item' field as required by your service
-    this._updateOrCompleteItem(item.u, { status: 'completed' }, item.c, sourceMap);
+    await updateOrCompleteItem(this.hass, item.u, { status: 'completed' }, item.c, sourceMap, this, this._addPending.bind(this), this._removePending.bind(this), this._cachedItems, (newItems) => { this._cachedItems = newItems; });
   };
 
   /**
@@ -681,113 +371,11 @@ class ItemListCard extends LitElement {
    * @param {Object} item The todo item to add
    * @private
    */
-  _addToShoppingList(item) {
-    const entityId = this.config.shopping_list_entity;
-    if (!entityId) {
-      console.error('No valid shopping list entity id configured');
-      return;
-    }
-    (async () => {
-      const ok = await confirmDialog(this, `Möchtest du "${item.s}" zur Einkaufsliste hinzufügen?`);
-      if (!ok) return;
-      await callService(this.hass, 'todo', 'add_item',
-        { entity_id: entityId, item: item.s, description: '' },
-        this,
-        'Einkaufsliste aktualisieren fehlgeschlagen'
-      );
-    })();
+  _addToShoppingList = async (item) => {
+    await addToShoppingList(this.hass, this.config, item, this);
   }
 
-  /**
-   * Renders the quantity controls for a given todo item, which can be an
-   * increment/decrement button pair if the item's description is a numeric
-   * string, or just a plain text display if it's not.
-   * @param {Object} item The todo item to render.
-   * @param {Object} sourceMap A map of source numbers to the corresponding
-   * todo list entity ids.
-   * @returns {TemplateResult} The rendered quantity controls.
-   * @private
-   */
-  _renderQuantityControls(item, sourceMap) {
-    let qStr = String(item.d ?? '');
-    if (qStr === '') qStr = '1';
 
-    // if not numeric, just show text
-    if (!this._isNumeric(qStr)) {
-      return html`<div class="quantity" title="Menge">${qStr}</div>`;
-    }
-    const quantity = parseInt(qStr, 10);
-    const pending = this._pendingUpdates.has(item.u);
-
-    const dec = () => {
-      if (pending) return;
-      this._updateOrCompleteItem(item.u, { description: Math.max(quantity - 1, 0) }, item.c, sourceMap);
-    };
-    const inc = () => {
-      if (pending) return;
-      this._updateOrCompleteItem(item.u, { description: quantity + 1 }, item.c, sourceMap);
-    };
-
-    return html`
-      ${quantity > 1
-        ? html`<button class="btn" type="button" title="Verringern" aria-label="Verringern"
-                      ?disabled=${pending}
-                      @click=${dec}><ha-icon icon="mdi:minus-circle-outline"></ha-icon></button>`
-        : ''}
-      <div class="quantity" title="Menge">
-        ${pending
-          ? html`<span class="loading-icon" aria-hidden="true"><ha-icon icon="mdi:loading"></ha-icon></span>`
-          : quantity}
-      </div>
-      <button class="btn" type="button" title="Erhöhen" aria-label="Erhöhen"
-              ?disabled=${pending}
-              @click=${inc}><ha-icon icon="mdi:plus-circle-outline"></ha-icon></button>
-    `;
-  }
-
-  /**
-   * Renders a single todo item row with quantity controls and a button to add
-   * the item to the shopping list. If the item is part of a list that has an
-   * origin (i.e. a sourceMap), it will also display the origin's friendly name
-   * as a sub-label below the item summary. If the item's description is a
-   * numeric string, it will be rendered as a quantity control. If the item's
-   * description is not numeric, it will be rendered as plain text.
-   * @param {Object} item The todo item to render.
-   * @param {Object} sourceMap A map of source numbers to the corresponding
-   * todo list entity ids.
-   * @returns {TemplateResult} The rendered item row.
-   * @private
-   */
-  _renderItemRow(item, sourceMap) {
-      const showOrigin = !!this.config?.show_origin;
-      const friendlyName = showOrigin 
-        ? sourceMap?.[String(item.c)]?.friendly_name 
-        : null;
-
-      const search = this._normalizeTodoText(this._filterValue);
-      const showHighlight = Boolean(search && this.config.highlight_matches);
-      const contentParts = showHighlight
-        ? highlightParts(item.s, search)
-        : [String(item.s ?? '')];
-    
-      return html`
-        <div class="item-row" role="listitem">
-          <div class="item-summary" title=${item.s}>
-            ${contentParts}
-            ${friendlyName ? html`<div class="item-sublabel">${friendlyName}</div>` : ''}
-          </div>
-          <div class="item-controls">
-            ${this._renderQuantityControls(item, sourceMap)}
-            <button class="btn" type="button" title="Zur Einkaufsliste" aria-label="Zur Einkaufsliste" @click=${() => this._addToShoppingList(item)}>
-              <ha-icon icon="mdi:cart-outline"></ha-icon>
-            </button>
-            <button class="btn" type="button" title="Erledigt" aria-label="Erledigt" @click=${() => this._confirmAndComplete(item, this._cachedSourceMap)}>
-              <ha-icon icon="mdi:delete-outline"></ha-icon>
-            </button>
-          </div>
-        </div>
-      `;
-    }
 
 
   /**
@@ -846,26 +434,6 @@ class ItemListCard extends LitElement {
     this._cachedItems = items.slice(0, this._displayLimit);
   }
 
-/**
- * Parse the comma separated config string this.config.show_more_buttons
- * into an array of positive integers (deduplicated and sorted ascending).
- * Returns [] when none available.
- * @returns {number[]}
- * @private
- */
-_parseShowMoreButtons() {
-  const raw = String(this.config?.show_more_buttons ?? '').trim();
-  if (!raw) return [];
-  const parts = raw.split(',').map((s) => s.trim()).filter(Boolean);
-  const nums = parts
-    .map((p) => {
-      const n = Number(p);
-      return Number.isFinite(n) && n > 0 ? Math.floor(n) : null;
-    })
-    .filter((n) => n !== null);
-  // dedupe and sort
-  return Array.from(new Set(nums)).sort((a, b) => a - b);
-}
 
   /**
    * Renders the card content.
@@ -888,7 +456,7 @@ _parseShowMoreButtons() {
     if (!this._lastItemsHash) {
       const attr = itemsEntity.attributes.filtered_items;
       const items = typeof attr === 'string'
-        ? this._safeParseJSON(attr, [])
+        ? safeParseJSON(attr, [])
         : Array.isArray(attr) ? attr : [];
       // remember the full list for "show more" handling
       this._fullItemsList = items;
@@ -903,7 +471,7 @@ _parseShowMoreButtons() {
     
       const mapAttr = itemsEntity.attributes.source_map;
       this._cachedSourceMap = typeof mapAttr === 'string'
-        ? this._safeParseJSON(mapAttr, {})
+        ? safeParseJSON(mapAttr, {})
         : (mapAttr && typeof mapAttr === 'object') ? mapAttr : {};
     
       // initialize last-seen hash from the external hash entity (if present)
@@ -913,7 +481,7 @@ _parseShowMoreButtons() {
       if (!extHash || low === 'unknown' || low === 'unavailable') extHash = '';
       let localFp = '';
       if (!extHash) {
-        localFp = this._computeItemsFingerprint(itemsEntity) || '';
+        localFp = computeItemsFingerprint(itemsEntity) || '';
       }
       this._lastItemsHash = extHash || localFp;
     }
@@ -921,7 +489,7 @@ _parseShowMoreButtons() {
     // Always ensure we have the full list cached (useful when not first render)
     {
       const attr = itemsEntity.attributes.filtered_items;
-      const items = typeof attr === 'string' ? this._safeParseJSON(attr, []) : Array.isArray(attr) ? attr : [];
+      const items = typeof attr === 'string' ? safeParseJSON(attr, []) : Array.isArray(attr) ? attr : [];
       this._fullItemsList = items;
       // if filter active, ensure cachedItems follows displayLimit
       if (filterValue.trim()) {
@@ -1008,12 +576,12 @@ _parseShowMoreButtons() {
 
         ${displayedCount === 0
           ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
-          : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => this._renderItemRow(item, this._cachedSourceMap))}</div>`}
+          : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => renderItemRow(item, this._cachedSourceMap, this.config, this._filterValue, this._pendingUpdates, updateOrCompleteItem, addToShoppingList, this._confirmAndComplete.bind(this), this.hass, this, this._addPending.bind(this), this._removePending.bind(this), this._cachedItems, (newItems) => { this._cachedItems = newItems; }))}</div>`}
 
         ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0)
           ? (() => {
               const remaining = Math.max(0, this._fullItemsList.length - displayedItems.length);
-              const configured = this._parseShowMoreButtons();
+              const configured = parseShowMoreButtons(this.config);
               return html`
                 <div class="key-buttons" role="group" aria-label="Mehr anzeigen Optionen">
                   ${configured.length
