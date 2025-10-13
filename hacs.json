@@ -2,6 +2,5 @@
   "name": "Item List Card",
   "content_in_root": false,
   "render_readme": true,
-  "domains": ["frontend"],
   "zip_release": false,
 }
