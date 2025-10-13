@@ -4,7 +4,6 @@
   "render_readme": true,
   "domains": ["frontend"],
   "zip_release": false,
-  "author": "Duncan",
+  "author": "Duncan1106",
   "documentation": "https://github.com/Duncan1106/item-list-card",
-  "keywords": ["lovelace", "card", "todo", "items", "filtered", "interactive"]
 }
