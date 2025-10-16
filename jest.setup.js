@@ -7,6 +7,9 @@ global.CustomEvent = class CustomEvent extends Event {
   constructor(type, options = {}) {
     super(type, options);
     this.detail = options.detail;
+    this.bubbles = options.bubbles ?? false;
+    this.cancelable = options.cancelable ?? false;
+    this.composed = options.composed ?? false;
   }
 };
 
@@ -14,7 +17,11 @@ global.CustomEvent = class CustomEvent extends Event {
 global.html = (strings, ...values) => ({
   strings,
   values,
-  toString: () => strings.join(''),
+  toString: () => {
+    return strings.reduce((result, str, i) => {
+      return result + str + (values[i] ?? '');
+    }, '');
+  },
 });
 
 // Mock HA icons
