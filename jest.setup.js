@@ -1,5 +1,5 @@
 // Jest setup for testing Lit components and ES modules
-import 'jest-environment-jsdom';
+// import 'jest-environment-jsdom'; // Dropped as it has no side effects and causes CommonJS issues
 
 // Mock Home Assistant globals if needed
 global.window.confirm = jest.fn();

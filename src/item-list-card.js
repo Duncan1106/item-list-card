@@ -5,6 +5,7 @@ import {
   safeParseJSON,
   computeItemsFingerprint,
   parseShowMoreButtons,
+  normalizeTodoText,
   updateOrCompleteItem,
   confirmAndComplete,
   addToShoppingList,
@@ -445,7 +446,7 @@ class ItemListCard extends LitElement {
 
         ${displayedCount === 0
            ? html`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`
-           : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => renderItemRow(item, this._cachedSourceMap, this._pendingUpdates, this._updateOrCompleteItemBound, this._addToShoppingListBound, this._confirmAndCompleteBound, this.config?.show_origin, this._normalizeTodoText(this._filterValue), this.config.highlight_matches, highlightParts))}</div>`}
+           : html`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => renderItemRow(item, this._cachedSourceMap, this._pendingUpdates, this._updateOrCompleteItemBound, this._addToShoppingListBound, this._confirmAndCompleteBound, this.config?.show_origin, normalizeTodoText(this._filterValue), this.config.highlight_matches, highlightParts))}</div>`}
 
         ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0)
           ? (() => {

@@ -30,11 +30,11 @@ export const renderQuantityControls = (item, sourceMap, pendingUpdates, updateOr
 
   const dec = () => {
     if (pending) return;
-    updateOrCompleteItem(item.u, { description: Math.max(quantity - 1, 0) }, item.c, sourceMap);
+    updateOrCompleteItem(item.u, { description: String(Math.max(quantity - 1, 0)) }, item.c, sourceMap);
   };
   const inc = () => {
     if (pending) return;
-    updateOrCompleteItem(item.u, { description: quantity + 1 }, item.c, sourceMap);
+    updateOrCompleteItem(item.u, { description: String(quantity + 1) }, item.c, sourceMap);
   };
 
   return html`
