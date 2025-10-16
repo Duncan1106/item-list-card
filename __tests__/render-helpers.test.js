@@ -37,6 +37,8 @@ describe('render-helpers', () => {
       expect(htmlString).toContain('mdi:minus-circle-outline');
       expect(htmlString).toContain('5');
       expect(htmlString).toContain('mdi:plus-circle-outline');
+      // Sanitize HTML for security
+      expect(htmlString).not.toMatch(/<script/i);
     });
 
     it('should disable buttons when item is pending', () => {
@@ -51,6 +53,8 @@ describe('render-helpers', () => {
 
       const htmlString = result.strings.join('');
       expect(htmlString).toContain('disabled');
+      // Sanitize HTML for security
+      expect(htmlString).not.toMatch(/<script/i);
     });
 
     it('should not show decrement button for quantity 1', () => {
@@ -60,6 +64,8 @@ describe('render-helpers', () => {
       const htmlString = result.strings.join('');
       expect(htmlString).not.toContain('mdi:minus-circle-outline');
       expect(htmlString).toContain('mdi:plus-circle-outline');
+      // Sanitize HTML for security
+      expect(htmlString).not.toMatch(/<script/i);
     });
   });
 
@@ -98,6 +104,8 @@ describe('render-helpers', () => {
       expect(htmlString).toContain('item-summary');
       expect(htmlString).toContain('item-controls');
       expect(htmlString).toContain('Test List'); // friendly name
+      // Sanitize HTML for security
+      expect(htmlString).not.toMatch(/<script/i);
     });
 
     it('should not show origin when disabled', () => {
@@ -117,6 +125,8 @@ describe('render-helpers', () => {
 
       const htmlString = result.strings.join('');
       expect(htmlString).not.toContain('Test List');
+      // Sanitize HTML for security
+      expect(htmlString).not.toMatch(/<script/i);
     });
 
     it('should call highlight function when highlighting is enabled', () => {

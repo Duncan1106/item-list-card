@@ -204,7 +204,7 @@ export const confirmAndComplete = async (item, sourceMap, hass, toastEl, cachedI
  * @param {Element} toastEl - Element to dispatch error notifications on.
  */
 export const addToShoppingList = async (item, shoppingListEntity, hass, toastEl) => {
-  const entityId = shoppingListEntity;
+  const entityId = String(shoppingListEntity);
   if (!entityId) {
     console.error('No valid shopping list entity id configured');
     return;
@@ -212,7 +212,7 @@ export const addToShoppingList = async (item, shoppingListEntity, hass, toastEl)
   const ok = await confirmDialog(toastEl, `Möchtest du "${item.s}" zur Einkaufsliste hinzufügen?`);
   if (!ok) return;
   await callService(hass, 'todo', 'add_item',
-    { entity_id: entityId, item: item.s, description: '' },
+    { entity_id: entityId, item: String(item.s), description: '' },
     toastEl,
     'Einkaufsliste aktualisieren fehlgeschlagen'
   );
@@ -244,7 +244,7 @@ export const setFilterService = async (entityId, hass, previous, value, toastEl,
 
   try {
     await callService(hass, 'input_text', 'set_value',
-      { entity_id: entityId, value: value ?? '' },
+      { entity_id: String(entityId), value: String(value ?? '') },
       toastEl,
       'Fehler beim Aktualisieren des Suchfeldes');
   } catch (err) {
@@ -270,7 +270,7 @@ export const setFilterService = async (entityId, hass, previous, value, toastEl,
  */
 export const clearFilterPreservingTodoKey = async (filterEntity, hass, setFilterValue, requestUpdate, setFilterService) => {
   try {
-    const entityId = filterEntity;
+    const entityId = String(filterEntity);
     const current = hass?.states?.[entityId]?.state ?? '';
     const trimmed = String(current).trim();
     if (!trimmed) {
@@ -345,7 +345,7 @@ export const onFilterKeyButtonClick = async (filterKey, filterEntity, hass, setF
   const previous = setFilterValue();
   setFilterValue(value);
   requestUpdate();
-  await setFilterService(filterEntity, hass, previous, value, null, setFilterValue, requestUpdate);
+  await setFilterService(String(filterEntity), hass, previous, value, null, setFilterValue, requestUpdate);
 };
 
 /**
@@ -389,7 +389,7 @@ export const onInputKeydown = async (e, filterValue, setFilterValue, requestUpda
     const value = '';
     setFilterValue(value);
     requestUpdate();
-    await setFilterService(null, null, previous, value, null, setFilterValue, requestUpdate);
+    await setFilterService(String(null), null, previous, value, null, setFilterValue, requestUpdate);
   }
 };
 
@@ -408,7 +408,7 @@ export const addFilterTextToShoppingList = async (filterValue, shoppingListEntit
   const ok = await confirmDialog(toastEl, `Möchtest du "${value}" zur Einkaufsliste hinzufügen?`);
   if (!ok) return;
   await callService(hass, 'todo', 'add_item',
-    { entity_id: shoppingListEntity, item: value, description: '' },
+    { entity_id: String(shoppingListEntity), item: String(value), description: '' },
     toastEl,
     'Konnte \''+value+'\' **nicht** zur Einkaufsliste hinzufügen'
   );

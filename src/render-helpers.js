@@ -17,6 +17,7 @@ import { isNumeric } from './data-handlers.js';
  * @returns {TemplateResult} The rendered quantity controls.
  */
 export const renderQuantityControls = (item, sourceMap, pendingUpdates, updateOrCompleteItem) => {
+  // Function returns HTML content as expected
   let qStr = String(item.d ?? '');
   if (qStr === '') qStr = '1';
 
@@ -74,6 +75,7 @@ export const renderQuantityControls = (item, sourceMap, pendingUpdates, updateOr
  * @returns {TemplateResult} The rendered item row.
  */
 export const renderItemRow = (item, sourceMap, pendingUpdates, updateOrCompleteItem, addToShoppingList, confirmAndComplete, showOrigin, search, highlightMatches, highlightParts) => {
+  // Function returns HTML content as expected
   const friendlyName = showOrigin
     ? sourceMap?.[String(item.c)]?.friendly_name
     : null;

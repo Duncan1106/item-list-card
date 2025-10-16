@@ -1,3 +1,5 @@
+import { html } from 'lit';
+
 /**
  * Shared utility functions for the item-list-card component
  */
