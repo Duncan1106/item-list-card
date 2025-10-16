@@ -143,7 +143,8 @@ export const updateOrCompleteItem = async (uid, updates, source, sourceMap, hass
       // set optimistic value (keep numeric-ish as string to match how items store d)
       newItems[idx] = { ...newItems[idx], d: newDesc };
       // Update the cachedItems reference
-      cachedItems.splice(0, cachedItems.length, ...newItems);
+      cachedItems.length = 0;
+      cachedItems.push(...newItems);
     }
   }
 
@@ -172,7 +173,8 @@ export const updateOrCompleteItem = async (uid, updates, source, sourceMap, hass
       if (idx >= 0) {
         const newItems = cachedItems.slice();
         newItems[idx] = { ...newItems[idx], d: previousDesc };
-        cachedItems.splice(0, cachedItems.length, ...newItems);
+        cachedItems.length = 0;
+        cachedItems.push(...newItems);
       }
     }
     removePending(uid);

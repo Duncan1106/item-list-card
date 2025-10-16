@@ -1,3 +1,4 @@
+import { html } from 'lit';
 import { renderQuantityControls, renderItemRow } from '../src/render-helpers.js';
 import { isNumeric } from '../src/data-handlers.js';
 
@@ -77,7 +78,7 @@ describe('render-helpers', () => {
     const mockUpdateFn = jest.fn();
     const mockAddFn = jest.fn();
     const mockCompleteFn = jest.fn();
-    const mockHighlightFn = jest.fn().mockReturnValue(['test ', { strings: ['<span>'], values: ['item'] }]);
+    const mockHighlightFn = jest.fn().mockReturnValue(['test ', html`<span>item</span>`]);
 
     it('should render item row with all controls', () => {
       const item = { u: '1', s: 'test item', d: '1', c: 1 };
