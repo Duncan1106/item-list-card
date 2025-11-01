@@ -709,7 +709,7 @@ class ItemListCard extends LitElement {
    * @private
    */
   _renderQuantityControls(item, sourceMap) {
-    let qStr = String(item.d ?? '');
+    let qStr = String(item.d.trim() ?? '');
     if (qStr === '') qStr = '1';
 
     // if not numeric, just show text
