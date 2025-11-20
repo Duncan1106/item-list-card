@@ -227,7 +227,7 @@ class ItemListCard extends LitElement {
    *     - `filter_key`: The key to send to the filter input when the button is clicked
    *     - `icon`: The icon to display in the button (optional)
    */
-   setConfig(config) {
+  setConfig(config) {
     if (!config) throw new Error("Missing config");
     
     const required = ['filter_items_entity', 'shopping_list_entity', 'filter_entity', 'hash_entity'];
