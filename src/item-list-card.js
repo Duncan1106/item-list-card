@@ -227,13 +227,17 @@ class ItemListCard extends LitElement {
    *     - `filter_key`: The key to send to the filter input when the button is clicked
    *     - `icon`: The icon to display in the button (optional)
    */
-  setConfig(config) {
+    setConfig(config) {
     if (!config) throw new Error("Missing config");
+    
     const required = ['filter_items_entity', 'shopping_list_entity', 'filter_entity', 'hash_entity'];
     const missing = required.filter(k => !config[k]);
+    
     if (missing.length) {
       throw new Error(`Missing required config: ${missing.join(', ')}`);
     }
+
+    // 1. Add disable_debounce to the defaults here
     this.config = {
       title: 'ToDo List',
       show_origin: false,
@@ -243,8 +247,23 @@ class ItemListCard extends LitElement {
       max_items_with_filter: 50,
       show_more_buttons: '',
       filter_key_buttons: [],
+      disable_debounce: false, // Default to false (standard behavior)
       ...config,
     };
+
+    // 2. Logic to switch between Debounced and Instant mode
+    if (this.config.disable_debounce) {
+      // INSTANT MODE: Assign the function directly
+      this._debouncedSetFilter = (prev, val) => this._setFilterService(prev, val);
+      
+      // Add dummy cancel() to prevent crashes in disconnectedCallback
+      this._debouncedSetFilter.cancel = () => {}; 
+      
+    } else {
+      // DEBOUNCE MODE: Restore the 250ms delay
+      // We re-initialize this here to support toggling via the Lovelace editor
+      this._debouncedSetFilter = debounce((prev, val) => this._setFilterService(prev, val), 250);
+    }
   }
 
   /**
