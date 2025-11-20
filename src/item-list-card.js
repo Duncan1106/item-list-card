@@ -250,7 +250,8 @@ class ItemListCard extends LitElement {
       disable_debounce: false, // Default to false (standard behavior)
       ...config,
     };
-
+    // Cancel any existing debounce timer before switching modes
+    this._debouncedSetFilter?.cancel?.();
     // 2. Logic to switch between Debounced and Instant mode
     if (this.config.disable_debounce) {
       // INSTANT MODE: Assign the function directly
