@@ -83,6 +83,7 @@ show_more_buttons: 10,15,20,25
 show_origin: true
 hide_add_button: false
 highlight_matches: true
+disable_debounce: false
 filter_key_buttons:
   - name: Kellervorräte
     icon: mdi:warehouse
