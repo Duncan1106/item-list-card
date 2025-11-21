@@ -118,6 +118,7 @@ filter_key_buttons:
 - `show_origin` (bool, optional, default: false): Display item source (e.g., list name).
 - `hide_add_button` (bool, optional, default: false): Hide the "Add to Shopping" button.
 - `highlight_matches` (bool, optional, default: true): Highlight search matches in item names.
+- disable_debounce (bool, optional, default: false): Disable Debounce on text input for faster responsiveness but worse performance.
 - `filter_key_buttons` (array of objects, optional): Quick filter buttons with `name`, `icon` (mdi icon), `filter_key`.
 
 ## Backend Setup (Required)
