@@ -673,7 +673,8 @@ class ItemListCard extends LitElement {
         'Fehler beim Aktualisieren des Eintrags'
       );
       // Press update button only if amount got changed
-      if (updates.description !== undefined && this.config.update_button_entity) {
+      if (this.config.update_button_entity) {
+        console.error('Update button pressed');
         await callService(
           this.hass,
           'input_button',
