@@ -1,3 +1,6 @@
+[![CodeQL](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/github-code-scanning/codeql) [![Release](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/build-on-release.yml) [![Codacy Badge](https://app.codacy.com/project/badge/Grade/a09631f0e93848548ca63f154ba5c545)](https://app.codacy.com/gh/Duncan1106/item-list-card/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![GitHub release](https://img.shields.io/github/release/Duncan1106/item-list-card?include_prereleases=&sort=semver&color=blue)](https://github.com/Duncan1106/item-list-card/releases/) ![CodeFactor Grade](https://img.shields.io/codefactor/grade/github/Duncan1106/item-list-card) ![GitHub language count](https://img.shields.io/github/languages/count/Duncan1106/item-list-card) [![Validate HACS](https://github.com/Duncan1106/item-list-card/actions/workflows/validate_hacs.yml/badge.svg)](https://github.com/Duncan1106/item-list-card/actions/workflows/validate_hacs.yml)
+
+
 # Item List Card for Home Assistant
 
 A custom Lovelace card that displays filtered and aggregated items from multiple `todo.*` lists. It provides an interactive, UI-first experience for managing shopping lists, inventory, or tasks in Home Assistant.
@@ -80,6 +83,7 @@ show_more_buttons: 10,15,20,25
 show_origin: true
 hide_add_button: false
 highlight_matches: true
+disable_debounce: false
 filter_key_buttons:
   - name: Kellervorräte
     icon: mdi:warehouse
@@ -114,6 +118,7 @@ filter_key_buttons:
 - `show_origin` (bool, optional, default: false): Display item source (e.g., list name).
 - `hide_add_button` (bool, optional, default: false): Hide the "Add to Shopping" button.
 - `highlight_matches` (bool, optional, default: true): Highlight search matches in item names.
+- `disable_debounce` (bool, optional, default: false): Disable Debounce on text input for faster responsiveness but worse performance.
 - `filter_key_buttons` (array of objects, optional): Quick filter buttons with `name`, `icon` (mdi icon), `filter_key`.
 
 ## Backend Setup (Required)
