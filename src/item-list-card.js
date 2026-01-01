@@ -651,6 +651,17 @@ class ItemListCard extends LitElement {
         this,
         'Fehler beim Aktualisieren des Eintrags'
       );
+      // Press update button only if amount got changed
+      if (updates.description !== undefined) {
+        await callService(
+          this.hass,
+          'input_button',
+          'press',
+          { entity_id: 'input_button.update_kellervorrate' },
+          this,
+          'Fehler beim Aktualisieren des Eintrags'
+        );
+      }
       // success => nothing else to do here
       /* success */
       this._removePending(uid);
