@@ -68,7 +68,7 @@ jobs:
           # Ensure we’re on the main branch and up-to-date
           git fetch origin main
           git checkout main
-          git reset --hard origin/main
+          # git reset --hard origin/main
 
           echo "Pushing built file commit to origin/main"
           git push origin main
