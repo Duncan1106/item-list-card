@@ -53,16 +53,14 @@ jobs:
 
           if [ ! -f dist/item-list-card.js ]; then
             echo "dist/item-list-card.js not found; skipping commit."
-            exit 0
           fi
 
           # force add ignored dist file
           git add -f dist/item-list-card.js
 
           # only continue if there are staged changes
-          if git diff --cached --quiet; then
+          if git diff --quiet; then
             echo "No changes to dist/item-list-card.js; skipping commit."
-            exit 0
           fi
 
           git commit -m "chore: add dist/item-list-card.js [skip ci]"
