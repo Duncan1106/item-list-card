@@ -248,6 +248,7 @@ class ItemListCard extends LitElement {
       show_more_buttons: '',
       filter_key_buttons: [],
       disable_debounce: false, // Default to false (standard behavior)
+      update_button_entity: null,
       ...config,
     };
     // Cancel any existing debounce timer before switching modes
@@ -672,12 +673,12 @@ class ItemListCard extends LitElement {
         'Fehler beim Aktualisieren des Eintrags'
       );
       // Press update button only if amount got changed
-      if (updates.description !== undefined) {
+      if (updates.description !== undefined && this.config.update_button_entity) {
         await callService(
           this.hass,
           'input_button',
           'press',
-          { entity_id: 'input_button.update_kellervorrate' },
+          { entity_id: this.config.update_button_entity },
           this,
           'Fehler beim Aktualisieren des Backend-Sensors'
         );
@@ -693,7 +694,6 @@ class ItemListCard extends LitElement {
           this._cachedItems = newItems;
         }
       }
-      this._removePending(uid);
     } finally {
       // Always remove pending state after both operations complete or fail
       this._removePending(uid);
