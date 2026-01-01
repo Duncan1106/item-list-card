@@ -679,12 +679,9 @@ class ItemListCard extends LitElement {
           'press',
           { entity_id: 'input_button.update_kellervorrate' },
           this,
-          'Fehler beim Aktualisieren des Eintrags'
+          'Fehler beim Aktualisieren des Backend-Sensors'
         );
       }
-      // success => nothing else to do here
-      /* success */
-      this._removePending(uid);
     } catch (err) {
       console.error('todo/update_item:', err);
       // revert
@@ -696,6 +693,9 @@ class ItemListCard extends LitElement {
           this._cachedItems = newItems;
         }
       }
+      this._removePending(uid);
+    } finally {
+      // Always remove pending state after both operations complete or fail
       this._removePending(uid);
     }
   }
