@@ -1,6 +1,571 @@
-var Tt=Object.defineProperty;var Lt=(o,e,t)=>e in o?Tt(o,e,{enumerable:!0,configurable:!0,writable:!0,value:t}):o[e]=t;var S=(o,e,t)=>(Lt(o,typeof e!="symbol"?e+"":e,t),t);var F=window,R=F.ShadowRoot&&(F.ShadyCSS===void 0||F.ShadyCSS.nativeShadow)&&"adoptedStyleSheets"in Document.prototype&&"replace"in CSSStyleSheet.prototype,V=Symbol(),ht=new WeakMap,T=class{constructor(e,t,i){if(this._$cssResult$=!0,i!==V)throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");this.cssText=e,this.t=t}get styleSheet(){let e=this.o,t=this.t;if(R&&e===void 0){let i=t!==void 0&&t.length===1;i&&(e=ht.get(t)),e===void 0&&((this.o=e=new CSSStyleSheet).replaceSync(this.cssText),i&&ht.set(t,e))}return e}toString(){return this.cssText}},ct=o=>new T(typeof o=="string"?o:o+"",void 0,V),q=(o,...e)=>{let t=o.length===1?o[0]:e.reduce((i,s,n)=>i+(r=>{if(r._$cssResult$===!0)return r.cssText;if(typeof r=="number")return r;throw Error("Value passed to 'css' function must be a 'css' function result: "+r+". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.")})(s)+o[n+1],o[0]);return new T(t,o,V)},W=(o,e)=>{R?o.adoptedStyleSheets=e.map(t=>t instanceof CSSStyleSheet?t:t.styleSheet):e.forEach(t=>{let i=document.createElement("style"),s=F.litNonce;s!==void 0&&i.setAttribute("nonce",s),i.textContent=t.cssText,o.appendChild(i)})},z=R?o=>o:o=>o instanceof CSSStyleSheet?(e=>{let t="";for(let i of e.cssRules)t+=i.cssText;return ct(t)})(o):o;var J,j=window,dt=j.trustedTypes,Mt=dt?dt.emptyScript:"",ut=j.reactiveElementPolyfillSupport,X={toAttribute(o,e){switch(e){case Boolean:o=o?Mt:null;break;case Object:case Array:o=o==null?o:JSON.stringify(o)}return o},fromAttribute(o,e){let t=o;switch(e){case Boolean:t=o!==null;break;case Number:t=o===null?null:Number(o);break;case Object:case Array:try{t=JSON.parse(o)}catch{t=null}}return t}},pt=(o,e)=>e!==o&&(e==e||o==o),K={attribute:!0,type:String,converter:X,reflect:!1,hasChanged:pt},Y="finalized",g=class extends HTMLElement{constructor(){super(),this._$Ei=new Map,this.isUpdatePending=!1,this.hasUpdated=!1,this._$El=null,this._$Eu()}static addInitializer(e){var t;this.finalize(),((t=this.h)!==null&&t!==void 0?t:this.h=[]).push(e)}static get observedAttributes(){this.finalize();let e=[];return this.elementProperties.forEach((t,i)=>{let s=this._$Ep(i,t);s!==void 0&&(this._$Ev.set(s,i),e.push(s))}),e}static createProperty(e,t=K){if(t.state&&(t.attribute=!1),this.finalize(),this.elementProperties.set(e,t),!t.noAccessor&&!this.prototype.hasOwnProperty(e)){let i=typeof e=="symbol"?Symbol():"__"+e,s=this.getPropertyDescriptor(e,i,t);s!==void 0&&Object.defineProperty(this.prototype,e,s)}}static getPropertyDescriptor(e,t,i){return{get(){return this[t]},set(s){let n=this[e];this[t]=s,this.requestUpdate(e,n,i)},configurable:!0,enumerable:!0}}static getPropertyOptions(e){return this.elementProperties.get(e)||K}static finalize(){if(this.hasOwnProperty(Y))return!1;this[Y]=!0;let e=Object.getPrototypeOf(this);if(e.finalize(),e.h!==void 0&&(this.h=[...e.h]),this.elementProperties=new Map(e.elementProperties),this._$Ev=new Map,this.hasOwnProperty("properties")){let t=this.properties,i=[...Object.getOwnPropertyNames(t),...Object.getOwnPropertySymbols(t)];for(let s of i)this.createProperty(s,t[s])}return this.elementStyles=this.finalizeStyles(this.styles),!0}static finalizeStyles(e){let t=[];if(Array.isArray(e)){let i=new Set(e.flat(1/0).reverse());for(let s of i)t.unshift(z(s))}else e!==void 0&&t.push(z(e));return t}static _$Ep(e,t){let i=t.attribute;return i===!1?void 0:typeof i=="string"?i:typeof e=="string"?e.toLowerCase():void 0}_$Eu(){var e;this._$E_=new Promise(t=>this.enableUpdating=t),this._$AL=new Map,this._$Eg(),this.requestUpdate(),(e=this.constructor.h)===null||e===void 0||e.forEach(t=>t(this))}addController(e){var t,i;((t=this._$ES)!==null&&t!==void 0?t:this._$ES=[]).push(e),this.renderRoot!==void 0&&this.isConnected&&((i=e.hostConnected)===null||i===void 0||i.call(e))}removeController(e){var t;(t=this._$ES)===null||t===void 0||t.splice(this._$ES.indexOf(e)>>>0,1)}_$Eg(){this.constructor.elementProperties.forEach((e,t)=>{this.hasOwnProperty(t)&&(this._$Ei.set(t,this[t]),delete this[t])})}createRenderRoot(){var e;let t=(e=this.shadowRoot)!==null&&e!==void 0?e:this.attachShadow(this.constructor.shadowRootOptions);return W(t,this.constructor.elementStyles),t}connectedCallback(){var e;this.renderRoot===void 0&&(this.renderRoot=this.createRenderRoot()),this.enableUpdating(!0),(e=this._$ES)===null||e===void 0||e.forEach(t=>{var i;return(i=t.hostConnected)===null||i===void 0?void 0:i.call(t)})}enableUpdating(e){}disconnectedCallback(){var e;(e=this._$ES)===null||e===void 0||e.forEach(t=>{var i;return(i=t.hostDisconnected)===null||i===void 0?void 0:i.call(t)})}attributeChangedCallback(e,t,i){this._$AK(e,i)}_$EO(e,t,i=K){var s;let n=this.constructor._$Ep(e,i);if(n!==void 0&&i.reflect===!0){let r=(((s=i.converter)===null||s===void 0?void 0:s.toAttribute)!==void 0?i.converter:X).toAttribute(t,i.type);this._$El=e,r==null?this.removeAttribute(n):this.setAttribute(n,r),this._$El=null}}_$AK(e,t){var i;let s=this.constructor,n=s._$Ev.get(e);if(n!==void 0&&this._$El!==n){let r=s.getPropertyOptions(n),d=typeof r.converter=="function"?{fromAttribute:r.converter}:((i=r.converter)===null||i===void 0?void 0:i.fromAttribute)!==void 0?r.converter:X;this._$El=n,this[n]=d.fromAttribute(t,r.type),this._$El=null}}requestUpdate(e,t,i){let s=!0;e!==void 0&&(((i=i||this.constructor.getPropertyOptions(e)).hasChanged||pt)(this[e],t)?(this._$AL.has(e)||this._$AL.set(e,t),i.reflect===!0&&this._$El!==e&&(this._$EC===void 0&&(this._$EC=new Map),this._$EC.set(e,i))):s=!1),!this.isUpdatePending&&s&&(this._$E_=this._$Ej())}async _$Ej(){this.isUpdatePending=!0;try{await this._$E_}catch(t){Promise.reject(t)}let e=this.scheduleUpdate();return e!=null&&await e,!this.isUpdatePending}scheduleUpdate(){return this.performUpdate()}performUpdate(){var e;if(!this.isUpdatePending)return;this.hasUpdated,this._$Ei&&(this._$Ei.forEach((s,n)=>this[n]=s),this._$Ei=void 0);let t=!1,i=this._$AL;try{t=this.shouldUpdate(i),t?(this.willUpdate(i),(e=this._$ES)===null||e===void 0||e.forEach(s=>{var n;return(n=s.hostUpdate)===null||n===void 0?void 0:n.call(s)}),this.update(i)):this._$Ek()}catch(s){throw t=!1,this._$Ek(),s}t&&this._$AE(i)}willUpdate(e){}_$AE(e){var t;(t=this._$ES)===null||t===void 0||t.forEach(i=>{var s;return(s=i.hostUpdated)===null||s===void 0?void 0:s.call(i)}),this.hasUpdated||(this.hasUpdated=!0,this.firstUpdated(e)),this.updated(e)}_$Ek(){this._$AL=new Map,this.isUpdatePending=!1}get updateComplete(){return this.getUpdateComplete()}getUpdateComplete(){return this._$E_}shouldUpdate(e){return!0}update(e){this._$EC!==void 0&&(this._$EC.forEach((t,i)=>this._$EO(i,this[i],t)),this._$EC=void 0),this._$Ek()}updated(e){}firstUpdated(e){}};g[Y]=!0,g.elementProperties=new Map,g.elementStyles=[],g.shadowRootOptions={mode:"open"},ut?.({ReactiveElement:g}),((J=j.reactiveElementVersions)!==null&&J!==void 0?J:j.reactiveElementVersions=[]).push("1.6.3");var Z,D=window,E=D.trustedTypes,ft=E?E.createPolicy("lit-html",{createHTML:o=>o}):void 0,G="$lit$",v=`lit$${(Math.random()+"").slice(9)}$`,$t="?"+v,Pt=`<${$t}>`,A=document,M=()=>A.createComment(""),P=o=>o===null||typeof o!="object"&&typeof o!="function",xt=Array.isArray,Ht=o=>xt(o)||typeof o?.[Symbol.iterator]=="function",Q=`[ 	
-\f\r]`,L=/<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g,mt=/-->/g,_t=/>/g,$=RegExp(`>|${Q}(?:([^\\s"'>=/]+)(${Q}*=${Q}*(?:[^ 	
-\f\r"'\`<>=]|("|')|))|$)`,"g"),gt=/'/g,yt=/"/g,At=/^(?:script|style|textarea|title)$/i,wt=o=>(e,...t)=>({_$litType$:o,strings:e,values:t}),p=wt(1),Wt=wt(2),w=Symbol.for("lit-noChange"),m=Symbol.for("lit-nothing"),vt=new WeakMap,x=A.createTreeWalker(A,129,null,!1);function St(o,e){if(!Array.isArray(o)||!o.hasOwnProperty("raw"))throw Error("invalid template strings array");return ft!==void 0?ft.createHTML(e):e}var Nt=(o,e)=>{let t=o.length-1,i=[],s,n=e===2?"<svg>":"",r=L;for(let d=0;d<t;d++){let h=o[d],l,c,a=-1,u=0;for(;u<h.length&&(r.lastIndex=u,c=r.exec(h),c!==null);)u=r.lastIndex,r===L?c[1]==="!--"?r=mt:c[1]!==void 0?r=_t:c[2]!==void 0?(At.test(c[2])&&(s=RegExp("</"+c[2],"g")),r=$):c[3]!==void 0&&(r=$):r===$?c[0]===">"?(r=s??L,a=-1):c[1]===void 0?a=-2:(a=r.lastIndex-c[2].length,l=c[1],r=c[3]===void 0?$:c[3]==='"'?yt:gt):r===yt||r===gt?r=$:r===mt||r===_t?r=L:(r=$,s=void 0);let f=r===$&&o[d+1].startsWith("/>")?" ":"";n+=r===L?h+Pt:a>=0?(i.push(l),h.slice(0,a)+G+h.slice(a)+v+f):h+v+(a===-2?(i.push(void 0),d):f)}return[St(o,n+(o[t]||"<?>")+(e===2?"</svg>":"")),i]},H=class o{constructor({strings:e,_$litType$:t},i){let s;this.parts=[];let n=0,r=0,d=e.length-1,h=this.parts,[l,c]=Nt(e,t);if(this.el=o.createElement(l,i),x.currentNode=this.el.content,t===2){let a=this.el.content,u=a.firstChild;u.remove(),a.append(...u.childNodes)}for(;(s=x.nextNode())!==null&&h.length<d;){if(s.nodeType===1){if(s.hasAttributes()){let a=[];for(let u of s.getAttributeNames())if(u.endsWith(G)||u.startsWith(v)){let f=c[r++];if(a.push(u),f!==void 0){let y=s.getAttribute(f.toLowerCase()+G).split(v),_=/([.?@])?(.*)/.exec(f);h.push({type:1,index:n,name:_[2],strings:y,ctor:_[1]==="."?et:_[1]==="?"?it:_[1]==="@"?st:C})}else h.push({type:6,index:n})}for(let u of a)s.removeAttribute(u)}if(At.test(s.tagName)){let a=s.textContent.split(v),u=a.length-1;if(u>0){s.textContent=E?E.emptyScript:"";for(let f=0;f<u;f++)s.append(a[f],M()),x.nextNode(),h.push({type:2,index:++n});s.append(a[u],M())}}}else if(s.nodeType===8)if(s.data===$t)h.push({type:2,index:n});else{let a=-1;for(;(a=s.data.indexOf(v,a+1))!==-1;)h.push({type:7,index:n}),a+=v.length-1}n++}}static createElement(e,t){let i=A.createElement("template");return i.innerHTML=e,i}};function k(o,e,t=o,i){var s,n,r,d;if(e===w)return e;let h=i!==void 0?(s=t._$Co)===null||s===void 0?void 0:s[i]:t._$Cl,l=P(e)?void 0:e._$litDirective$;return h?.constructor!==l&&((n=h?._$AO)===null||n===void 0||n.call(h,!1),l===void 0?h=void 0:(h=new l(o),h._$AT(o,t,i)),i!==void 0?((r=(d=t)._$Co)!==null&&r!==void 0?r:d._$Co=[])[i]=h:t._$Cl=h),h!==void 0&&(e=k(o,h._$AS(o,e.values),h,i)),e}var tt=class{constructor(e,t){this._$AV=[],this._$AN=void 0,this._$AD=e,this._$AM=t}get parentNode(){return this._$AM.parentNode}get _$AU(){return this._$AM._$AU}u(e){var t;let{el:{content:i},parts:s}=this._$AD,n=((t=e?.creationScope)!==null&&t!==void 0?t:A).importNode(i,!0);x.currentNode=n;let r=x.nextNode(),d=0,h=0,l=s[0];for(;l!==void 0;){if(d===l.index){let c;l.type===2?c=new N(r,r.nextSibling,this,e):l.type===1?c=new l.ctor(r,l.name,l.strings,this,e):l.type===6&&(c=new nt(r,this,e)),this._$AV.push(c),l=s[++h]}d!==l?.index&&(r=x.nextNode(),d++)}return x.currentNode=A,n}v(e){let t=0;for(let i of this._$AV)i!==void 0&&(i.strings!==void 0?(i._$AI(e,i,t),t+=i.strings.length-2):i._$AI(e[t])),t++}},N=class o{constructor(e,t,i,s){var n;this.type=2,this._$AH=m,this._$AN=void 0,this._$AA=e,this._$AB=t,this._$AM=i,this.options=s,this._$Cp=(n=s?.isConnected)===null||n===void 0||n}get _$AU(){var e,t;return(t=(e=this._$AM)===null||e===void 0?void 0:e._$AU)!==null&&t!==void 0?t:this._$Cp}get parentNode(){let e=this._$AA.parentNode,t=this._$AM;return t!==void 0&&e?.nodeType===11&&(e=t.parentNode),e}get startNode(){return this._$AA}get endNode(){return this._$AB}_$AI(e,t=this){e=k(this,e,t),P(e)?e===m||e==null||e===""?(this._$AH!==m&&this._$AR(),this._$AH=m):e!==this._$AH&&e!==w&&this._(e):e._$litType$!==void 0?this.g(e):e.nodeType!==void 0?this.$(e):Ht(e)?this.T(e):this._(e)}k(e){return this._$AA.parentNode.insertBefore(e,this._$AB)}$(e){this._$AH!==e&&(this._$AR(),this._$AH=this.k(e))}_(e){this._$AH!==m&&P(this._$AH)?this._$AA.nextSibling.data=e:this.$(A.createTextNode(e)),this._$AH=e}g(e){var t;let{values:i,_$litType$:s}=e,n=typeof s=="number"?this._$AC(e):(s.el===void 0&&(s.el=H.createElement(St(s.h,s.h[0]),this.options)),s);if(((t=this._$AH)===null||t===void 0?void 0:t._$AD)===n)this._$AH.v(i);else{let r=new tt(n,this),d=r.u(this.options);r.v(i),this.$(d),this._$AH=r}}_$AC(e){let t=vt.get(e.strings);return t===void 0&&vt.set(e.strings,t=new H(e)),t}T(e){xt(this._$AH)||(this._$AH=[],this._$AR());let t=this._$AH,i,s=0;for(let n of e)s===t.length?t.push(i=new o(this.k(M()),this.k(M()),this,this.options)):i=t[s],i._$AI(n),s++;s<t.length&&(this._$AR(i&&i._$AB.nextSibling,s),t.length=s)}_$AR(e=this._$AA.nextSibling,t){var i;for((i=this._$AP)===null||i===void 0||i.call(this,!1,!0,t);e&&e!==this._$AB;){let s=e.nextSibling;e.remove(),e=s}}setConnected(e){var t;this._$AM===void 0&&(this._$Cp=e,(t=this._$AP)===null||t===void 0||t.call(this,e))}},C=class{constructor(e,t,i,s,n){this.type=1,this._$AH=m,this._$AN=void 0,this.element=e,this.name=t,this._$AM=s,this.options=n,i.length>2||i[0]!==""||i[1]!==""?(this._$AH=Array(i.length-1).fill(new String),this.strings=i):this._$AH=m}get tagName(){return this.element.tagName}get _$AU(){return this._$AM._$AU}_$AI(e,t=this,i,s){let n=this.strings,r=!1;if(n===void 0)e=k(this,e,t,0),r=!P(e)||e!==this._$AH&&e!==w,r&&(this._$AH=e);else{let d=e,h,l;for(e=n[0],h=0;h<n.length-1;h++)l=k(this,d[i+h],t,h),l===w&&(l=this._$AH[h]),r||(r=!P(l)||l!==this._$AH[h]),l===m?e=m:e!==m&&(e+=(l??"")+n[h+1]),this._$AH[h]=l}r&&!s&&this.j(e)}j(e){e===m?this.element.removeAttribute(this.name):this.element.setAttribute(this.name,e??"")}},et=class extends C{constructor(){super(...arguments),this.type=3}j(e){this.element[this.name]=e===m?void 0:e}},Ut=E?E.emptyScript:"",it=class extends C{constructor(){super(...arguments),this.type=4}j(e){e&&e!==m?this.element.setAttribute(this.name,Ut):this.element.removeAttribute(this.name)}},st=class extends C{constructor(e,t,i,s,n){super(e,t,i,s,n),this.type=5}_$AI(e,t=this){var i;if((e=(i=k(this,e,t,0))!==null&&i!==void 0?i:m)===w)return;let s=this._$AH,n=e===m&&s!==m||e.capture!==s.capture||e.once!==s.once||e.passive!==s.passive,r=e!==m&&(s===m||n);n&&this.element.removeEventListener(this.name,this,s),r&&this.element.addEventListener(this.name,this,e),this._$AH=e}handleEvent(e){var t,i;typeof this._$AH=="function"?this._$AH.call((i=(t=this.options)===null||t===void 0?void 0:t.host)!==null&&i!==void 0?i:this.element,e):this._$AH.handleEvent(e)}},nt=class{constructor(e,t,i){this.element=e,this.type=6,this._$AN=void 0,this._$AM=t,this.options=i}get _$AU(){return this._$AM._$AU}_$AI(e){k(this,e)}};var bt=D.litHtmlPolyfillSupport;bt?.(H,N),((Z=D.litHtmlVersions)!==null&&Z!==void 0?Z:D.litHtmlVersions=[]).push("2.8.0");var Et=(o,e,t)=>{var i,s;let n=(i=t?.renderBefore)!==null&&i!==void 0?i:e,r=n._$litPart$;if(r===void 0){let d=(s=t?.renderBefore)!==null&&s!==void 0?s:null;n._$litPart$=r=new N(e.insertBefore(M(),d),d,void 0,t??{})}return r._$AI(o),r};var rt,ot;var b=class extends g{constructor(){super(...arguments),this.renderOptions={host:this},this._$Do=void 0}createRenderRoot(){var e,t;let i=super.createRenderRoot();return(e=(t=this.renderOptions).renderBefore)!==null&&e!==void 0||(t.renderBefore=i.firstChild),i}update(e){let t=this.render();this.hasUpdated||(this.renderOptions.isConnected=this.isConnected),super.update(e),this._$Do=Et(t,this.renderRoot,this.renderOptions)}connectedCallback(){var e;super.connectedCallback(),(e=this._$Do)===null||e===void 0||e.setConnected(!0)}disconnectedCallback(){var e;super.disconnectedCallback(),(e=this._$Do)===null||e===void 0||e.setConnected(!1)}render(){return w}};b.finalized=!0,b._$litElement$=!0,(rt=globalThis.litElementHydrateSupport)===null||rt===void 0||rt.call(globalThis,{LitElement:b});var kt=globalThis.litElementPolyfillSupport;kt?.({LitElement:b});((ot=globalThis.litElementVersions)!==null&&ot!==void 0?ot:globalThis.litElementVersions=[]).push("3.3.3");var Ct=q`
+var __defProp = Object.defineProperty;
+var __defNormalProp = (obj, key, value) => key in obj ? __defProp(obj, key, { enumerable: true, configurable: true, writable: true, value }) : obj[key] = value;
+var __publicField = (obj, key, value) => __defNormalProp(obj, typeof key !== "symbol" ? key + "" : key, value);
+
+// node_modules/@lit/reactive-element/css-tag.js
+var t = window;
+var e = t.ShadowRoot && (void 0 === t.ShadyCSS || t.ShadyCSS.nativeShadow) && "adoptedStyleSheets" in Document.prototype && "replace" in CSSStyleSheet.prototype;
+var s = Symbol();
+var n = /* @__PURE__ */ new WeakMap();
+var o = class {
+  constructor(t3, e4, n5) {
+    if (this._$cssResult$ = true, n5 !== s) throw Error("CSSResult is not constructable. Use `unsafeCSS` or `css` instead.");
+    this.cssText = t3, this.t = e4;
+  }
+  get styleSheet() {
+    let t3 = this.o;
+    const s5 = this.t;
+    if (e && void 0 === t3) {
+      const e4 = void 0 !== s5 && 1 === s5.length;
+      e4 && (t3 = n.get(s5)), void 0 === t3 && ((this.o = t3 = new CSSStyleSheet()).replaceSync(this.cssText), e4 && n.set(s5, t3));
+    }
+    return t3;
+  }
+  toString() {
+    return this.cssText;
+  }
+};
+var r = (t3) => new o("string" == typeof t3 ? t3 : t3 + "", void 0, s);
+var i = (t3, ...e4) => {
+  const n5 = 1 === t3.length ? t3[0] : e4.reduce(((e5, s5, n6) => e5 + ((t4) => {
+    if (true === t4._$cssResult$) return t4.cssText;
+    if ("number" == typeof t4) return t4;
+    throw Error("Value passed to 'css' function must be a 'css' function result: " + t4 + ". Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.");
+  })(s5) + t3[n6 + 1]), t3[0]);
+  return new o(n5, t3, s);
+};
+var S = (s5, n5) => {
+  e ? s5.adoptedStyleSheets = n5.map(((t3) => t3 instanceof CSSStyleSheet ? t3 : t3.styleSheet)) : n5.forEach(((e4) => {
+    const n6 = document.createElement("style"), o5 = t.litNonce;
+    void 0 !== o5 && n6.setAttribute("nonce", o5), n6.textContent = e4.cssText, s5.appendChild(n6);
+  }));
+};
+var c = e ? (t3) => t3 : (t3) => t3 instanceof CSSStyleSheet ? ((t4) => {
+  let e4 = "";
+  for (const s5 of t4.cssRules) e4 += s5.cssText;
+  return r(e4);
+})(t3) : t3;
+
+// node_modules/@lit/reactive-element/reactive-element.js
+var s2;
+var e2 = window;
+var r2 = e2.trustedTypes;
+var h = r2 ? r2.emptyScript : "";
+var o2 = e2.reactiveElementPolyfillSupport;
+var n2 = { toAttribute(t3, i3) {
+  switch (i3) {
+    case Boolean:
+      t3 = t3 ? h : null;
+      break;
+    case Object:
+    case Array:
+      t3 = null == t3 ? t3 : JSON.stringify(t3);
+  }
+  return t3;
+}, fromAttribute(t3, i3) {
+  let s5 = t3;
+  switch (i3) {
+    case Boolean:
+      s5 = null !== t3;
+      break;
+    case Number:
+      s5 = null === t3 ? null : Number(t3);
+      break;
+    case Object:
+    case Array:
+      try {
+        s5 = JSON.parse(t3);
+      } catch (t4) {
+        s5 = null;
+      }
+  }
+  return s5;
+} };
+var a = (t3, i3) => i3 !== t3 && (i3 == i3 || t3 == t3);
+var l = { attribute: true, type: String, converter: n2, reflect: false, hasChanged: a };
+var d = "finalized";
+var u = class extends HTMLElement {
+  constructor() {
+    super(), this._$Ei = /* @__PURE__ */ new Map(), this.isUpdatePending = false, this.hasUpdated = false, this._$El = null, this._$Eu();
+  }
+  static addInitializer(t3) {
+    var i3;
+    this.finalize(), (null !== (i3 = this.h) && void 0 !== i3 ? i3 : this.h = []).push(t3);
+  }
+  static get observedAttributes() {
+    this.finalize();
+    const t3 = [];
+    return this.elementProperties.forEach(((i3, s5) => {
+      const e4 = this._$Ep(s5, i3);
+      void 0 !== e4 && (this._$Ev.set(e4, s5), t3.push(e4));
+    })), t3;
+  }
+  static createProperty(t3, i3 = l) {
+    if (i3.state && (i3.attribute = false), this.finalize(), this.elementProperties.set(t3, i3), !i3.noAccessor && !this.prototype.hasOwnProperty(t3)) {
+      const s5 = "symbol" == typeof t3 ? Symbol() : "__" + t3, e4 = this.getPropertyDescriptor(t3, s5, i3);
+      void 0 !== e4 && Object.defineProperty(this.prototype, t3, e4);
+    }
+  }
+  static getPropertyDescriptor(t3, i3, s5) {
+    return { get() {
+      return this[i3];
+    }, set(e4) {
+      const r4 = this[t3];
+      this[i3] = e4, this.requestUpdate(t3, r4, s5);
+    }, configurable: true, enumerable: true };
+  }
+  static getPropertyOptions(t3) {
+    return this.elementProperties.get(t3) || l;
+  }
+  static finalize() {
+    if (this.hasOwnProperty(d)) return false;
+    this[d] = true;
+    const t3 = Object.getPrototypeOf(this);
+    if (t3.finalize(), void 0 !== t3.h && (this.h = [...t3.h]), this.elementProperties = new Map(t3.elementProperties), this._$Ev = /* @__PURE__ */ new Map(), this.hasOwnProperty("properties")) {
+      const t4 = this.properties, i3 = [...Object.getOwnPropertyNames(t4), ...Object.getOwnPropertySymbols(t4)];
+      for (const s5 of i3) this.createProperty(s5, t4[s5]);
+    }
+    return this.elementStyles = this.finalizeStyles(this.styles), true;
+  }
+  static finalizeStyles(i3) {
+    const s5 = [];
+    if (Array.isArray(i3)) {
+      const e4 = new Set(i3.flat(1 / 0).reverse());
+      for (const i4 of e4) s5.unshift(c(i4));
+    } else void 0 !== i3 && s5.push(c(i3));
+    return s5;
+  }
+  static _$Ep(t3, i3) {
+    const s5 = i3.attribute;
+    return false === s5 ? void 0 : "string" == typeof s5 ? s5 : "string" == typeof t3 ? t3.toLowerCase() : void 0;
+  }
+  _$Eu() {
+    var t3;
+    this._$E_ = new Promise(((t4) => this.enableUpdating = t4)), this._$AL = /* @__PURE__ */ new Map(), this._$Eg(), this.requestUpdate(), null === (t3 = this.constructor.h) || void 0 === t3 || t3.forEach(((t4) => t4(this)));
+  }
+  addController(t3) {
+    var i3, s5;
+    (null !== (i3 = this._$ES) && void 0 !== i3 ? i3 : this._$ES = []).push(t3), void 0 !== this.renderRoot && this.isConnected && (null === (s5 = t3.hostConnected) || void 0 === s5 || s5.call(t3));
+  }
+  removeController(t3) {
+    var i3;
+    null === (i3 = this._$ES) || void 0 === i3 || i3.splice(this._$ES.indexOf(t3) >>> 0, 1);
+  }
+  _$Eg() {
+    this.constructor.elementProperties.forEach(((t3, i3) => {
+      this.hasOwnProperty(i3) && (this._$Ei.set(i3, this[i3]), delete this[i3]);
+    }));
+  }
+  createRenderRoot() {
+    var t3;
+    const s5 = null !== (t3 = this.shadowRoot) && void 0 !== t3 ? t3 : this.attachShadow(this.constructor.shadowRootOptions);
+    return S(s5, this.constructor.elementStyles), s5;
+  }
+  connectedCallback() {
+    var t3;
+    void 0 === this.renderRoot && (this.renderRoot = this.createRenderRoot()), this.enableUpdating(true), null === (t3 = this._$ES) || void 0 === t3 || t3.forEach(((t4) => {
+      var i3;
+      return null === (i3 = t4.hostConnected) || void 0 === i3 ? void 0 : i3.call(t4);
+    }));
+  }
+  enableUpdating(t3) {
+  }
+  disconnectedCallback() {
+    var t3;
+    null === (t3 = this._$ES) || void 0 === t3 || t3.forEach(((t4) => {
+      var i3;
+      return null === (i3 = t4.hostDisconnected) || void 0 === i3 ? void 0 : i3.call(t4);
+    }));
+  }
+  attributeChangedCallback(t3, i3, s5) {
+    this._$AK(t3, s5);
+  }
+  _$EO(t3, i3, s5 = l) {
+    var e4;
+    const r4 = this.constructor._$Ep(t3, s5);
+    if (void 0 !== r4 && true === s5.reflect) {
+      const h3 = (void 0 !== (null === (e4 = s5.converter) || void 0 === e4 ? void 0 : e4.toAttribute) ? s5.converter : n2).toAttribute(i3, s5.type);
+      this._$El = t3, null == h3 ? this.removeAttribute(r4) : this.setAttribute(r4, h3), this._$El = null;
+    }
+  }
+  _$AK(t3, i3) {
+    var s5;
+    const e4 = this.constructor, r4 = e4._$Ev.get(t3);
+    if (void 0 !== r4 && this._$El !== r4) {
+      const t4 = e4.getPropertyOptions(r4), h3 = "function" == typeof t4.converter ? { fromAttribute: t4.converter } : void 0 !== (null === (s5 = t4.converter) || void 0 === s5 ? void 0 : s5.fromAttribute) ? t4.converter : n2;
+      this._$El = r4, this[r4] = h3.fromAttribute(i3, t4.type), this._$El = null;
+    }
+  }
+  requestUpdate(t3, i3, s5) {
+    let e4 = true;
+    void 0 !== t3 && (((s5 = s5 || this.constructor.getPropertyOptions(t3)).hasChanged || a)(this[t3], i3) ? (this._$AL.has(t3) || this._$AL.set(t3, i3), true === s5.reflect && this._$El !== t3 && (void 0 === this._$EC && (this._$EC = /* @__PURE__ */ new Map()), this._$EC.set(t3, s5))) : e4 = false), !this.isUpdatePending && e4 && (this._$E_ = this._$Ej());
+  }
+  async _$Ej() {
+    this.isUpdatePending = true;
+    try {
+      await this._$E_;
+    } catch (t4) {
+      Promise.reject(t4);
+    }
+    const t3 = this.scheduleUpdate();
+    return null != t3 && await t3, !this.isUpdatePending;
+  }
+  scheduleUpdate() {
+    return this.performUpdate();
+  }
+  performUpdate() {
+    var t3;
+    if (!this.isUpdatePending) return;
+    this.hasUpdated, this._$Ei && (this._$Ei.forEach(((t4, i4) => this[i4] = t4)), this._$Ei = void 0);
+    let i3 = false;
+    const s5 = this._$AL;
+    try {
+      i3 = this.shouldUpdate(s5), i3 ? (this.willUpdate(s5), null === (t3 = this._$ES) || void 0 === t3 || t3.forEach(((t4) => {
+        var i4;
+        return null === (i4 = t4.hostUpdate) || void 0 === i4 ? void 0 : i4.call(t4);
+      })), this.update(s5)) : this._$Ek();
+    } catch (t4) {
+      throw i3 = false, this._$Ek(), t4;
+    }
+    i3 && this._$AE(s5);
+  }
+  willUpdate(t3) {
+  }
+  _$AE(t3) {
+    var i3;
+    null === (i3 = this._$ES) || void 0 === i3 || i3.forEach(((t4) => {
+      var i4;
+      return null === (i4 = t4.hostUpdated) || void 0 === i4 ? void 0 : i4.call(t4);
+    })), this.hasUpdated || (this.hasUpdated = true, this.firstUpdated(t3)), this.updated(t3);
+  }
+  _$Ek() {
+    this._$AL = /* @__PURE__ */ new Map(), this.isUpdatePending = false;
+  }
+  get updateComplete() {
+    return this.getUpdateComplete();
+  }
+  getUpdateComplete() {
+    return this._$E_;
+  }
+  shouldUpdate(t3) {
+    return true;
+  }
+  update(t3) {
+    void 0 !== this._$EC && (this._$EC.forEach(((t4, i3) => this._$EO(i3, this[i3], t4))), this._$EC = void 0), this._$Ek();
+  }
+  updated(t3) {
+  }
+  firstUpdated(t3) {
+  }
+};
+u[d] = true, u.elementProperties = /* @__PURE__ */ new Map(), u.elementStyles = [], u.shadowRootOptions = { mode: "open" }, null == o2 || o2({ ReactiveElement: u }), (null !== (s2 = e2.reactiveElementVersions) && void 0 !== s2 ? s2 : e2.reactiveElementVersions = []).push("1.6.3");
+
+// node_modules/lit-html/lit-html.js
+var t2;
+var i2 = window;
+var s3 = i2.trustedTypes;
+var e3 = s3 ? s3.createPolicy("lit-html", { createHTML: (t3) => t3 }) : void 0;
+var o3 = "$lit$";
+var n3 = `lit$${(Math.random() + "").slice(9)}$`;
+var l2 = "?" + n3;
+var h2 = `<${l2}>`;
+var r3 = document;
+var u2 = () => r3.createComment("");
+var d2 = (t3) => null === t3 || "object" != typeof t3 && "function" != typeof t3;
+var c2 = Array.isArray;
+var v = (t3) => c2(t3) || "function" == typeof (null == t3 ? void 0 : t3[Symbol.iterator]);
+var a2 = "[ 	\n\f\r]";
+var f = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g;
+var _ = /-->/g;
+var m = />/g;
+var p = RegExp(`>|${a2}(?:([^\\s"'>=/]+)(${a2}*=${a2}*(?:[^ 	
+\f\r"'\`<>=]|("|')|))|$)`, "g");
+var g = /'/g;
+var $ = /"/g;
+var y = /^(?:script|style|textarea|title)$/i;
+var w = (t3) => (i3, ...s5) => ({ _$litType$: t3, strings: i3, values: s5 });
+var x = w(1);
+var b = w(2);
+var T = Symbol.for("lit-noChange");
+var A = Symbol.for("lit-nothing");
+var E = /* @__PURE__ */ new WeakMap();
+var C = r3.createTreeWalker(r3, 129, null, false);
+function P(t3, i3) {
+  if (!Array.isArray(t3) || !t3.hasOwnProperty("raw")) throw Error("invalid template strings array");
+  return void 0 !== e3 ? e3.createHTML(i3) : i3;
+}
+var V = (t3, i3) => {
+  const s5 = t3.length - 1, e4 = [];
+  let l4, r4 = 2 === i3 ? "<svg>" : "", u3 = f;
+  for (let i4 = 0; i4 < s5; i4++) {
+    const s6 = t3[i4];
+    let d3, c3, v2 = -1, a3 = 0;
+    for (; a3 < s6.length && (u3.lastIndex = a3, c3 = u3.exec(s6), null !== c3); ) a3 = u3.lastIndex, u3 === f ? "!--" === c3[1] ? u3 = _ : void 0 !== c3[1] ? u3 = m : void 0 !== c3[2] ? (y.test(c3[2]) && (l4 = RegExp("</" + c3[2], "g")), u3 = p) : void 0 !== c3[3] && (u3 = p) : u3 === p ? ">" === c3[0] ? (u3 = null != l4 ? l4 : f, v2 = -1) : void 0 === c3[1] ? v2 = -2 : (v2 = u3.lastIndex - c3[2].length, d3 = c3[1], u3 = void 0 === c3[3] ? p : '"' === c3[3] ? $ : g) : u3 === $ || u3 === g ? u3 = p : u3 === _ || u3 === m ? u3 = f : (u3 = p, l4 = void 0);
+    const w2 = u3 === p && t3[i4 + 1].startsWith("/>") ? " " : "";
+    r4 += u3 === f ? s6 + h2 : v2 >= 0 ? (e4.push(d3), s6.slice(0, v2) + o3 + s6.slice(v2) + n3 + w2) : s6 + n3 + (-2 === v2 ? (e4.push(void 0), i4) : w2);
+  }
+  return [P(t3, r4 + (t3[s5] || "<?>") + (2 === i3 ? "</svg>" : "")), e4];
+};
+var N = class _N {
+  constructor({ strings: t3, _$litType$: i3 }, e4) {
+    let h3;
+    this.parts = [];
+    let r4 = 0, d3 = 0;
+    const c3 = t3.length - 1, v2 = this.parts, [a3, f2] = V(t3, i3);
+    if (this.el = _N.createElement(a3, e4), C.currentNode = this.el.content, 2 === i3) {
+      const t4 = this.el.content, i4 = t4.firstChild;
+      i4.remove(), t4.append(...i4.childNodes);
+    }
+    for (; null !== (h3 = C.nextNode()) && v2.length < c3; ) {
+      if (1 === h3.nodeType) {
+        if (h3.hasAttributes()) {
+          const t4 = [];
+          for (const i4 of h3.getAttributeNames()) if (i4.endsWith(o3) || i4.startsWith(n3)) {
+            const s5 = f2[d3++];
+            if (t4.push(i4), void 0 !== s5) {
+              const t5 = h3.getAttribute(s5.toLowerCase() + o3).split(n3), i5 = /([.?@])?(.*)/.exec(s5);
+              v2.push({ type: 1, index: r4, name: i5[2], strings: t5, ctor: "." === i5[1] ? H : "?" === i5[1] ? L : "@" === i5[1] ? z : k });
+            } else v2.push({ type: 6, index: r4 });
+          }
+          for (const i4 of t4) h3.removeAttribute(i4);
+        }
+        if (y.test(h3.tagName)) {
+          const t4 = h3.textContent.split(n3), i4 = t4.length - 1;
+          if (i4 > 0) {
+            h3.textContent = s3 ? s3.emptyScript : "";
+            for (let s5 = 0; s5 < i4; s5++) h3.append(t4[s5], u2()), C.nextNode(), v2.push({ type: 2, index: ++r4 });
+            h3.append(t4[i4], u2());
+          }
+        }
+      } else if (8 === h3.nodeType) if (h3.data === l2) v2.push({ type: 2, index: r4 });
+      else {
+        let t4 = -1;
+        for (; -1 !== (t4 = h3.data.indexOf(n3, t4 + 1)); ) v2.push({ type: 7, index: r4 }), t4 += n3.length - 1;
+      }
+      r4++;
+    }
+  }
+  static createElement(t3, i3) {
+    const s5 = r3.createElement("template");
+    return s5.innerHTML = t3, s5;
+  }
+};
+function S2(t3, i3, s5 = t3, e4) {
+  var o5, n5, l4, h3;
+  if (i3 === T) return i3;
+  let r4 = void 0 !== e4 ? null === (o5 = s5._$Co) || void 0 === o5 ? void 0 : o5[e4] : s5._$Cl;
+  const u3 = d2(i3) ? void 0 : i3._$litDirective$;
+  return (null == r4 ? void 0 : r4.constructor) !== u3 && (null === (n5 = null == r4 ? void 0 : r4._$AO) || void 0 === n5 || n5.call(r4, false), void 0 === u3 ? r4 = void 0 : (r4 = new u3(t3), r4._$AT(t3, s5, e4)), void 0 !== e4 ? (null !== (l4 = (h3 = s5)._$Co) && void 0 !== l4 ? l4 : h3._$Co = [])[e4] = r4 : s5._$Cl = r4), void 0 !== r4 && (i3 = S2(t3, r4._$AS(t3, i3.values), r4, e4)), i3;
+}
+var M = class {
+  constructor(t3, i3) {
+    this._$AV = [], this._$AN = void 0, this._$AD = t3, this._$AM = i3;
+  }
+  get parentNode() {
+    return this._$AM.parentNode;
+  }
+  get _$AU() {
+    return this._$AM._$AU;
+  }
+  u(t3) {
+    var i3;
+    const { el: { content: s5 }, parts: e4 } = this._$AD, o5 = (null !== (i3 = null == t3 ? void 0 : t3.creationScope) && void 0 !== i3 ? i3 : r3).importNode(s5, true);
+    C.currentNode = o5;
+    let n5 = C.nextNode(), l4 = 0, h3 = 0, u3 = e4[0];
+    for (; void 0 !== u3; ) {
+      if (l4 === u3.index) {
+        let i4;
+        2 === u3.type ? i4 = new R(n5, n5.nextSibling, this, t3) : 1 === u3.type ? i4 = new u3.ctor(n5, u3.name, u3.strings, this, t3) : 6 === u3.type && (i4 = new Z(n5, this, t3)), this._$AV.push(i4), u3 = e4[++h3];
+      }
+      l4 !== (null == u3 ? void 0 : u3.index) && (n5 = C.nextNode(), l4++);
+    }
+    return C.currentNode = r3, o5;
+  }
+  v(t3) {
+    let i3 = 0;
+    for (const s5 of this._$AV) void 0 !== s5 && (void 0 !== s5.strings ? (s5._$AI(t3, s5, i3), i3 += s5.strings.length - 2) : s5._$AI(t3[i3])), i3++;
+  }
+};
+var R = class _R {
+  constructor(t3, i3, s5, e4) {
+    var o5;
+    this.type = 2, this._$AH = A, this._$AN = void 0, this._$AA = t3, this._$AB = i3, this._$AM = s5, this.options = e4, this._$Cp = null === (o5 = null == e4 ? void 0 : e4.isConnected) || void 0 === o5 || o5;
+  }
+  get _$AU() {
+    var t3, i3;
+    return null !== (i3 = null === (t3 = this._$AM) || void 0 === t3 ? void 0 : t3._$AU) && void 0 !== i3 ? i3 : this._$Cp;
+  }
+  get parentNode() {
+    let t3 = this._$AA.parentNode;
+    const i3 = this._$AM;
+    return void 0 !== i3 && 11 === (null == t3 ? void 0 : t3.nodeType) && (t3 = i3.parentNode), t3;
+  }
+  get startNode() {
+    return this._$AA;
+  }
+  get endNode() {
+    return this._$AB;
+  }
+  _$AI(t3, i3 = this) {
+    t3 = S2(this, t3, i3), d2(t3) ? t3 === A || null == t3 || "" === t3 ? (this._$AH !== A && this._$AR(), this._$AH = A) : t3 !== this._$AH && t3 !== T && this._(t3) : void 0 !== t3._$litType$ ? this.g(t3) : void 0 !== t3.nodeType ? this.$(t3) : v(t3) ? this.T(t3) : this._(t3);
+  }
+  k(t3) {
+    return this._$AA.parentNode.insertBefore(t3, this._$AB);
+  }
+  $(t3) {
+    this._$AH !== t3 && (this._$AR(), this._$AH = this.k(t3));
+  }
+  _(t3) {
+    this._$AH !== A && d2(this._$AH) ? this._$AA.nextSibling.data = t3 : this.$(r3.createTextNode(t3)), this._$AH = t3;
+  }
+  g(t3) {
+    var i3;
+    const { values: s5, _$litType$: e4 } = t3, o5 = "number" == typeof e4 ? this._$AC(t3) : (void 0 === e4.el && (e4.el = N.createElement(P(e4.h, e4.h[0]), this.options)), e4);
+    if ((null === (i3 = this._$AH) || void 0 === i3 ? void 0 : i3._$AD) === o5) this._$AH.v(s5);
+    else {
+      const t4 = new M(o5, this), i4 = t4.u(this.options);
+      t4.v(s5), this.$(i4), this._$AH = t4;
+    }
+  }
+  _$AC(t3) {
+    let i3 = E.get(t3.strings);
+    return void 0 === i3 && E.set(t3.strings, i3 = new N(t3)), i3;
+  }
+  T(t3) {
+    c2(this._$AH) || (this._$AH = [], this._$AR());
+    const i3 = this._$AH;
+    let s5, e4 = 0;
+    for (const o5 of t3) e4 === i3.length ? i3.push(s5 = new _R(this.k(u2()), this.k(u2()), this, this.options)) : s5 = i3[e4], s5._$AI(o5), e4++;
+    e4 < i3.length && (this._$AR(s5 && s5._$AB.nextSibling, e4), i3.length = e4);
+  }
+  _$AR(t3 = this._$AA.nextSibling, i3) {
+    var s5;
+    for (null === (s5 = this._$AP) || void 0 === s5 || s5.call(this, false, true, i3); t3 && t3 !== this._$AB; ) {
+      const i4 = t3.nextSibling;
+      t3.remove(), t3 = i4;
+    }
+  }
+  setConnected(t3) {
+    var i3;
+    void 0 === this._$AM && (this._$Cp = t3, null === (i3 = this._$AP) || void 0 === i3 || i3.call(this, t3));
+  }
+};
+var k = class {
+  constructor(t3, i3, s5, e4, o5) {
+    this.type = 1, this._$AH = A, this._$AN = void 0, this.element = t3, this.name = i3, this._$AM = e4, this.options = o5, s5.length > 2 || "" !== s5[0] || "" !== s5[1] ? (this._$AH = Array(s5.length - 1).fill(new String()), this.strings = s5) : this._$AH = A;
+  }
+  get tagName() {
+    return this.element.tagName;
+  }
+  get _$AU() {
+    return this._$AM._$AU;
+  }
+  _$AI(t3, i3 = this, s5, e4) {
+    const o5 = this.strings;
+    let n5 = false;
+    if (void 0 === o5) t3 = S2(this, t3, i3, 0), n5 = !d2(t3) || t3 !== this._$AH && t3 !== T, n5 && (this._$AH = t3);
+    else {
+      const e5 = t3;
+      let l4, h3;
+      for (t3 = o5[0], l4 = 0; l4 < o5.length - 1; l4++) h3 = S2(this, e5[s5 + l4], i3, l4), h3 === T && (h3 = this._$AH[l4]), n5 || (n5 = !d2(h3) || h3 !== this._$AH[l4]), h3 === A ? t3 = A : t3 !== A && (t3 += (null != h3 ? h3 : "") + o5[l4 + 1]), this._$AH[l4] = h3;
+    }
+    n5 && !e4 && this.j(t3);
+  }
+  j(t3) {
+    t3 === A ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, null != t3 ? t3 : "");
+  }
+};
+var H = class extends k {
+  constructor() {
+    super(...arguments), this.type = 3;
+  }
+  j(t3) {
+    this.element[this.name] = t3 === A ? void 0 : t3;
+  }
+};
+var I = s3 ? s3.emptyScript : "";
+var L = class extends k {
+  constructor() {
+    super(...arguments), this.type = 4;
+  }
+  j(t3) {
+    t3 && t3 !== A ? this.element.setAttribute(this.name, I) : this.element.removeAttribute(this.name);
+  }
+};
+var z = class extends k {
+  constructor(t3, i3, s5, e4, o5) {
+    super(t3, i3, s5, e4, o5), this.type = 5;
+  }
+  _$AI(t3, i3 = this) {
+    var s5;
+    if ((t3 = null !== (s5 = S2(this, t3, i3, 0)) && void 0 !== s5 ? s5 : A) === T) return;
+    const e4 = this._$AH, o5 = t3 === A && e4 !== A || t3.capture !== e4.capture || t3.once !== e4.once || t3.passive !== e4.passive, n5 = t3 !== A && (e4 === A || o5);
+    o5 && this.element.removeEventListener(this.name, this, e4), n5 && this.element.addEventListener(this.name, this, t3), this._$AH = t3;
+  }
+  handleEvent(t3) {
+    var i3, s5;
+    "function" == typeof this._$AH ? this._$AH.call(null !== (s5 = null === (i3 = this.options) || void 0 === i3 ? void 0 : i3.host) && void 0 !== s5 ? s5 : this.element, t3) : this._$AH.handleEvent(t3);
+  }
+};
+var Z = class {
+  constructor(t3, i3, s5) {
+    this.element = t3, this.type = 6, this._$AN = void 0, this._$AM = i3, this.options = s5;
+  }
+  get _$AU() {
+    return this._$AM._$AU;
+  }
+  _$AI(t3) {
+    S2(this, t3);
+  }
+};
+var B = i2.litHtmlPolyfillSupport;
+null == B || B(N, R), (null !== (t2 = i2.litHtmlVersions) && void 0 !== t2 ? t2 : i2.litHtmlVersions = []).push("2.8.0");
+var D = (t3, i3, s5) => {
+  var e4, o5;
+  const n5 = null !== (e4 = null == s5 ? void 0 : s5.renderBefore) && void 0 !== e4 ? e4 : i3;
+  let l4 = n5._$litPart$;
+  if (void 0 === l4) {
+    const t4 = null !== (o5 = null == s5 ? void 0 : s5.renderBefore) && void 0 !== o5 ? o5 : null;
+    n5._$litPart$ = l4 = new R(i3.insertBefore(u2(), t4), t4, void 0, null != s5 ? s5 : {});
+  }
+  return l4._$AI(t3), l4;
+};
+
+// node_modules/lit-element/lit-element.js
+var l3;
+var o4;
+var s4 = class extends u {
+  constructor() {
+    super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
+  }
+  createRenderRoot() {
+    var t3, e4;
+    const i3 = super.createRenderRoot();
+    return null !== (t3 = (e4 = this.renderOptions).renderBefore) && void 0 !== t3 || (e4.renderBefore = i3.firstChild), i3;
+  }
+  update(t3) {
+    const i3 = this.render();
+    this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(t3), this._$Do = D(i3, this.renderRoot, this.renderOptions);
+  }
+  connectedCallback() {
+    var t3;
+    super.connectedCallback(), null === (t3 = this._$Do) || void 0 === t3 || t3.setConnected(true);
+  }
+  disconnectedCallback() {
+    var t3;
+    super.disconnectedCallback(), null === (t3 = this._$Do) || void 0 === t3 || t3.setConnected(false);
+  }
+  render() {
+    return T;
+  }
+};
+s4.finalized = true, s4._$litElement$ = true, null === (l3 = globalThis.litElementHydrateSupport) || void 0 === l3 || l3.call(globalThis, { LitElement: s4 });
+var n4 = globalThis.litElementPolyfillSupport;
+null == n4 || n4({ LitElement: s4 });
+(null !== (o4 = globalThis.litElementVersions) && void 0 !== o4 ? o4 : globalThis.litElementVersions = []).push("3.3.3");
+
+// src/styles.js
+var styles = i`
     :host {
         display: block;
         font-family: var(--primary-font-family, 'Helvetica Neue', Arial, sans-serif);
@@ -252,6 +817,7 @@ var Tt=Object.defineProperty;var Lt=(o,e,t)=>e in o?Tt(o,e,{enumerable:!0,config
         border-color: var(--accent-color, #03a9f4);
     }
 
+ 
     /* icon centering & sizing */
     .key-buttons .key-btn ha-icon,
     .btn ha-icon {
@@ -272,12 +838,6 @@ var Tt=Object.defineProperty;var Lt=(o,e,t)=>e in o?Tt(o,e,{enumerable:!0,config
         padding: 8px;
     }
 
-    .show-more {
-        text-align: center;
-        justify-content:center;
-        display:flex; 
-        margin-top:8px;
-    }
     /* ensure .info acts as a row so we can place the button to the right */
 
     .info {
@@ -300,58 +860,780 @@ var Tt=Object.defineProperty;var Lt=(o,e,t)=>e in o?Tt(o,e,{enumerable:!0,config
         display: flex;
         align-items: center;
     }
-    `;var Ot=(o,e=200)=>{let t,i=function(...s){clearTimeout(t),t=setTimeout(()=>o.call(this,...s),e)};return i.cancel=()=>clearTimeout(t),i},Ft=(o,e)=>{o&&o.dispatchEvent(new CustomEvent("hass-notification",{detail:{message:e},bubbles:!0,composed:!0}))},at=async(o,e)=>typeof window.confirm=="function"?window.confirm(e):!1,B=async(o,e,t,i,s,n="Fehler")=>{try{await o.callService(e,t,i)}catch(r){throw console.error(`Error calling ${e}.${t}:`,r),Ft(s,n),r}},Rt=(o,e)=>{let t=String(o??""),i=String(e??"").trim();if(!i)return[t];let s=i.split(/\s+/).map(a=>a.trim()).filter(Boolean);if(!s.length)return[t];let n=t.toLowerCase(),r=Array.from(new Set(s.map(a=>a.toLowerCase()))).sort((a,u)=>u.length-a.length),d=a=>{for(let u of r)if(n.startsWith(u,a))return u.length;return 0},h=[],l=0,c=t.length;for(;l<c;){let a=-1;for(let y of r){let _=n.indexOf(y,l);if(_!==-1){if(_===l){a=l;break}(a===-1||_<a)&&(a=_)}}if(a===-1){h.push(t.slice(l));break}let u=d(a);a>l&&h.push(t.slice(l,a));let f=t.slice(a,a+u);h.push(p`<span class="highlight">${f}</span>`),l=a+u}return h.length?h:[t]},U=class extends b{constructor(){super();S(this,"_onInputKeydown",t=>{if(t.key==="Enter"){let i=(t.currentTarget?.value||"").trim();if(!i||this.config.hide_add_button)return;i.length>3&&this._addFilterTextToShoppingList()}else t.key==="Escape"&&this._updateFilterTextActual("")});S(this,"_addFilterTextToShoppingList",async()=>{let t=this.hass.states[this.config.filter_entity]?.state||"",i=this._normalizeTodoText(t);!i||!await at(this,`M\xF6chtest du "${i}" zur Einkaufsliste hinzuf\xFCgen?`)||await B(this.hass,"todo","add_item",{entity_id:this.config.shopping_list_entity,item:i,description:""},this,"Konnte '"+i+"' **nicht** zur Einkaufsliste hinzuf\xFCgen")});S(this,"_confirmAndComplete",async(t,i)=>{await at(this,`M\xF6chtest du "${t.s}" wirklich als erledigt markieren?`)&&this._updateOrCompleteItem(t.u,{status:"completed"},t.c,i)});this._cachedItems=[],this._cachedSourceMap={},this._filterValue="",this._lastItemsHash="",this._debouncedUpdateFilterText=Ot(this._updateFilterTextActual,250),this._pendingUpdates=new Set,this._displayLimit=void 0}get MAX_DISPLAY(){return this.config?.max_items_without_filter??20}get MAX_WITH_FILTER(){return this.config?.max_items_with_filter??50}disconnectedCallback(){super.disconnectedCallback(),this._debouncedUpdateFilterText?.cancel?.()}setConfig(t){if(!t)throw new Error("Missing config");let s=["filter_items_entity","shopping_list_entity","filter_entity","hash_entity"].filter(n=>!t[n]);if(s.length)throw new Error(`Missing required config: ${s.join(", ")}`);this.config={title:"ToDo List",show_origin:!1,hide_add_button:!1,highlight_matches:!1,max_items_without_filter:20,max_items_with_filter:50,show_more_buttons:"",filter_key_buttons:[],...t}}getCardSize(){return 4+Math.min(this._cachedItems?.length||0,6)}_addPending(t){this._pendingUpdates=new Set(this._pendingUpdates),this._pendingUpdates.add(t)}_removePending(t){let i=new Set(this._pendingUpdates);i.delete(t),this._pendingUpdates=i}shouldUpdate(t){if(!t.has("hass"))return t.size>0;let i=this.hass;if(!i||!this.config)return!0;let s=i.states?.[this.config.filter_entity],n=i.states?.[this.config.filter_items_entity],r=i.states?.[this.config.hash_entity],d=s?.state??"";if(d!==this._filterValue)return this._filterValue=d,this._displayLimit=void 0,!0;let h=String(r?.state??""),l=h.toLowerCase();(!h||l==="unknown"||l==="unavailable")&&(h="");let a=(h?null:this._computeItemsFingerprint(n))??h,u=a!==(this._lastItemsHash||"");if(u){this._displayLimit=void 0;let O=n?.attributes?.filtered_items,lt=typeof O=="string"?this._safeParseJSON(O,[]):Array.isArray(O)?O:[],I=n?.attributes?.source_map,It=typeof I=="string"?this._safeParseJSON(I,{}):I&&typeof I=="object"?I:{};this._cachedItems=d.trim()?lt.slice(0,this.MAX_WITH_FILTER):lt.slice(0,this.MAX_DISPLAY),this._cachedSourceMap=It,this._lastItemsHash=a}let f=t.get("hass"),y=parseInt(f?.states?.[this.config.filter_items_entity]?.state,10)||0,_=parseInt(n?.state,10)||0;return u||y!==_}_safeParseJSON(t,i){try{return JSON.parse(t)}catch{return i}}_computeItemsFingerprint(t){if(!t)return null;let i=t.attributes?.filtered_items,s=typeof i=="string"?i:JSON.stringify(i??[]),n=t.attributes?.source_map,r=typeof n=="string"?n:JSON.stringify(n??{});return`${t.state}|${s}|${r}`}_isNumeric(t){return typeof t=="string"&&/^\d+$/.test(t)}_onFilterKeyButtonClick(t){if(!t)return;let i=`todo:${String(t)} `;this._updateFilterTextActual(i)}_updateFilterTextActual(t){try{let i=this.config?.filter_entity;if(!i||!this.hass)return;let s=this.hass.states?.[i]?.state??"",n=String(s),r=String(t??"");if(n===r)return;B(this.hass,"input_text","set_value",{entity_id:i,value:t??""},this,"Fehler beim Aktualisieren des Suchfeldes")}catch(i){console.error("Error in _updateFilterTextActual:",i)}}_clearFilterPreservingTodoKey(){try{let t=this.config?.filter_entity,i=this.hass?.states?.[t]?.state??"",s=String(i).trim();if(!s){this._updateFilterTextActual("");return}let n=s.split(/\s+/).filter(Boolean),r=n.findIndex(h=>/^todo:[^\s]+$/.test(h));if(r===-1){this._updateFilterTextActual("");return}if(n.length===1){this._updateFilterTextActual("");return}let d=n[r];this._updateFilterTextActual(d+" ")}catch(t){console.error("Error while clearing filter:",t),this._updateFilterTextActual("")}}_handleFilterInputChange(t){this._debouncedUpdateFilterText(t.target.value)}_normalizeTodoText(t){let i=(t||"").trim();if(!i)return"";if(i.startsWith("todo:")){let s=i.split(" ");if(s.length>1)s.shift(),i=s.join(" ");else return""}return i}async _updateOrCompleteItem(t,i,s,n){let r=n?.[String(s)]?.entity_id;if(!r){console.error("No valid todo entity id for source:",s);return}let d={entity_id:r,item:t,...i},h;if(i.description!==void 0){let c=parseInt(i.description,10);(isNaN(c)||c<0)&&(c=0),d.description=String(c),h=String(c)}let l=null;if(h!==void 0&&Array.isArray(this._cachedItems)){let c=this._cachedItems.findIndex(a=>String(a.u)===String(t));if(c>=0){let a=this._cachedItems.slice();l=a[c].d,a[c]={...a[c],d:h},this._cachedItems=a}}this._addPending(t);try{await B(this.hass,"todo","update_item",d,this,"Fehler beim Aktualisieren des Eintrags"),this._removePending(t)}catch(c){if(console.error("todo/update_item:",c),l!==null&&Array.isArray(this._cachedItems)){let a=this._cachedItems.findIndex(u=>String(u.u)===String(t));if(a>=0){let u=this._cachedItems.slice();u[a]={...u[a],d:l},this._cachedItems=u}}this._removePending(t)}}_addToShoppingList(t){let i=this.config.shopping_list_entity;if(!i){console.error("No valid shopping list entity id configured");return}(async()=>await at(this,`M\xF6chtest du "${t.s}" zur Einkaufsliste hinzuf\xFCgen?`)&&await B(this.hass,"todo","add_item",{entity_id:i,item:t.s,description:""},this,"Einkaufsliste aktualisieren fehlgeschlagen"))()}_renderQuantityControls(t,i){let s=String(t.d??"");if(s===""&&(s="1"),!this._isNumeric(s))return p`<div class="quantity" title="Menge">${s}</div>`;let n=parseInt(s,10),r=this._pendingUpdates.has(t.u),d=()=>{r||this._updateOrCompleteItem(t.u,{description:Math.max(n-1,0)},t.c,i)},h=()=>{r||this._updateOrCompleteItem(t.u,{description:n+1},t.c,i)};return p`
-      ${n>1?p`<button class="btn" type="button" title="Verringern" aria-label="Verringern"
-                      ?disabled=${r}
-                      @click=${d}><ha-icon icon="mdi:minus-circle-outline"></ha-icon></button>`:""}
+    `;
+
+// src/item-list-card.js
+var debounce = (fn, delay = 200) => {
+  let timer;
+  const debounced = function(...a3) {
+    clearTimeout(timer);
+    timer = setTimeout(() => fn.call(this, ...a3), delay);
+  };
+  debounced.cancel = () => clearTimeout(timer);
+  return debounced;
+};
+var showToast = (el, message) => {
+  if (!el) return;
+  el.dispatchEvent(new CustomEvent("hass-notification", {
+    detail: { message },
+    bubbles: true,
+    composed: true
+  }));
+};
+var confirmDialog = async (_el, text) => typeof window.confirm === "function" ? window.confirm(text) : false;
+var callService = async (hass, domain, service, data, toastEl, fallbackMsg = "Fehler") => {
+  try {
+    await hass.callService(domain, service, data);
+  } catch (err) {
+    console.error(`Error calling ${domain}.${service}:`, err);
+    showToast(toastEl, fallbackMsg);
+    throw err;
+  }
+};
+var highlightParts = (text, term) => {
+  const src = String(text ?? "");
+  const needle = String(term ?? "").trim();
+  if (!needle) return [src];
+  const tokens = needle.split(/\s+/).map((w2) => w2.trim()).filter(Boolean);
+  if (!tokens.length) return [src];
+  const lowSrc = src.toLowerCase();
+  const sortedWords = Array.from(new Set(tokens.map((w2) => w2.toLowerCase()))).sort((a3, b2) => b2.length - a3.length);
+  const getLongestAtIndex = (index) => {
+    for (const low of sortedWords) {
+      if (lowSrc.startsWith(low, index)) return low.length;
+    }
+    return 0;
+  };
+  const parts = [];
+  let pos = 0;
+  const N2 = src.length;
+  while (pos < N2) {
+    let minIndex = -1;
+    for (const low of sortedWords) {
+      const found = lowSrc.indexOf(low, pos);
+      if (found === -1) continue;
+      if (found === pos) {
+        minIndex = pos;
+        break;
+      }
+      if (minIndex === -1 || found < minIndex) {
+        minIndex = found;
+      }
+    }
+    if (minIndex === -1) {
+      parts.push(src.slice(pos));
+      break;
+    }
+    const matchLen = getLongestAtIndex(minIndex);
+    if (minIndex > pos) {
+      parts.push(src.slice(pos, minIndex));
+    }
+    const matchedText = src.slice(minIndex, minIndex + matchLen);
+    parts.push(x`<span class="highlight">${matchedText}</span>`);
+    pos = minIndex + matchLen;
+  }
+  return parts.length ? parts : [src];
+};
+var ItemListCard = class extends s4 {
+  constructor() {
+    super();
+    __publicField(this, "_onInputKeydown", (e4) => {
+      if (e4.key === "Enter") {
+        const val = (e4.currentTarget?.value || "").trim();
+        if (!val) return;
+        if (this.config.hide_add_button) return;
+        if (val.length > 3) this._addFilterTextToShoppingList();
+      } else if (e4.key === "Escape") {
+        const previous = this._filterValue;
+        const value = "";
+        this._filterValue = value;
+        this.requestUpdate();
+        this._setFilterService(previous, value);
+      }
+    });
+    __publicField(this, "_addFilterTextToShoppingList", async () => {
+      const raw = this._filterValue || "";
+      const value = this._normalizeTodoText(raw);
+      if (!value) return;
+      const ok = await confirmDialog(this, `M\xF6chtest du "${value}" zur Einkaufsliste hinzuf\xFCgen?`);
+      if (!ok) return;
+      await callService(
+        this.hass,
+        "todo",
+        "add_item",
+        { entity_id: this.config.shopping_list_entity, item: value, description: "" },
+        this,
+        "Konnte '" + value + "' **nicht** zur Einkaufsliste hinzuf\xFCgen"
+      );
+    });
+    __publicField(this, "_confirmAndComplete", async (item, sourceMap) => {
+      const ok = await confirmDialog(this, `M\xF6chtest du "${item.s}" wirklich als erledigt markieren?`);
+      if (!ok) return;
+      this._updateOrCompleteItem(item.u, { status: "completed" }, item.c, sourceMap);
+    });
+    this._cachedItems = [];
+    this._cachedSourceMap = {};
+    this._filterValue = "";
+    this._lastItemsHash = "";
+    this._debouncedSetFilter = debounce((prev, val) => this._setFilterService(prev, val), 250);
+    this._pendingUpdates = /* @__PURE__ */ new Set();
+    this._displayLimit = void 0;
+  }
+  /**
+   * Returns the maximum number of items to display when there is no filter
+   * active. If not set in the config, defaults to 20.
+   * @type {number}
+   */
+  get MAX_DISPLAY() {
+    return this.config?.max_items_without_filter ?? 20;
+  }
+  /**
+   * Returns the default maximum number of items to show when a filter is
+   * active (initial display limit). Defaults to 50.
+   */
+  get MAX_WITH_FILTER() {
+    return this.config?.max_items_with_filter ?? 50;
+  }
+  /**
+   * Clean up debounced filter text update when this element is no longer in the DOM.
+   * This ensures that any pending updates are cancelled and do not trigger after
+   * the element is gone.
+   */
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this._debouncedSetFilter?.cancel?.();
+  }
+  /**
+   * Sets the configuration for this element. Throws an error if the required
+   * properties are not present in the config object.
+   * @param {Object} config - The configuration object
+   * @param {string} config.filter_items_entity - The entity ID of the Todo list
+   *     to filter
+   * @param {string} config.shopping_list_entity - The entity ID of the Todo list
+   *     to add items to
+   * @param {string} config.filter_entity - The entity ID of the input_text
+   *     controlling the filter
+   * @param {string} config.hash_entity - Entity providing a backend hash of items/source map (required).
+   * @param {string} [config.title='ToDo List'] - The title to display in the
+   *     card header
+   * @param {boolean} [config.show_origin=false] - If true, show the origin of
+   *     each item in the list
+   * @param {boolean} [config.hide_add_button=false] - If true, hide the "Add"
+   *     button at the bottom of the list
+   * @param {number} [config.max_items_without_filter=20] - The maximum number of
+   *     items to display when there is no filter active
+   * @param {boolean} [config.highlight_matches=false] - If true, highlight the
+   *     matches in the filter text
+   * @param {Array<Object>} [config.filter_key_buttons=[]] - A list of key button
+   *     definitions with the following properties:
+   *     - `name`: The text to display in the button (fallback to `filter_key` if missing)
+   *     - `filter_key`: The key to send to the filter input when the button is clicked
+   *     - `icon`: The icon to display in the button (optional)
+   */
+  setConfig(config) {
+    if (!config) throw new Error("Missing config");
+    const required = ["filter_items_entity", "shopping_list_entity", "filter_entity", "hash_entity"];
+    const missing = required.filter((k2) => !config[k2]);
+    if (missing.length) {
+      throw new Error(`Missing required config: ${missing.join(", ")}`);
+    }
+    this.config = {
+      title: "ToDo List",
+      show_origin: false,
+      hide_add_button: false,
+      highlight_matches: false,
+      max_items_without_filter: 20,
+      max_items_with_filter: 50,
+      show_more_buttons: "",
+      filter_key_buttons: [],
+      disable_debounce: false,
+      // Default to false (standard behavior)
+      update_button_entity: "input_button.update_kellervorrate",
+      ...config
+    };
+    this._debouncedSetFilter?.cancel?.();
+    if (this.config.disable_debounce) {
+      this._debouncedSetFilter = (prev, val) => this._setFilterService(prev, val);
+      this._debouncedSetFilter.cancel = () => {
+      };
+    } else {
+      this._debouncedSetFilter = debounce((prev, val) => this._setFilterService(prev, val), 250);
+    }
+  }
+  /**
+   * Returns the size of the card in "rows". The size is calculated as a base
+   * size of 4 plus the minimum of the number of items in the list and 6.
+   * @returns {number} The size of the card in "rows"
+   */
+  getCardSize() {
+    const base = 4;
+    return base + Math.min(this._cachedItems?.length || 0, 6);
+  }
+  /**
+   * Adds a pending update to the list. This will cause the item with the given
+   * `uid` to be re-rendered on the next update.
+   * @param {string} uid The uid of the item to add to the pending updates
+   * @private
+   */
+  _addPending(uid) {
+    this._pendingUpdates = new Set(this._pendingUpdates);
+    this._pendingUpdates.add(uid);
+  }
+  /**
+   * Removes a pending update from the list. This will prevent the item with the
+   * given `uid` from being re-rendered on the next update.
+   * @param {string} uid The uid of the item to remove from the pending updates
+   * @private
+   */
+  _removePending(uid) {
+    const s5 = new Set(this._pendingUpdates);
+    s5.delete(uid);
+    this._pendingUpdates = s5;
+  }
+  /**
+   * Decides whether or not to re-render the card based on changed properties.
+   * @param {Map<string, unknown>} changedProps The changed properties
+   * @returns {boolean} Whether the card should be re-rendered
+   */
+  shouldUpdate(changedProps) {
+    if (!changedProps.has("hass")) return changedProps.size > 0;
+    const hass = this.hass;
+    if (!hass || !this.config) return true;
+    const filterEntity = hass.states?.[this.config.filter_entity];
+    const filterItemsEntity = hass.states?.[this.config.filter_items_entity];
+    const hashEntity = hass.states?.[this.config.hash_entity];
+    const oldHass = changedProps.get("hass");
+    const prevRemote = oldHass?.states?.[this.config.filter_entity]?.state ?? "";
+    const nextFilter = filterEntity?.state ?? "";
+    if (nextFilter !== prevRemote && nextFilter !== this._filterValue) {
+      this._filterValue = nextFilter;
+      this._displayLimit = void 0;
+      return true;
+    }
+    let itemsHash = String(hashEntity?.state ?? "");
+    const lower = itemsHash.toLowerCase();
+    if (!itemsHash || lower === "unknown" || lower === "unavailable") {
+      itemsHash = "";
+    }
+    const fallbackHash = !itemsHash ? this._computeItemsFingerprint(filterItemsEntity) : null;
+    const effectiveHash = fallbackHash ?? itemsHash;
+    const changed = effectiveHash !== (this._lastItemsHash || "");
+    if (changed) {
+      this._displayLimit = void 0;
+      const itemsAttr = filterItemsEntity?.attributes?.filtered_items;
+      const nextItems = typeof itemsAttr === "string" ? this._safeParseJSON(itemsAttr, []) : Array.isArray(itemsAttr) ? itemsAttr : [];
+      const mapAttr = filterItemsEntity?.attributes?.source_map;
+      const nextMap = typeof mapAttr === "string" ? this._safeParseJSON(mapAttr, {}) : mapAttr && typeof mapAttr === "object" ? mapAttr : {};
+      this._cachedItems = nextFilter.trim() ? nextItems.slice(0, this.MAX_WITH_FILTER) : nextItems.slice(0, this.MAX_DISPLAY);
+      this._cachedSourceMap = nextMap;
+      this._lastItemsHash = effectiveHash;
+    }
+    const oldCount = parseInt(oldHass?.states?.[this.config.filter_items_entity]?.state, 10) || 0;
+    const newCount = parseInt(filterItemsEntity?.state, 10) || 0;
+    const countChanged = oldCount !== newCount;
+    return changed || countChanged;
+  }
+  /**
+   * Tries to parse the given string as JSON and returns the result. If the
+   * parsing fails, it returns the given fallback value instead.
+   * @param {string} s The string to parse
+   * @param {*} fallback The value to return if the parsing fails
+   * @returns {*} The parsed JSON or the fallback value
+   * @private
+   */
+  _safeParseJSON(s5, fallback) {
+    try {
+      return JSON.parse(s5);
+    } catch {
+      return fallback;
+    }
+  }
+  /**
+   * Computes a fingerprint (string) from the given entity that represents the
+   * current state of the items (filtered_items) and their source map.
+   * This fingerprint is used to detect changes in the items or source map.
+   * @param {Object} entity The entity to compute the fingerprint for.
+   * @returns {string|null} The computed fingerprint or null if the entity is null.
+   * @private
+   */
+  _computeItemsFingerprint(entity) {
+    if (!entity) return null;
+    const itemsAttr = entity.attributes?.filtered_items;
+    const itemsPart = typeof itemsAttr === "string" ? itemsAttr : JSON.stringify(itemsAttr ?? []);
+    const mapAttr = entity.attributes?.source_map;
+    const mapPart = typeof mapAttr === "string" ? mapAttr : JSON.stringify(mapAttr ?? {});
+    return `${entity.state}|${itemsPart}|${mapPart}`;
+  }
+  /**
+   * Returns true if the given string consists only of digits.
+   * @param {string} str The string to check
+   * @returns {boolean} Whether the string consists only of digits
+   * @private
+   */
+  _isNumeric(str) {
+    return typeof str === "string" && /^\d+$/.test(str);
+  }
+  /**
+   * Handles a click on one of the filter key buttons. The value in the
+   * input_text entity is updated immediately to the corresponding
+   * "todo:<filterKey>" string. If the filterKey is falsy, nothing is done.
+   * @param {string} [filterKey] The key to filter by
+   * @private
+   */
+  _onFilterKeyButtonClick(filterKey) {
+    if (!filterKey) return;
+    const value = `todo:${String(filterKey)} `;
+    const previous = this._filterValue;
+    this._filterValue = value;
+    this.requestUpdate();
+    this._setFilterService(previous, value);
+  }
+  /**
+   * Updates the value of the input_text entity specified in the config
+   * (filter_entity) to the given value. If the value is falsy, the
+   * filter text is cleared. If the value is the same as the current
+   * value, nothing is done. If there is an error, it is logged to the
+   * console.
+   * @param {string} [value] The value to set the filter text to
+   * @private
+   */
+  async _setFilterService(previous, value) {
+    const entityId = this.config?.filter_entity;
+    if (!entityId || !this.hass) {
+      return;
+    }
+    const current = this.hass.states?.[entityId]?.state ?? "";
+    const curRaw = String(current);
+    const valRaw = String(value ?? "");
+    if (curRaw === valRaw) return;
+    try {
+      await callService(
+        this.hass,
+        "input_text",
+        "set_value",
+        { entity_id: entityId, value: value ?? "" },
+        this,
+        "Fehler beim Aktualisieren des Suchfeldes"
+      );
+    } catch (err) {
+      console.error("Error in _setFilterService:", err);
+      this._filterValue = previous;
+      this.requestUpdate();
+    }
+  }
+  /**
+   * Clears the filter text completely if there is no token in the current filter text
+   * that matches the pattern "todo:<filterKey>" or if the only token is exactly
+   * "todo:<filterKey>". If there is a token like "todo:<filterKey>" present, only
+   * this token is preserved and the rest of the text is cleared. This is useful
+   * when the user clicks on the "clear filter" button and we want to keep the
+   * currently selected filter key.
+   * @private
+   */
+  _clearFilterPreservingTodoKey() {
+    try {
+      const entityId = this.config?.filter_entity;
+      const current = this.hass?.states?.[entityId]?.state ?? "";
+      const trimmed = String(current).trim();
+      if (!trimmed) {
+        const previous2 = this._filterValue;
+        const value2 = "";
+        this._filterValue = value2;
+        this.requestUpdate();
+        this._setFilterService(previous2, value2);
+        return;
+      }
+      const tokens = trimmed.split(/\s+/).filter(Boolean);
+      const todoTokenIndex = tokens.findIndex((t3) => /^todo:[^\s]+$/.test(t3));
+      if (todoTokenIndex === -1) {
+        const previous2 = this._filterValue;
+        const value2 = "";
+        this._filterValue = value2;
+        this.requestUpdate();
+        this._setFilterService(previous2, value2);
+        return;
+      }
+      if (tokens.length === 1) {
+        const previous2 = this._filterValue;
+        const value2 = "";
+        this._filterValue = value2;
+        this.requestUpdate();
+        this._setFilterService(previous2, value2);
+        return;
+      }
+      const preserved = tokens[todoTokenIndex];
+      const previous = this._filterValue;
+      const value = preserved + " ";
+      this._filterValue = value;
+      this.requestUpdate();
+      this._setFilterService(previous, value);
+    } catch (err) {
+      console.error("Error while clearing filter:", err);
+      const prev = this._filterValue;
+      const val = "";
+      this._filterValue = val;
+      this.requestUpdate();
+      this._setFilterService(prev, val);
+    }
+  }
+  /**
+   * Handles the input event of the filter input field by calling the
+   * debounced version of `_updateFilterTextActual` with the current value
+   * of the input field. This is necessary because the input event is
+   * triggered on every key press, but we don't want to update the filter
+   * on every key press, but only after the user has stopped typing for
+   * a short period of time.
+   * @private
+   * @param {Event} e - The input event.
+   */
+  _handleFilterInputChange(e4) {
+    const newValue = e4.target.value;
+    if (newValue !== this._filterValue) {
+      const previous = this._filterValue;
+      this._filterValue = newValue;
+      this.requestUpdate();
+      this._debouncedSetFilter(previous, newValue);
+    }
+  }
+  /**
+   * Normalize the given text by removing any leading "todo:" prefix and
+   * trimming the resulting string. If the text does not start with "todo:"
+   * or if it is empty, it is returned as-is.
+   * @param {string} raw - The text to normalize.
+   * @returns {string} The normalized text.
+   * @private
+   */
+  _normalizeTodoText(raw) {
+    let value = (raw || "").trim();
+    if (!value) return "";
+    if (value.startsWith("todo:")) {
+      const parts = value.split(" ");
+      if (parts.length > 1) {
+        parts.shift();
+        value = parts.join(" ");
+      } else {
+        return "";
+      }
+    }
+    return value;
+  }
+  /**
+   * Updates an item in the given todo list, identified by the given `uid`.
+   * The `updates` object contains the new values for the item, such as a new
+   * description or a new completed state.
+   * If the item is updated successfully, the cached item description is
+   * updated immediately to reflect the new state.
+   * If the update fails, the cached item description is reverted to its
+   * previous value.
+   * @param {string} uid - The unique id of the item to update.
+   * @param {Object} updates - The new values for the item.
+   * @param {number} source - The source of the item to update.
+   * @param {Object} sourceMap - A map of source numbers to the
+   * corresponding todo list entity ids.
+   * @returns {Promise<void>} A promise that resolves when the update is
+   * done, or rejects if the update fails.
+   * @private
+   */
+  async _updateOrCompleteItem(uid, updates, source, sourceMap) {
+    const entityId = sourceMap?.[String(source)]?.entity_id;
+    if (!entityId) {
+      console.error("No valid todo entity id for source:", source);
+      return;
+    }
+    const data = {
+      entity_id: entityId,
+      item: uid,
+      ...updates
+    };
+    let newDesc;
+    if (updates.description !== void 0) {
+      let desc = parseInt(updates.description, 10);
+      if (isNaN(desc) || desc < 0) desc = 0;
+      data.description = String(desc);
+      newDesc = String(desc);
+    }
+    let previousDesc = null;
+    if (newDesc !== void 0 && Array.isArray(this._cachedItems)) {
+      const idx = this._cachedItems.findIndex((it) => String(it.u) === String(uid));
+      if (idx >= 0) {
+        const newItems = this._cachedItems.slice();
+        previousDesc = newItems[idx].d;
+        newItems[idx] = { ...newItems[idx], d: newDesc };
+        this._cachedItems = newItems;
+      }
+    }
+    this._addPending(uid);
+    try {
+      await callService(
+        this.hass,
+        "todo",
+        "update_item",
+        data,
+        this,
+        "Fehler beim Aktualisieren des Eintrags"
+      );
+      console.error("update_button_entity:", this.config.update_button_entity);
+      console.error("updates.description:", updates.description);
+      console.error("Update button pressed");
+      await callService(
+        this.hass,
+        "input_button",
+        "press",
+        { entity_id: this.config.update_button_entity },
+        this,
+        "Fehler beim Aktualisieren des Backend-Sensors"
+      );
+    } catch (err) {
+      console.error("todo/update_item:", err);
+      if (previousDesc !== null && Array.isArray(this._cachedItems)) {
+        const idx = this._cachedItems.findIndex((it) => String(it.u) === String(uid));
+        if (idx >= 0) {
+          const newItems = this._cachedItems.slice();
+          newItems[idx] = { ...newItems[idx], d: previousDesc };
+          this._cachedItems = newItems;
+        }
+      }
+    } finally {
+      this._removePending(uid);
+    }
+  }
+  /**
+   * Adds an item to the shopping list if the user confirms the dialog
+   * @param {Object} item The todo item to add
+   * @private
+   */
+  _addToShoppingList(item) {
+    const entityId = this.config.shopping_list_entity;
+    if (!entityId) {
+      console.error("No valid shopping list entity id configured");
+      return;
+    }
+    (async () => {
+      const ok = await confirmDialog(this, `M\xF6chtest du "${item.s}" zur Einkaufsliste hinzuf\xFCgen?`);
+      if (!ok) return;
+      await callService(
+        this.hass,
+        "todo",
+        "add_item",
+        { entity_id: entityId, item: item.s, description: "" },
+        this,
+        "Einkaufsliste aktualisieren fehlgeschlagen"
+      );
+    })();
+  }
+  /**
+   * Renders the quantity controls for a given todo item, which can be an
+   * increment/decrement button pair if the item's description is a numeric
+   * string, or just a plain text display if it's not.
+   * @param {Object} item The todo item to render.
+   * @param {Object} sourceMap A map of source numbers to the corresponding
+   * todo list entity ids.
+   * @returns {TemplateResult} The rendered quantity controls.
+   * @private
+   */
+  _renderQuantityControls(item, sourceMap) {
+    let qStr = String(item.d.trim() ?? "");
+    if (qStr === "") qStr = "1";
+    if (!this._isNumeric(qStr)) {
+      return x`<div class="quantity" title="Menge">${qStr}</div>`;
+    }
+    const quantity = parseInt(qStr, 10);
+    const pending = this._pendingUpdates.has(item.u);
+    const dec = () => {
+      if (pending) return;
+      this._updateOrCompleteItem(item.u, { description: Math.max(quantity - 1, 0) }, item.c, sourceMap);
+    };
+    const inc = () => {
+      if (pending) return;
+      this._updateOrCompleteItem(item.u, { description: quantity + 1 }, item.c, sourceMap);
+    };
+    return x`
+      ${quantity > 1 ? x`<button class="btn" type="button" title="Verringern" aria-label="Verringern"
+                      ?disabled=${pending}
+                      @click=${dec}><ha-icon icon="mdi:minus-circle-outline"></ha-icon></button>` : ""}
       <div class="quantity" title="Menge">
-        ${r?p`<span class="loading-icon" aria-hidden="true"><ha-icon icon="mdi:loading"></ha-icon></span>`:n}
+        ${pending ? x`<span class="loading-icon" aria-hidden="true"><ha-icon icon="mdi:loading"></ha-icon></span>` : quantity}
       </div>
       <button class="btn" type="button" title="Erhöhen" aria-label="Erhöhen"
-              ?disabled=${r}
-              @click=${h}><ha-icon icon="mdi:plus-circle-outline"></ha-icon></button>
-    `}_renderItemRow(t,i){let n=!!this.config?.show_origin?i?.[String(t.c)]?.friendly_name:null,r=this._normalizeTodoText(this._filterValue),h=!!(r&&this.config.highlight_matches)?Rt(t.s,r):[String(t.s??"")];return p`
+              ?disabled=${pending}
+              @click=${inc}><ha-icon icon="mdi:plus-circle-outline"></ha-icon></button>
+    `;
+  }
+  /**
+   * Renders a single todo item row with quantity controls and a button to add
+   * the item to the shopping list. If the item is part of a list that has an
+   * origin (i.e. a sourceMap), it will also display the origin's friendly name
+   * as a sub-label below the item summary. If the item's description is a
+   * numeric string, it will be rendered as a quantity control. If the item's
+   * description is not numeric, it will be rendered as plain text.
+   * @param {Object} item The todo item to render.
+   * @param {Object} sourceMap A map of source numbers to the corresponding
+   * todo list entity ids.
+   * @returns {TemplateResult} The rendered item row.
+   * @private
+   */
+  _renderItemRow(item, sourceMap) {
+    const showOrigin = !!this.config?.show_origin;
+    const friendlyName = showOrigin ? sourceMap?.[String(item.c)]?.friendly_name : null;
+    const search = this._normalizeTodoText(this._filterValue);
+    const showHighlight = Boolean(search && this.config.highlight_matches);
+    const contentParts = showHighlight ? highlightParts(item.s, search) : [String(item.s ?? "")];
+    return x`
         <div class="item-row" role="listitem">
-          <div class="item-summary" title=${t.s}>
-            ${h}
-            ${n?p`<div class="item-sublabel">${n}</div>`:""}
+          <div class="item-summary" title=${item.s}>
+            ${contentParts}
+            ${friendlyName ? x`<div class="item-sublabel">${friendlyName}</div>` : ""}
           </div>
           <div class="item-controls">
-            ${this._renderQuantityControls(t,i)}
-            <button class="btn" type="button" title="Zur Einkaufsliste" aria-label="Zur Einkaufsliste" @click=${()=>this._addToShoppingList(t)}>
+            ${this._renderQuantityControls(item, sourceMap)}
+            <button class="btn" type="button" title="Zur Einkaufsliste" aria-label="Zur Einkaufsliste" @click=${() => this._addToShoppingList(item)}>
               <ha-icon icon="mdi:cart-outline"></ha-icon>
             </button>
-            <button class="btn" type="button" title="Erledigt" aria-label="Erledigt" @click=${()=>this._confirmAndComplete(t,this._cachedSourceMap)}>
+            <button class="btn" type="button" title="Erledigt" aria-label="Erledigt" @click=${() => this._confirmAndComplete(item, this._cachedSourceMap)}>
               <ha-icon icon="mdi:delete-outline"></ha-icon>
             </button>
           </div>
         </div>
-      `}_showMore(t){let i=this._fullItemsList||this._cachedItems||[];(this._displayLimit===void 0||this._displayLimit===null)&&(this._displayLimit=this._filterValue?.trim()?this.MAX_WITH_FILTER:this.MAX_DISPLAY);let s=this._displayLimit;if(typeof t=="string"){let n=t.toLowerCase().trim();if(n==="all"||n==="rest")s=i.length;else{let r=Number(t);Number.isFinite(r)&&r>0?s=Math.min(this._displayLimit+Math.floor(r),i.length):s=Math.min(this._displayLimit+10,i.length)}}else typeof t=="number"?Number.isFinite(t)&&t>0?s=Math.min(this._displayLimit+Math.floor(t),i.length):s=Math.min(this._displayLimit+10,i.length):typeof t>"u"?s=Math.min(this._displayLimit+10,i.length):s=Math.min(this._displayLimit+10,i.length);this._displayLimit=s,this._cachedItems=i.slice(0,this._displayLimit)}_parseShowMoreButtons(){let t=String(this.config?.show_more_buttons??"").trim();if(!t)return[];let s=t.split(",").map(n=>n.trim()).filter(Boolean).map(n=>{let r=Number(n);return Number.isFinite(r)&&r>0?Math.floor(r):null}).filter(n=>n!==null);return Array.from(new Set(s)).sort((n,r)=>n-r)}render(){if(!this.hass)return p`<ha-card><div class="empty-state">Home Assistant context not available</div></ha-card>`;let t=this.hass.states[this.config.filter_items_entity];if(!t)return p`<ha-card><div class="empty-state">Entity '${this.config.filter_items_entity}' not found</div></ha-card>`;let i=this._filterValue??"",s=i.trim().length>3&&!this.config.hide_add_button;if(!this._lastItemsHash){let l=t.attributes.filtered_items,c=typeof l=="string"?this._safeParseJSON(l,[]):Array.isArray(l)?l:[];this._fullItemsList=c,(this._displayLimit===void 0||this._displayLimit===null)&&(this._displayLimit=i.trim()?this.MAX_WITH_FILTER:this.MAX_DISPLAY),this._cachedItems=c.slice(0,this._displayLimit);let a=t.attributes.source_map;this._cachedSourceMap=typeof a=="string"?this._safeParseJSON(a,{}):a&&typeof a=="object"?a:{};let u=this.hass.states?.[this.config.hash_entity],f=String(u?.state??""),y=f.toLowerCase();(!f||y==="unknown"||y==="unavailable")&&(f="");let _="";f||(_=this._computeItemsFingerprint(t)||""),this._lastItemsHash=f||_}{let l=t.attributes.filtered_items,c=typeof l=="string"?this._safeParseJSON(l,[]):Array.isArray(l)?l:[];this._fullItemsList=c,i.trim()?((this._displayLimit===void 0||this._displayLimit===null)&&(this._displayLimit=this.MAX_WITH_FILTER),this._cachedItems=c.slice(0,this._displayLimit)):((this._displayLimit===void 0||this._displayLimit===null)&&(this._displayLimit=this.MAX_DISPLAY),this._cachedItems=c.slice(0,this._displayLimit))}let n=parseInt(t?.state,10)||0,r=this._cachedItems||[],d=r.length,h=Math.max(0,n-d);return p`
+      `;
+  }
+  /**
+   * Increases the display limit of the list by the given amount.
+   * @param {number|string|undefined} option - Number of items to add to the
+   *   display limit, or a string that can be parsed as a number. If `'all'` or
+   *   `'rest'`, the list will show all items. If `undefined`, the default is
+   *   10. If any other value, the default is 10.
+   * @private
+   */
+  _showMore(option) {
+    const items = this._fullItemsList || this._cachedItems || [];
+    if (this._displayLimit === void 0 || this._displayLimit === null) {
+      this._displayLimit = this._filterValue?.trim() ? this.MAX_WITH_FILTER : this.MAX_DISPLAY;
+    }
+    let newLimit = this._displayLimit;
+    if (typeof option === "string") {
+      const lower = option.toLowerCase().trim();
+      if (lower === "all" || lower === "rest") {
+        newLimit = items.length;
+      } else {
+        const parsed = Number(option);
+        if (Number.isFinite(parsed) && parsed > 0) {
+          newLimit = Math.min(this._displayLimit + Math.floor(parsed), items.length);
+        } else {
+          newLimit = Math.min(this._displayLimit + 10, items.length);
+        }
+      }
+    } else if (typeof option === "number") {
+      if (Number.isFinite(option) && option > 0) {
+        newLimit = Math.min(this._displayLimit + Math.floor(option), items.length);
+      } else {
+        newLimit = Math.min(this._displayLimit + 10, items.length);
+      }
+    } else if (typeof option === "undefined") {
+      newLimit = Math.min(this._displayLimit + 10, items.length);
+    } else {
+      newLimit = Math.min(this._displayLimit + 10, items.length);
+    }
+    this._displayLimit = newLimit;
+    this._cachedItems = items.slice(0, this._displayLimit);
+  }
+  /**
+   * Parse the comma separated config string this.config.show_more_buttons
+   * into an array of positive integers (deduplicated and sorted ascending).
+   * Returns [] when none available.
+   * @returns {number[]}
+   * @private
+   */
+  _parseShowMoreButtons() {
+    const raw = String(this.config?.show_more_buttons ?? "").trim();
+    if (!raw) return [];
+    const parts = raw.split(",").map((s5) => s5.trim()).filter(Boolean);
+    const nums = parts.map((p2) => {
+      const n5 = Number(p2);
+      return Number.isFinite(n5) && n5 > 0 ? Math.floor(n5) : null;
+    }).filter((n5) => n5 !== null);
+    return Array.from(new Set(nums)).sort((a3, b2) => a3 - b2);
+  }
+  /**
+   * Renders the card content.
+   * @returns {TemplateResult} The rendered content.
+   * @private
+   */
+  render() {
+    if (!this.hass) {
+      return x`<ha-card><div class="empty-state">Home Assistant context not available</div></ha-card>`;
+    }
+    const itemsEntity = this.hass.states[this.config.filter_items_entity];
+    if (!itemsEntity) {
+      return x`<ha-card><div class="empty-state">Entity '${this.config.filter_items_entity}' not found</div></ha-card>`;
+    }
+    const filterValue = this._filterValue ?? "";
+    const showAddButton = filterValue.trim().length > 3 && !this.config.hide_add_button;
+    if (!this._lastItemsHash) {
+      const attr = itemsEntity.attributes.filtered_items;
+      const items = typeof attr === "string" ? this._safeParseJSON(attr, []) : Array.isArray(attr) ? attr : [];
+      this._fullItemsList = items;
+      if (this._displayLimit === void 0 || this._displayLimit === null) {
+        this._displayLimit = filterValue.trim() ? this.MAX_WITH_FILTER : this.MAX_DISPLAY;
+      }
+      this._cachedItems = items.slice(0, this._displayLimit);
+      const mapAttr = itemsEntity.attributes.source_map;
+      this._cachedSourceMap = typeof mapAttr === "string" ? this._safeParseJSON(mapAttr, {}) : mapAttr && typeof mapAttr === "object" ? mapAttr : {};
+      const hashEntity = this.hass.states?.[this.config.hash_entity];
+      let extHash = String(hashEntity?.state ?? "");
+      const low = extHash.toLowerCase();
+      if (!extHash || low === "unknown" || low === "unavailable") extHash = "";
+      let localFp = "";
+      if (!extHash) {
+        localFp = this._computeItemsFingerprint(itemsEntity) || "";
+      }
+      this._lastItemsHash = extHash || localFp;
+    }
+    {
+      const attr = itemsEntity.attributes.filtered_items;
+      const items = typeof attr === "string" ? this._safeParseJSON(attr, []) : Array.isArray(attr) ? attr : [];
+      this._fullItemsList = items;
+      if (filterValue.trim()) {
+        if (this._displayLimit === void 0 || this._displayLimit === null) {
+          this._displayLimit = this.MAX_WITH_FILTER;
+        }
+        this._cachedItems = items.slice(0, this._displayLimit);
+      } else {
+        if (this._displayLimit === void 0 || this._displayLimit === null) {
+          this._displayLimit = this.MAX_DISPLAY;
+        }
+        this._cachedItems = items.slice(0, this._displayLimit);
+      }
+    }
+    const totalItemsCount = parseInt(itemsEntity?.state, 10) || 0;
+    const displayedItems = this._cachedItems || [];
+    const displayedCount = displayedItems.length;
+    const remaining = Math.max(0, totalItemsCount - displayedCount);
+    return x`
       <ha-card>
         <div class="card-header">
-          <div class="card-title">${this.config.title||"ToDo List"}</div>
-          <div class="count-badge" title="Gesamtanzahl Einträge">${n}</div>
+          <div class="card-title">${this.config.title || "ToDo List"}</div>
+          <div class="count-badge" title="Gesamtanzahl Einträge">${totalItemsCount}</div>
         </div>
         <div class="input-row">
           <input
             type="text"
-            .value=${i}
+            .value=${filterValue}
             placeholder="Tippe einen Suchfilter ein"
             @input=${this._handleFilterInputChange}
             @keydown=${this._onInputKeydown}
             aria-label="Filter"
           />
           <button
-            class="btn ${i?"":"hidden"}"
+            class="btn ${!filterValue ? "hidden" : ""}"
             type="button"
-            @click=${()=>this._clearFilterPreservingTodoKey()}
+            @click=${() => this._clearFilterPreservingTodoKey()}
             title="Eingabe leeren"
             aria-label="Eingabe leeren"
           >
             <ha-icon icon="mdi:close-circle-outline"></ha-icon>
           </button>
           <button
-            class="btn ${s?"":"hidden"}"
+            class="btn ${!showAddButton ? "hidden" : ""}"
             type="button"
             @click=${this._addFilterTextToShoppingList}
             title="Zur Einkaufsliste hinzufügen"
@@ -361,52 +1643,98 @@ var Tt=Object.defineProperty;var Lt=(o,e,t)=>e in o?Tt(o,e,{enumerable:!0,config
           </button>
         </div>
         
-        ${Array.isArray(this.config.filter_key_buttons)&&this.config.filter_key_buttons.length?p`<div class="key-buttons" role="toolbar" aria-label="Schnellfilter">
-              ${this.config.filter_key_buttons.map(l=>{let c=l.name||l.filter_key||"",a=l.icon,u=l.filter_key||"";return p`
+        ${Array.isArray(this.config.filter_key_buttons) && this.config.filter_key_buttons.length ? x`<div class="key-buttons" role="toolbar" aria-label="Schnellfilter">
+              ${this.config.filter_key_buttons.map((btn) => {
+      const label = btn.name || btn.filter_key || "";
+      const icon = typeof btn.icon === "string" && /^mdi:[\w-]+$/.test(btn.icon) ? btn.icon : null;
+      const fk = btn.filter_key || "";
+      return x`
                   <button
                     class="key-btn"
                     type="button"
-                    title=${c}
-                    aria-label=${c}
-                    @click=${()=>this._onFilterKeyButtonClick(u)}
+                    title=${label}
+                    aria-label=${label}
+                    @click=${() => this._onFilterKeyButtonClick(fk)}
                   >
-                    ${a?p`<ha-icon .icon=${a}></ha-icon>`:p`${c}`}
+                    ${icon ? x`<ha-icon .icon=${icon}></ha-icon>` : x`${label}`}
                   </button>
-                `})}
-            </div>`:""}
+                `;
+    })}
+            </div>` : ""}
 
 
-        ${i.trim()?p`<div class="info" aria-live="polite">Filter: "${i.trim()}" → ${(this._fullItemsList||[]).length} Treffer</div>`:n>(this.config.max_items_without_filter??20)?p`<div class="info" aria-live="polite">${d} von ${n} Einträgen</div>`:""}
+        ${filterValue.trim() ? x`<div class="info" aria-live="polite">Filter: "${filterValue.trim()}" → ${(this._fullItemsList || []).length} Treffer</div>` : totalItemsCount > (this.config.max_items_without_filter ?? 20) ? x`<div class="info" aria-live="polite">${displayedCount} von ${totalItemsCount} Einträgen</div>` : ""}
 
-        ${d===0?p`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>`:p`<div role="list" aria-label="Trefferliste">${r.map(l=>this._renderItemRow(l,this._cachedSourceMap))}</div>`}
+        ${displayedCount === 0 ? x`<div class="empty-state" aria-live="polite">Keine Ergebnisse gefunden</div>` : x`<div role="list" aria-label="Trefferliste">${displayedItems.map((item) => this._renderItemRow(item, this._cachedSourceMap))}</div>`}
 
-        ${this._fullItemsList&&this._fullItemsList.length>(r?.length||0)?(()=>{let l=Math.max(0,this._fullItemsList.length-r.length),c=this._parseShowMoreButtons();return p`
+        ${this._fullItemsList && this._fullItemsList.length > (displayedItems?.length || 0) ? (() => {
+      const remaining2 = Math.max(0, this._fullItemsList.length - displayedItems.length);
+      const configured = this._parseShowMoreButtons();
+      return x`
                 <div class="key-buttons" role="group" aria-label="Mehr anzeigen Optionen">
-                  ${c.length?c.map(a=>p`
+                  ${configured.length ? configured.map(
+        (n5) => x`
                           <button
                             class="key-btn"
                             type="button"
-                            title="Mehr anzeigen ${a}"
-                            ?disabled=${a>l}
-                            @click=${()=>this._showMore(a)}
+                            title="Mehr anzeigen ${n5}"
+                            ?disabled=${n5 > remaining2}
+                            @click=${() => this._showMore(n5)}
                           >
-                            +${a}
+                            +${n5}
                           </button>
-                        `):""}
+                        `
+      ) : ""}
         
                   <button
                     class="key-btn"
                     type="button"
                     title="Alles anzeigen"
-                    @click=${()=>this._showMore("all")}
+                    @click=${() => this._showMore("all")}
                   >
-                    Alle (${l})
+                    Alle (${remaining2})
                   </button>
                 </div>
-              `})():""}
+              `;
+    })() : ""}
       
           </ha-card>
-    `}static getConfigElement(){return null}static getStubConfig(){return{title:"ToDo List",filter_items_entity:"sensor.todo_filtered_items",hash_entity:"sensor.todo_hash",shopping_list_entity:"todo.shopping_list",filter_entity:"input_text.todo_filter"}}};S(U,"properties",{hass:{},config:{},_cachedItems:{state:!0},_cachedSourceMap:{state:!0},_displayLimit:{state:!0},_filterValue:{state:!0},_pendingUpdates:{state:!0},_lastItemsHash:{state:!1}}),S(U,"styles",Ct);customElements.get("item-list-card")||customElements.define("item-list-card",U);
+    `;
+  }
+  // Optional: Lovelace UI editor support
+  static getConfigElement() {
+    return null;
+  }
+  /**
+   * Provides a default configuration stub for the editor to use when not
+   * given a real configuration.
+   *
+   * @return {Object} A configuration stub with default values.
+   */
+  static getStubConfig() {
+    return {
+      title: "ToDo List",
+      filter_items_entity: "sensor.todo_filtered_items",
+      hash_entity: "sensor.todo_hash",
+      shopping_list_entity: "todo.shopping_list",
+      filter_entity: "input_text.todo_filter"
+    };
+  }
+};
+__publicField(ItemListCard, "properties", {
+  hass: {},
+  config: {},
+  _cachedItems: { state: true },
+  _cachedSourceMap: { state: true },
+  _displayLimit: { state: true },
+  _filterValue: { state: true },
+  _pendingUpdates: { state: true },
+  _lastItemsHash: { state: false }
+});
+__publicField(ItemListCard, "styles", styles);
+if (!customElements.get("item-list-card")) {
+  customElements.define("item-list-card", ItemListCard);
+}
 /*! Bundled license information:
 
 @lit/reactive-element/css-tag.js:
@@ -417,19 +1745,7 @@ var Tt=Object.defineProperty;var Lt=(o,e,t)=>e in o?Tt(o,e,{enumerable:!0,config
    *)
 
 @lit/reactive-element/reactive-element.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   * SPDX-License-Identifier: BSD-3-Clause
-   *)
-
 lit-html/lit-html.js:
-  (**
-   * @license
-   * Copyright 2017 Google LLC
-   * SPDX-License-Identifier: BSD-3-Clause
-   *)
-
 lit-element/lit-element.js:
   (**
    * @license
