@@ -1,17 +1,27 @@
 ```yaml
 template:
-  - sensor:
+  # Kellervorraete
+  - trigger:
+      - platform: event
+        event_type: event_template_reloaded
+      - platform: homeassistant
+        event: start
+    sensor:
       - name: "Todo Lists Config"
         unique_id: todo_lists_config
         state: "static"
         attributes:
           todo_lists: >-
-            ['todo.kellervorrate', 'todo.kellervorrate_katzenfutter', 'todo.kellervorrate_safe', 'todo.kellervorrate_marmelade_selbstgemachtes', 'todo.kuhltruhe_keller', 'todo.kuhltruhe_garage']
+            {{ ['todo.kellervorrate', 'todo.kellervorrate_katzenfutter', 'todo.kellervorrate_safe', 'todo.kellervorrate_marmelade_selbstgemachtes', 'todo.kuhltruhe_keller', 'todo.kuhltruhe_garage'] }}
   - trigger:
+      - platform: event
+        event_type: event_template_reloaded
+      - platform: homeassistant
+        event: start
       - platform: state
         entity_id: input_text.search_todo_list
-      - platform: time_pattern
-        seconds: "/1"
+      - platform: state
+        entity_id: input_button.update_kellervorrate
       - platform: state
         entity_id: &todo_lists
           - todo.kellervorrate
@@ -144,7 +154,6 @@ template:
             {% else %}
               []
             {% endif %}
-
   - trigger: 
       - platform: state
         entity_id: sensor.kellervorrate_combined_filtered_items
@@ -153,6 +162,8 @@ template:
         attribute: filtered_items
       - platform: homeassistant
         event: start
+      - platform: event
+        event_type: event_template_reloaded
     sensor:
       - name: "Kellervorrate Combined Filtered Items Hash"
         unique_id: kellervorrate_combined_filtered_items_hash

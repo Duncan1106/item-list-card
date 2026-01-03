@@ -66,6 +66,7 @@ filter_items_entity: sensor.kellervorrate_combined_filtered_items
 hash_entity: sensor.kellervorrate_combined_filtered_items_hash
 shopping_list_entity: todo.einkaufsliste
 filter_entity: input_text.search_todo_list
+update_button_entity: input_button.update_kellervorrate
 ```
 
 ### Full Configuration
@@ -77,6 +78,7 @@ filter_items_entity: sensor.kellervorrate_combined_filtered_items
 hash_entity: sensor.kellervorrate_combined_filtered_items_hash
 shopping_list_entity: todo.einkaufsliste
 filter_entity: input_text.search_todo_list
+update_button_entity: input_button.update_kellervorrate
 max_items_without_filter: 15
 max_items_with_filter: 15
 show_more_buttons: 10,15,20,25
@@ -112,6 +114,7 @@ filter_key_buttons:
 - `hash_entity` (required): Sensor for stable hashing to prevent unnecessary re-renders.
 - `shopping_list_entity` (required): Todo entity to add items to (e.g., shopping list).
 - `filter_entity` (required): `input_text` helper for search input.
+- `update_button_entity` (string, required): Entity ID of a button to trigger updates (e.g., `input_button.update_kellervorrate`).
 - `max_items_without_filter` (int, optional, default: 15): Max items shown without filter.
 - `max_items_with_filter` (int, optional, default: 15): Max items shown with filter.
 - `show_more_buttons` (array of ints, optional): Options for "Show More" buttons (e.g., 10,15,20,25).
