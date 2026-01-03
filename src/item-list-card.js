@@ -673,17 +673,16 @@ class ItemListCard extends LitElement {
         'Fehler beim Aktualisieren des Eintrags'
       );
       // Press update button only if amount got changed
-      console.error('update_button_entity:', this.config.update_button_entity);
-      console.error('updates.description:', updates.description);
-      console.error('Update button pressed');
-      await callService(
-        this.hass,
-        'input_button',
-        'press',
-        { entity_id: this.config.update_button_entity },
-        this,
-        'Fehler beim Aktualisieren des Backend-Sensors'
-      );
+      if (this.config.update_button_entity) {
+        await callService(
+          this.hass,
+          'input_button',
+          'press',
+          { entity_id: this.config.update_button_entity },
+          this,
+          'Fehler beim Aktualisieren des Backend-Sensors'
+        );
+      }
     } catch (err) {
       console.error('todo/update_item:', err);
       // revert
