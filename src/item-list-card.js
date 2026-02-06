@@ -855,7 +855,7 @@ class ItemListCard extends LitElement {
               <ha-icon icon="mdi:cart-outline"></ha-icon>
             </button>
             <button class="btn" type="button" title="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" aria-label="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" ?disabled=${this._pendingUpdates.has(item.u)} @click=${() => this._confirmAndAction(item, this._cachedSourceMap, this.config.delete_instead_of_complete ? 'delete' : 'complete')}>
-              <ha-icon icon="${this.config.delete_instead_of_complete ? 'mdi:trash-can-outline' : 'mdi:delete-outline'}"></ha-icon>
+              <ha-icon icon="${this.config.delete_instead_of_complete ? 'mdi:trash-can-outline' : 'mdi:checkbox-marked-circle-outline'}"></ha-icon>
             </button>
           </div>
         </div>
