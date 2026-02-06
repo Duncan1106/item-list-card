@@ -966,10 +966,45 @@ var ItemListCard = class extends s4 {
         "Konnte '" + value + "' **nicht** zur Einkaufsliste hinzuf\xFCgen"
       );
     });
-    __publicField(this, "_confirmAndComplete", async (item, sourceMap) => {
-      const ok = await confirmDialog(this, `M\xF6chtest du "${item.s}" wirklich als erledigt markieren?`);
+    __publicField(this, "_confirmAndAction", async (item, sourceMap, action) => {
+      const isDelete = action === "delete";
+      const message = isDelete ? `M\xF6chtest du "${item.s}" wirklich l\xF6schen?` : `M\xF6chtest du "${item.s}" wirklich als erledigt markieren?`;
+      const ok = await confirmDialog(this, message);
       if (!ok) return;
-      this._updateOrCompleteItem(item.u, { status: "completed" }, item.c, sourceMap);
+      if (isDelete) {
+        const entityId = sourceMap?.[String(item.c)]?.entity_id;
+        if (!entityId) {
+          console.error("No valid todo entity id for source:", item.c);
+          return;
+        }
+        this._addPending(item.u);
+        try {
+          await callService(
+            this.hass,
+            "todo",
+            "remove_item",
+            { entity_id: entityId, item: item.u },
+            this,
+            "Fehler beim L\xF6schen des Eintrags"
+          );
+          if (this.config.update_button_entity) {
+            await callService(
+              this.hass,
+              "input_button",
+              "press",
+              { entity_id: this.config.update_button_entity },
+              this,
+              "Fehler beim Aktualisieren des Backend-Sensors"
+            );
+          }
+        } catch (err) {
+          console.error("Error in _confirmAndAction (delete):", err);
+        } finally {
+          this._removePending(item.u);
+        }
+      } else {
+        await this._updateOrCompleteItem(item.u, { status: "completed" }, item.c, sourceMap);
+      }
     });
     this._cachedItems = [];
     this._cachedSourceMap = {};
@@ -1048,6 +1083,8 @@ var ItemListCard = class extends s4 {
       filter_key_buttons: [],
       disable_debounce: false,
       // Default to false (standard behavior)
+      delete_instead_of_complete: false,
+      // Default to false (complete item)
       update_button_entity: "input_button.update_kellervorrate",
       ...config
     };
@@ -1488,8 +1525,8 @@ var ItemListCard = class extends s4 {
             <button class="btn" type="button" title="Zur Einkaufsliste" aria-label="Zur Einkaufsliste" @click=${() => this._addToShoppingList(item)}>
               <ha-icon icon="mdi:cart-outline"></ha-icon>
             </button>
-            <button class="btn" type="button" title="Erledigt" aria-label="Erledigt" @click=${() => this._confirmAndComplete(item, this._cachedSourceMap)}>
-              <ha-icon icon="mdi:delete-outline"></ha-icon>
+            <button class="btn" type="button" title="${this.config.delete_instead_of_complete ? "L\xF6schen" : "Erledigt"}" aria-label="${this.config.delete_instead_of_complete ? "L\xF6schen" : "Erledigt"}" ?disabled=${this._pendingUpdates.has(item.u)} @click=${() => this._confirmAndAction(item, this._cachedSourceMap, this.config.delete_instead_of_complete ? "delete" : "complete")}>
+              <ha-icon icon="${this.config.delete_instead_of_complete ? "mdi:trash-can-outline" : "mdi:delete-outline"}"></ha-icon>
             </button>
           </div>
         </div>
