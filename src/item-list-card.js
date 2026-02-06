@@ -745,7 +745,7 @@ class ItemListCard extends LitElement {
       }
     } else {
       // Complete action
-      this._updateOrCompleteItem(item.u, { status: 'completed' }, item.c, sourceMap);
+      await this._updateOrCompleteItem(item.u, { status: 'completed' }, item.c, sourceMap);
     }
   };
 
