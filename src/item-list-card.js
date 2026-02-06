@@ -248,6 +248,7 @@ class ItemListCard extends LitElement {
       show_more_buttons: '',
       filter_key_buttons: [],
       disable_debounce: false, // Default to false (standard behavior)
+      delete_instead_of_complete: false, // Default to false (complete item)
       update_button_entity: 'input_button.update_kellervorrate',
       ...config,
     };
@@ -700,11 +701,52 @@ class ItemListCard extends LitElement {
     }
   }
 
-  _confirmAndComplete = async (item, sourceMap) => {
-    const ok = await confirmDialog( this, `Möchtest du "${item.s}" wirklich als erledigt markieren?`);
+  _confirmAndAction = async (item, sourceMap, action) => {
+    const isDelete = action === 'delete';
+    const message = isDelete
+      ? `Möchtest du "${item.s}" wirklich löschen?`
+      : `Möchtest du "${item.s}" wirklich als erledigt markieren?`;
+    const ok = await confirmDialog(this, message);
     if (!ok) return;
-    // Uses UID placed in 'item' field as required by your service
-    this._updateOrCompleteItem(item.u, { status: 'completed' }, item.c, sourceMap);
+
+    if (isDelete) {
+      const entityId = sourceMap?.[String(item.c)]?.entity_id;
+      if (!entityId) {
+        console.error('No valid todo entity id for source:', item.c);
+        return;
+      }
+
+      // Add pending state to prevent double-clicks
+      this._addPending(item.u);
+
+      try {
+        await callService(this.hass, 'todo', 'remove_item',
+          { entity_id: entityId, item: item.u },
+          this,
+          'Fehler beim Löschen des Eintrags'
+        );
+        // Optionally press update button if configured
+        if (this.config.update_button_entity) {
+          await callService(
+            this.hass,
+            'input_button',
+            'press',
+            { entity_id: this.config.update_button_entity },
+            this,
+            'Fehler beim Aktualisieren des Backend-Sensors'
+          );
+        }
+      } catch (err) {
+        console.error('Error in _confirmAndAction (delete):', err);
+        // Error is already handled by callService (toast shown), just log here
+      } finally {
+        // Always remove pending state
+        this._removePending(item.u);
+      }
+    } else {
+      // Complete action
+      await this._updateOrCompleteItem(item.u, { status: 'completed' }, item.c, sourceMap);
+    }
   };
 
   /**
@@ -812,8 +854,8 @@ class ItemListCard extends LitElement {
             <button class="btn" type="button" title="Zur Einkaufsliste" aria-label="Zur Einkaufsliste" @click=${() => this._addToShoppingList(item)}>
               <ha-icon icon="mdi:cart-outline"></ha-icon>
             </button>
-            <button class="btn" type="button" title="Erledigt" aria-label="Erledigt" @click=${() => this._confirmAndComplete(item, this._cachedSourceMap)}>
-              <ha-icon icon="mdi:delete-outline"></ha-icon>
+            <button class="btn" type="button" title="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" aria-label="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" ?disabled=${this._pendingUpdates.has(item.u)} @click=${() => this._confirmAndAction(item, this._cachedSourceMap, this.config.delete_instead_of_complete ? 'delete' : 'complete')}>
+              <ha-icon icon="${this.config.delete_instead_of_complete ? 'mdi:trash-can-outline' : 'mdi:delete-outline'}"></ha-icon>
             </button>
           </div>
         </div>
