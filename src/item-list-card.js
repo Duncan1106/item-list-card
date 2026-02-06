@@ -716,21 +716,33 @@ class ItemListCard extends LitElement {
       console.error('No valid todo entity id for source:', item.c);
       return;
     }
-    await callService(this.hass, 'todo', 'remove_item',
-      { entity_id: entityId, item: item.u },
-      this,
-      'Fehler beim Löschen des Eintrags'
-    );
-    // Optionally press update button if configured
-    if (this.config.update_button_entity) {
-      await callService(
-        this.hass,
-        'input_button',
-        'press',
-        { entity_id: this.config.update_button_entity },
+
+    // Add pending state to prevent double-clicks
+    this._addPending(item.u);
+
+    try {
+      await callService(this.hass, 'todo', 'remove_item',
+        { entity_id: entityId, item: item.u },
         this,
-        'Fehler beim Aktualisieren des Backend-Sensors'
+        'Fehler beim Löschen des Eintrags'
       );
+      // Optionally press update button if configured
+      if (this.config.update_button_entity) {
+        await callService(
+          this.hass,
+          'input_button',
+          'press',
+          { entity_id: this.config.update_button_entity },
+          this,
+          'Fehler beim Aktualisieren des Backend-Sensors'
+        );
+      }
+    } catch (err) {
+      console.error('Error in _confirmAndDelete:', err);
+      // Error is already handled by callService (toast shown), just log here
+    } finally {
+      // Always remove pending state
+      this._removePending(item.u);
     }
   };
 
@@ -839,8 +851,8 @@ class ItemListCard extends LitElement {
             <button class="btn" type="button" title="Zur Einkaufsliste" aria-label="Zur Einkaufsliste" @click=${() => this._addToShoppingList(item)}>
               <ha-icon icon="mdi:cart-outline"></ha-icon>
             </button>
-            <button class="btn" type="button" title="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" aria-label="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" @click=${this.config.delete_instead_of_complete ? () => this._confirmAndDelete(item, this._cachedSourceMap) : () => this._confirmAndComplete(item, this._cachedSourceMap)}>
-              <ha-icon icon="mdi:delete-outline"></ha-icon>
+            <button class="btn" type="button" title="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" aria-label="${this.config.delete_instead_of_complete ? 'Löschen' : 'Erledigt'}" ?disabled=${this._pendingUpdates.has(item.u)} @click=${this.config.delete_instead_of_complete ? () => this._confirmAndDelete(item, this._cachedSourceMap) : () => this._confirmAndComplete(item, this._cachedSourceMap)}>
+              <ha-icon icon="${this.config.delete_instead_of_complete ? 'mdi:trash-can-outline' : 'mdi:delete-outline'}"></ha-icon>
             </button>
           </div>
         </div>
