@@ -15,6 +15,7 @@ This frontend card requires a backend template sensor to aggregate and filter da
 - **Aggregated Views**: Combine items from multiple todo lists (e.g., pantry, freezer, pet food) into a single, unified display.
 - **Interactive UI**: Add items to a shopping list with one click, show origins, highlight matches, and customize "show more" options.
 - **Customizable**: Configure titles, max items, buttons for quick filters, icons, and more.
+- **Delete or Complete**: Choose to delete items or mark them as completed with confirmation dialogs.
 - **Lightweight**: Built with [Lit](https://lit.dev/) for efficient rendering in Lovelace dashboards.
 - **Responsive**: Adapts to dashboard layouts, with options for hiding add buttons or showing origins.
 
@@ -86,6 +87,7 @@ show_origin: true
 hide_add_button: false
 highlight_matches: true
 disable_debounce: false
+delete_instead_of_complete: false
 filter_key_buttons:
   - name: Kellervorräte
     icon: mdi:warehouse
@@ -114,7 +116,7 @@ filter_key_buttons:
 - `hash_entity` (required): Sensor for stable hashing to prevent unnecessary re-renders.
 - `shopping_list_entity` (required): Todo entity to add items to (e.g., shopping list).
 - `filter_entity` (required): `input_text` helper for search input.
-- `update_button_entity` (string, required): Entity ID of a button to trigger updates (e.g., `input_button.update_kellervorrate`).
+- `update_button_entity` (string, optional): Entity ID of a button to trigger updates (e.g., `input_button.update_kellervorrate`). If not provided, the update button won't be pressed after delete/complete actions.
 - `max_items_without_filter` (int, optional, default: 15): Max items shown without filter.
 - `max_items_with_filter` (int, optional, default: 15): Max items shown with filter.
 - `show_more_buttons` (array of ints, optional): Options for "Show More" buttons (e.g., 10,15,20,25).
@@ -122,6 +124,7 @@ filter_key_buttons:
 - `hide_add_button` (bool, optional, default: false): Hide the "Add to Shopping" button.
 - `highlight_matches` (bool, optional, default: true): Highlight search matches in item names.
 - `disable_debounce` (bool, optional, default: false): Disable Debounce on text input for faster responsiveness but worse performance.
+- `delete_instead_of_complete` (bool, optional, default: false): If `true`, the action button will delete items instead of marking them as completed. Uses trash can icon when enabled, checkbox icon when disabled.
 - `filter_key_buttons` (array of objects, optional): Quick filter buttons with `name`, `icon` (mdi icon), `filter_key`.
 
 ## Backend Setup (Required)
@@ -143,6 +146,7 @@ Triggers on input changes, todo updates, or every second. Adjust entity IDs to m
 - **Basic Inventory View**: Configure with pantry and freezer todos. Use the search input for "milk" to show matches.
 - **Category Filtering**: Type "todo:katzen" to filter cat food items only.
 - **Shopping Integration**: Click "+" on an item to add it to `todo.einkaufsliste`.
+- **Delete or Complete Items**: Configure `delete_instead_of_complete: true` to delete items permanently, or keep the default to mark them as completed.
 - **Dashboard Integration**: Embed in a vertical stack with the filter input above the card.
 
 For advanced usage, customize `filter_key_buttons` for one-click category switches.
@@ -166,7 +170,8 @@ If the card doesn't render or behaves unexpectedly:
 
 4. **Service Calls Not Working**:
    - Verify the shopping list entity accepts `todo.add_item` services.
-   - Check automation logs for errors in adding items.
+   - For delete actions, ensure the todo entity supports `todo.remove_item` service.
+   - Check automation logs for errors in adding or removing items.
 
 5. **Filter Not Responding**:
    - Confirm `filter_entity` state changes trigger the template sensor.
